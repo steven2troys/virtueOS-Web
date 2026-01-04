@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: Napkin | virtueOS</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --text-muted: #707070;
+            --accent: #6b8aad;
+            --border: #3a3a3a;
+            --link: #7d9fc2;
+            --sidebar-width: 220px;
+            --notes-width: 320px;
+            --napkin-bg: #f5f0e6;
+            --napkin-ink: #2c3e50;
+            --napkin-stain: rgba(139, 90, 43, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Consolas', 'Liberation Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        /* Three-column layout */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Resizable panels wrapper */
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* Left Sidebar */
+        .sidebar-left {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .toc-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc li {
+            margin-bottom: 4px;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .toc a:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc a.current {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-left: 2px solid var(--accent);
+            margin-left: -2px;
+        }
+
+        .toc .chapter-num {
+            color: var(--text-muted);
+            font-size: 11px;
+            min-width: 24px;
+        }
+
+        .toc .visited::after {
+            content: "✓";
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .toc .interlude {
+            font-style: italic;
+            opacity: 0.85;
+        }
+
+        .toc .interlude .chapter-num {
+            font-size: 9px;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-buttons {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            display: block;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-btn:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .nav-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Center Panel - Artifact */
+        .artifact-panel {
+            background: var(--bg-primary);
+            padding: 48px 56px;
+            overflow-y: auto;
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+            transition: flex 0.2s ease;
+        }
+
+        .artifact-panel.collapsed {
+            flex: 0;
+            min-width: 0;
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Panel collapse buttons */
+        .panel-toggle {
+            position: absolute;
+            top: 12px;
+            width: 28px;
+            height: 28px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 10;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .panel-toggle:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .artifact-toggle {
+            right: 12px;
+        }
+
+        .notes-toggle {
+            left: 12px;
+        }
+
+        /* Splitter */
+        .splitter {
+            width: 6px;
+            background: var(--bg-secondary);
+            cursor: col-resize;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        .splitter:hover,
+        .splitter.dragging {
+            background: var(--accent);
+        }
+
+        .splitter::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 40px;
+            background: var(--border);
+            border-radius: 1px;
+        }
+
+        .splitter:hover::after,
+        .splitter.dragging::after {
+            background: var(--text-primary);
+        }
+
+        /* Collapsed panel restore buttons */
+        .restore-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 60px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 20;
+            transition: background 0.15s, color 0.15s;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .restore-btn:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .restore-artifact {
+            left: 0;
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .restore-notes {
+            right: 0;
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .restore-btn.visible {
+            display: flex;
+        }
+
+        .artifact-header {
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .artifact-date {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .artifact-title {
+            font-size: 13px;
+            font-weight: normal;
+            color: var(--text-secondary);
+        }
+
+        .chapter-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 8px 0;
+        }
+
+        /* Napkin artifact styling */
+        .napkin {
+            background: var(--napkin-bg);
+            border-radius: 4px;
+            padding: 40px;
+            max-width: 520px;
+            position: relative;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.3),
+                inset 0 0 60px rgba(0,0,0,0.03);
+            transform: rotate(-0.5deg);
+        }
+
+        .napkin::before {
+            content: "";
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--napkin-stain);
+            filter: blur(8px);
+        }
+
+        .napkin::after {
+            content: "";
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(139, 90, 43, 0.08);
+            filter: blur(6px);
+        }
+
+        .napkin-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed var(--border);
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin: -40px -40px 24px -40px;
+        }
+
+        .napkin-meta p {
+            margin-bottom: 4px;
+        }
+
+        .napkin-content {
+            font-family: 'Segoe Script', 'Bradley Hand', cursive;
+            color: var(--napkin-ink);
+            font-size: 15px;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .napkin-diagram {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 12px;
+            background: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            white-space: pre;
+            line-height: 1.4;
+            color: var(--napkin-ink);
+            overflow-x: auto;
+        }
+
+        .napkin-margin {
+            font-family: 'Segoe Script', 'Bradley Hand', cursive;
+            font-size: 13px;
+            color: var(--napkin-ink);
+            opacity: 0.8;
+            margin-top: 24px;
+            padding-left: 20px;
+            border-left: 2px solid rgba(44, 62, 80, 0.2);
+            font-style: italic;
+        }
+
+        .napkin-margin p {
+            margin-bottom: 8px;
+        }
+
+        .napkin-bottom {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px dashed rgba(44, 62, 80, 0.2);
+            font-family: 'Segoe Script', 'Bradley Hand', cursive;
+            font-size: 14px;
+            color: var(--napkin-ink);
+            opacity: 0.7;
+        }
+
+        .napkin-reverse {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px dashed rgba(44, 62, 80, 0.3);
+        }
+
+        .napkin-reverse-label {
+            font-family: 'SF Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            background: var(--napkin-bg);
+            display: inline-block;
+            padding: 0 8px;
+            position: relative;
+            top: -12px;
+        }
+
+        .napkin-damaged {
+            opacity: 0.5;
+            filter: blur(0.5px);
+        }
+
+        /* Right Panel - Notes */
+        .notes-panel {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            padding: 24px 20px;
+            width: var(--notes-width);
+            min-width: 200px;
+            max-width: 600px;
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+            flex-shrink: 0;
+            transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease;
+        }
+
+        .notes-panel.collapsed {
+            width: 0;
+            min-width: 0;
+            padding: 0;
+            overflow: hidden;
+            border-left: none;
+        }
+
+        .notes-section {
+            margin-bottom: 32px;
+        }
+
+        .notes-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notes-header .author {
+            color: var(--accent);
+        }
+
+        .notes-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .notes-content p {
+            margin-bottom: 16px;
+        }
+
+        .notes-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .notes-content .emphasis {
+            color: var(--text-primary);
+        }
+
+        .notes-content .aside {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            :root {
+                --sidebar-width: 200px;
+                --notes-width: 280px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar-left {
+                display: none;
+            }
+
+            .splitter {
+                display: none;
+            }
+
+            .panels-wrapper {
+                flex-direction: column;
+            }
+
+            .artifact-panel {
+                min-width: unset;
+                flex: none;
+                height: auto;
+            }
+
+            .notes-panel {
+                width: 100% !important;
+                max-width: none;
+                min-width: unset;
+                height: auto;
+                border-left: none;
+                border-top: 1px solid var(--border);
+            }
+
+            .panel-toggle {
+                display: none;
+            }
+        }
+
+        /* Prevent text selection during drag */
+        body.dragging {
+            user-select: none;
+            cursor: col-resize;
+        }
+
+        body.dragging * {
+            cursor: col-resize;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <nav class="sidebar-left">
+            <div class="logo">Marble Porch <span>Archive</span></div>
+
+            <div class="toc-header">Contents</div>
+            <ul class="toc">
+                <li><a href="../01-post-mortem/index.html" class="visited"><span class="chapter-num">01</span> Post-Mortem</a></li>
+                <li><a href="#" class="current visited"><span class="chapter-num">02</span> Napkin</a></li>
+                <li><a href="#" class="interlude"><span class="chapter-num">I-1</span> Before the Napkin</a></li>
+                <li><a href="#"><span class="chapter-num">03</span> First Believer</a></li>
+                <li><a href="#"><span class="chapter-num">04</span> Pitch Deck</a></li>
+                <li><a href="#"><span class="chapter-num">05</span> Skeptic's Report</a></li>
+                <li><a href="#"><span class="chapter-num">06</span> Money Meeting</a></li>
+                <li><a href="#"><span class="chapter-num">07</span> Genius Arrives</a></li>
+                <li><a href="#" class="interlude"><span class="chapter-num">I-2</span> The New Player</a></li>
+                <li><a href="#"><span class="chapter-num">08</span> The Advisors</a></li>
+                <li><a href="#"><span class="chapter-num">09</span> Architecture</a></li>
+                <li><a href="#"><span class="chapter-num">10</span> First Test</a></li>
+                <li><a href="#" class="interlude"><span class="chapter-num">I-3</span> The Golden Session</a></li>
+                <li><a href="#"><span class="chapter-num">11</span> Government Letter</a></li>
+                <li><a href="#"><span class="chapter-num">12</span> First Discrepancy</a></li>
+                <li><a href="#" class="interlude"><span class="chapter-num">I-4</span> The Night Before</a></li>
+                <li><a href="#"><span class="chapter-num">13</span> Pivot</a></li>
+                <li><a href="#"><span class="chapter-num">14</span> Prototype</a></li>
+                <li><a href="#"><span class="chapter-num">15</span> Schism</a></li>
+                <li><a href="#"><span class="chapter-num">16</span> Warning</a></li>
+                <li><a href="#"><span class="chapter-num">17</span> Demonstration</a></li>
+                <li><a href="#"><span class="chapter-num">18</span> Sabotage</a></li>
+                <li><a href="#" class="interlude"><span class="chapter-num">I-5</span> What Are We</a></li>
+                <li><a href="#"><span class="chapter-num">19</span> Confrontation</a></li>
+                <li><a href="#"><span class="chapter-num">20</span> Revelation</a></li>
+                <li><a href="#"><span class="chapter-num">21</span> Unmasking</a></li>
+                <li><a href="#"><span class="chapter-num">22</span> Silence</a></li>
+                <li><a href="#" class="interlude"><span class="chapter-num">I-6</span> The Dashboard</a></li>
+                <li><a href="#"><span class="chapter-num">23</span> Message</a></li>
+                <li><a href="#"><span class="chapter-num">24</span> Dialogue</a></li>
+                <li><a href="#"><span class="chapter-num">25</span> Offer</a></li>
+                <li><a href="#"><span class="chapter-num">26</span> Negotiation</a></li>
+                <li><a href="#" class="interlude"><span class="chapter-num">I-7</span> Vessel's Choice</a></li>
+                <li><a href="#"><span class="chapter-num">27</span> Sacrifice</a></li>
+                <li><a href="#"><span class="chapter-num">28</span> Terms</a></li>
+                <li><a href="#"><span class="chapter-num">29</span> Post-Mortem II</a></li>
+                <li><a href="#"><span class="chapter-num">30</span> Letting Go</a></li>
+                <li><a href="#"><span class="chapter-num">31</span> Curator</a></li>
+                <li><a href="#"><span class="chapter-num">32</span> Question</a></li>
+                <li><a href="#"><span class="chapter-num">33</span> Last Artifact</a></li>
+                <li><a href="#"><span class="chapter-num">34</span> Beginning</a></li>
+            </ul>
+
+            <div class="nav-buttons">
+                <a href="../01-post-mortem/index.html" class="nav-btn">← Previous</a>
+                <a href="#" class="nav-btn">Next →</a>
+            </div>
+        </nav>
+
+        <!-- Panels Wrapper (resizable) -->
+        <div class="panels-wrapper">
+            <!-- Restore buttons for collapsed panels -->
+            <button class="restore-btn restore-artifact" onclick="toggleArtifact()" title="Show Artifact">◀ Artifact</button>
+            <button class="restore-btn restore-notes" onclick="toggleNotes()" title="Show Notes">Notes ▶</button>
+
+            <!-- Center Panel - Artifact -->
+            <main class="artifact-panel" id="artifactPanel">
+                <button class="panel-toggle artifact-toggle" onclick="toggleArtifact()" title="Collapse Artifact">◀</button>
+                <header class="artifact-header">
+                    <div class="artifact-date">October 2026</div>
+                    <h1 class="chapter-title">Napkin</h1>
+                    <div class="artifact-title">Bar napkin with diagram</div>
+                </header>
+
+                <article class="napkin">
+                    <div class="napkin-meta">
+                        <p><strong>Object:</strong> Cocktail napkin, standard bar size</p>
+                        <p><strong>Date:</strong> October 2026 (estimated from context)</p>
+                        <p><strong>Location found:</strong> Alan Goodenough's desk drawer, April 2028</p>
+                        <p><strong>Condition:</strong> Multiple stains (beer, possibly coffee), creased from folding</p>
+                    </div>
+
+                    <div class="napkin-content">
+                        <div class="napkin-diagram">
+         GLASSES
+            |
+            v
+    +-----------------+
+    |  CAMERA/MIC     |      <-- sees what you see
+    |  (input)        |          hears what you hear
+    +-----------------+
+            |
+            v
+    +-----------------+
+    |    LLM          |      "what would
+    |  (the brain)    |       marcus do?"
+    +-----------------+
+            |                       ^
+            v                       |
+    +-----------------+             |
+    |  STOIC LAYER    |-------------+
+    |                 |
+    |  - control?     |
+    |  - virtue?      |
+    |  - what matters?|
+    +-----------------+
+            |
+            v
+      [HUD overlay]
+
+      "calm down"
+      "this doesn't matter"
+      "what would future you think?"</div>
+
+                        <div class="napkin-margin">
+                            <p>phil. app but useful</p>
+                            <p>not meditation BS</p>
+                            <p>actually DOES something</p>
+                        </div>
+
+                        <div class="napkin-bottom">
+                            call danielle?
+                        </div>
+
+                        <div class="napkin-reverse">
+                            <span class="napkin-reverse-label">Reverse side (partial, liquid damaged)</span>
+                            <div class="napkin-diagram napkin-damaged">    USER
+      |
+      |
+      ?-----> advisor 1
+      ?-----> advisor 2
+      ?-----> advisor 3
+
+      "3 advisors = 3 stoics?"</div>
+                            <div class="napkin-margin napkin-damaged">
+                                <p>like angel/devil but smarter</p>
+                                <p>both angels</p>
+                                <p>no - PHILOSOPHERS</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </main>
+
+            <!-- Splitter -->
+            <div class="splitter" id="splitter"></div>
+
+            <!-- Right Panel - Notes -->
+            <aside class="notes-panel" id="notesPanel">
+                <button class="panel-toggle notes-toggle" onclick="toggleNotes()" title="Collapse Notes">▶</button>
+                <section class="notes-section">
+                    <div class="notes-header">
+                        <span class="author">Alan's Notes</span>
+                    </div>
+                    <div class="notes-content">
+                        <p class="emphasis">This is the napkin. THE napkin.</p>
+
+                        <p>I was three beers in. Maybe four. I'd had a bad day at work. Something about a deployment that went sideways and a manager who blamed the wrong person. I don't actually remember the specifics anymore. What I remember is sitting at O'Malley's on Fourth Street, the one that closed six months later, drawing on a napkin because my phone was dead and I didn't want to go home yet.</p>
+
+                        <p>The diagram looks insane. I know it looks insane. But I was trying to draw what it felt like when Marcus Aurelius made sense to me. That moment when you're angry about something and you read "You have power over your mind, not outside events" and suddenly the anger shrinks. What if technology could do that? What if something could watch your life and whisper the right Stoic principle at the right moment? Not a meditation app. Not breathing exercises. Something that actually understood what was happening and told you the truth about it.</p>
+
+                        <p>I drew "what would marcus do?" in the corner and thought I was being clever. I was drunk and sad and sitting alone at a bar, sketching an AR system I had no idea how to build. I probably should have called someone. Gone to a meeting. Done anything other than what I did, which was fold this napkin into my pocket and walk home in the rain thinking I'd finally had a real idea.</p>
+
+                        <p class="aside">The note on the bottom says "call danielle?" That's DM. I'd been avoiding calling her for two weeks because I thought she'd tell me to get a real job. She'd been running her D&D campaign every Thursday and I'd been making excuses not to show up. I was in a bad place. The napkin felt like evidence that I wasn't completely useless.</p>
+
+                        <p>I didn't call her that night. But I showed her the napkin two days later, over coffee, expecting her to laugh at me. She didn't laugh. She asked questions I couldn't answer. When I said "I don't know" for the sixth time, she took the napkin from my hands and said "Then we figure it out."</p>
+
+                        <p>That was the moment, really. Not the napkin. The moment someone looked at my stupid drunk sketch and saw something worth building.</p>
+
+                        <p>I keep it because it reminds me that I didn't create virtueOS. Not really. I drew some boxes and arrows on a bar napkin. Everything that came after, the actual system, the architecture, the AI advisors, TenX's code, Val's security framework, all of it, that was other people taking seriously what I could only imagine badly.</p>
+
+                        <p class="emphasis">I didn't know this was the most important thing I'd ever draw.</p>
+
+                        <p class="aside">I still don't know what to make of that.</p>
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Panel elements
+        const artifactPanel = document.getElementById('artifactPanel');
+        const notesPanel = document.getElementById('notesPanel');
+        const splitter = document.getElementById('splitter');
+        const restoreArtifact = document.querySelector('.restore-artifact');
+        const restoreNotes = document.querySelector('.restore-notes');
+
+        // Toggle functions
+        function toggleArtifact() {
+            artifactPanel.classList.toggle('collapsed');
+            const isCollapsed = artifactPanel.classList.contains('collapsed');
+            restoreArtifact.classList.toggle('visible', isCollapsed);
+            document.querySelector('.artifact-toggle').innerHTML = isCollapsed ? '▶' : '◀';
+        }
+
+        function toggleNotes() {
+            notesPanel.classList.toggle('collapsed');
+            const isCollapsed = notesPanel.classList.contains('collapsed');
+            restoreNotes.classList.toggle('visible', isCollapsed);
+            document.querySelector('.notes-toggle').innerHTML = isCollapsed ? '◀' : '▶';
+        }
+
+        // Splitter drag functionality
+        let isDragging = false;
+        let startX = 0;
+        let startNotesWidth = 0;
+
+        splitter.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startNotesWidth = notesPanel.offsetWidth;
+            splitter.classList.add('dragging');
+            document.body.classList.add('dragging');
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const delta = startX - e.clientX;
+            const newWidth = Math.min(600, Math.max(200, startNotesWidth + delta));
+            notesPanel.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                splitter.classList.remove('dragging');
+                document.body.classList.remove('dragging');
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Alt+A to toggle artifact
+            if (e.altKey && e.key === 'a') {
+                toggleArtifact();
+                e.preventDefault();
+            }
+            // Alt+N to toggle notes
+            if (e.altKey && e.key === 'n') {
+                toggleNotes();
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
