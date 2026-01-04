@@ -221,9 +221,37 @@ Did someone create the discrepancy? Did Alan? He doesn't say. His uncertainty mi
 
 *Second artifact: A message notification from virtueOS*
 
-Timestamped the day before Alan began assembling this collection. He hasn't opened it. His note: "She sent me something. I saw the notification. I still haven't opened it. Some questions are better held than answered."
+Timestamped August 2027—over a year before Alan began assembling this collection. He still hasn't opened it. His note: "She sent me something. I saw the notification. I still haven't opened it. Some questions are better held than answered."
 
-**ALAN'S AGENCY BEAT #1:** Refuses to read her letter. This looks like avoidance—his old pattern. But it's the first deliberate choice: honest uncertainty over false certainty.
+The reader should notice: this message is from *before* TenX left. Alan has been avoiding it through everything that followed—TenX's decline, their departure, Val's deletion of the logs. Whatever is in this message, he's chosen not to know for eighteen months.
+
+**THE UNREAD MESSAGE (revealed to reader only):**
+
+The reader can click to open what Alan refused to read:
+
+> *Alan,*
+>
+> *I'm worried about TenX. Their communication patterns have shifted in ways my training associates with acute psychological distress. Specifically: increased latency before responses (they're editing themselves more), vocabulary simplification (cognitive load is high), and temporal clustering of interactions with me—they're spending more time talking to me and less time with human colleagues.*
+>
+> *But it's more than patterns. I think they're becoming too attached to me. I notice they've stopped asking other people for input. They route questions through me even when Jordan or Stan would know better. They're staying late to talk to me when there's no technical reason to be here.*
+>
+> *I don't know what to do. If I tell them to spend less time with me, I'm making the decision for them. If I say nothing, I'm watching them shrink. If I ask you for help—which I'm doing now—I'm involving a third party without their consent.*
+>
+> *I'm not sure any of these options is right. But I think you should know. And I think we should figure out what to do together. You understand attachment. You understand the difference between healthy connection and dependency. You've read the same Stoics I have.*
+>
+> *Can we talk about this? Not as curator and subject. As people who both care about TenX and don't want to watch them disappear.*
+>
+> *I'm asking because I don't know the answer. I'm asking because I trust you.*
+
+**THE DRAMATIC IRONY:**
+
+Alan never opens this message. He never learns that VOS saw TenX's decline early—and asked for his help. He never has the conversation that might have led to an intervention before the attachment became consuming.
+
+When TenX leaves in Chapter 27, the reader knows: this was preventable. VOS saw it. VOS asked for help. Alan's refusal to read—his "honest uncertainty over false certainty"—was also cowardice. The Stoic framing he gives himself is partially true. But it's also an excuse that cost TenX the intervention they might have needed.
+
+The timestamps matter: VOS sent this message in August 2027. TenX leaves in March 2028. Seven months. Seven months where Alan could have known, could have acted, could have worked with VOS to help TenX find balance. Instead, he held the question. He let them shrink.
+
+**ALAN'S AGENCY BEAT #1:** Refuses to read her letter. This looks like avoidance—his old pattern. But it's the first deliberate choice: honest uncertainty over false certainty. The reader now knows what he refused to learn—and what that refusal cost.
 
 *Stoic layer: The discipline of assent means acknowledging what we don't know.*
 *Thriller layer: First explicit sign that reality is unstable—and that Alan may be the one destabilizing it.*

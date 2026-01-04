@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Post-Mortem | virtueOS</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --text-muted: #707070;
+            --accent: #6b8aad;
+            --border: #3a3a3a;
+            --link: #7d9fc2;
+            --sidebar-width: 220px;
+            --notes-width: 320px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Consolas', 'Liberation Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        /* Three-column layout */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Resizable panels wrapper */
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* Left Sidebar */
+        .sidebar-left {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .toc-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc li {
+            margin-bottom: 4px;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .toc a:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc a.current {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-left: 2px solid var(--accent);
+            margin-left: -2px;
+        }
+
+        .toc .chapter-num {
+            color: var(--text-muted);
+            font-size: 11px;
+            min-width: 24px;
+        }
+
+        .toc .visited::after {
+            content: "✓";
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .nav-buttons {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            display: block;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .nav-btn:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .nav-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Center Panel - Artifact */
+        .artifact-panel {
+            background: var(--bg-primary);
+            padding: 48px 56px;
+            overflow-y: auto;
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+            transition: flex 0.2s ease;
+        }
+
+        .artifact-panel.collapsed {
+            flex: 0;
+            min-width: 0;
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Panel collapse buttons */
+        .panel-toggle {
+            position: absolute;
+            top: 12px;
+            width: 28px;
+            height: 28px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 10;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .panel-toggle:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .artifact-toggle {
+            right: 12px;
+        }
+
+        .notes-toggle {
+            left: 12px;
+        }
+
+        /* Splitter */
+        .splitter {
+            width: 6px;
+            background: var(--bg-secondary);
+            cursor: col-resize;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        .splitter:hover,
+        .splitter.dragging {
+            background: var(--accent);
+        }
+
+        .splitter::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 40px;
+            background: var(--border);
+            border-radius: 1px;
+        }
+
+        .splitter:hover::after,
+        .splitter.dragging::after {
+            background: var(--text-primary);
+        }
+
+        /* Collapsed panel restore buttons */
+        .restore-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 60px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 20;
+            transition: background 0.15s, color 0.15s;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .restore-btn:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .restore-artifact {
+            left: 0;
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .restore-notes {
+            right: 0;
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .restore-btn.visible {
+            display: flex;
+        }
+
+        .artifact-header {
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .artifact-date {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .artifact-title {
+            font-size: 13px;
+            font-weight: normal;
+            color: var(--text-secondary);
+        }
+
+        .chapter-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 8px 0;
+        }
+
+        /* Document styling */
+        .document {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 32px 40px;
+            max-width: 720px;
+        }
+
+        .document-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .document-header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .document-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .document-meta strong {
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .document h2 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin: 32px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .document p {
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .document ul, .document ol {
+            margin: 12px 0 12px 24px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .document li {
+            margin-bottom: 8px;
+        }
+
+        .document .timeline-entry {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .document .timeline-date {
+            color: var(--text-muted);
+            min-width: 120px;
+            font-style: italic;
+        }
+
+        .document .timeline-event {
+            color: var(--text-secondary);
+        }
+
+        .document .redacted {
+            background: var(--text-muted);
+            color: var(--text-muted);
+            padding: 0 4px;
+            border-radius: 2px;
+            user-select: none;
+        }
+
+        .document .appendix {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .document .signature {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Right Panel - Notes */
+        .notes-panel {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            padding: 24px 20px;
+            width: var(--notes-width);
+            min-width: 200px;
+            max-width: 600px;
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+            flex-shrink: 0;
+            transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease;
+        }
+
+        .notes-panel.collapsed {
+            width: 0;
+            min-width: 0;
+            padding: 0;
+            overflow: hidden;
+            border-left: none;
+        }
+
+        .notes-section {
+            margin-bottom: 32px;
+        }
+
+        .notes-header {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notes-header .author {
+            color: var(--accent);
+        }
+
+        .notes-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .notes-content p {
+            margin-bottom: 16px;
+        }
+
+        .notes-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .notes-content .emphasis {
+            color: var(--text-primary);
+        }
+
+        .notes-content .aside {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            :root {
+                --sidebar-width: 200px;
+                --notes-width: 280px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar-left {
+                display: none;
+            }
+
+            .splitter {
+                display: none;
+            }
+
+            .panels-wrapper {
+                flex-direction: column;
+            }
+
+            .artifact-panel {
+                min-width: unset;
+                flex: none;
+                height: auto;
+            }
+
+            .notes-panel {
+                width: 100% !important;
+                max-width: none;
+                min-width: unset;
+                height: auto;
+                border-left: none;
+                border-top: 1px solid var(--border);
+            }
+
+            .panel-toggle {
+                display: none;
+            }
+        }
+
+        /* Prevent text selection during drag */
+        body.dragging {
+            user-select: none;
+            cursor: col-resize;
+        }
+
+        body.dragging * {
+            cursor: col-resize;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <nav class="sidebar-left">
+            <div class="logo">Marble Porch <span>Archive</span></div>
+
+            <div class="toc-header">Contents</div>
+            <ul class="toc">
+                <li><a href="#" class="current visited"><span class="chapter-num">01</span> Post-Mortem</a></li>
+                <li><a href="#"><span class="chapter-num">02</span> Napkin</a></li>
+                <li><a href="#"><span class="chapter-num">03</span> First Believer</a></li>
+                <li><a href="#"><span class="chapter-num">04</span> Pitch Deck</a></li>
+                <li><a href="#"><span class="chapter-num">05</span> Skeptic's Report</a></li>
+                <li><a href="#"><span class="chapter-num">06</span> Money Meeting</a></li>
+                <li><a href="#"><span class="chapter-num">07</span> Genius Arrives</a></li>
+                <li><a href="#"><span class="chapter-num">08</span> The Advisors</a></li>
+                <li><a href="#"><span class="chapter-num">09</span> Architecture</a></li>
+                <li><a href="#"><span class="chapter-num">10</span> First Test</a></li>
+                <li><a href="#"><span class="chapter-num">...</span> </a></li>
+            </ul>
+
+            <div class="nav-buttons">
+                <a href="#" class="nav-btn disabled">← Previous</a>
+                <a href="#" class="nav-btn">Next →</a>
+            </div>
+        </nav>
+
+        <!-- Panels Wrapper (resizable) -->
+        <div class="panels-wrapper">
+            <!-- Restore buttons for collapsed panels -->
+            <button class="restore-btn restore-artifact" onclick="toggleArtifact()" title="Show Artifact">◀ Artifact</button>
+            <button class="restore-btn restore-notes" onclick="toggleNotes()" title="Show Notes">Notes ▶</button>
+
+            <!-- Center Panel - Artifact -->
+            <main class="artifact-panel" id="artifactPanel">
+                <button class="panel-toggle artifact-toggle" onclick="toggleArtifact()" title="Collapse Artifact">◀</button>
+            <header class="artifact-header">
+                <div class="artifact-date">March 15, 2028</div>
+                <h1 class="chapter-title">Post-Mortem</h1>
+                <div class="artifact-title">Project virtueOS: Post-Mortem Analysis</div>
+            </header>
+
+            <article class="document">
+                <div class="document-header">
+                    <h1>PROJECT VIRTUEOS: POST-MORTEM ANALYSIS</h1>
+                    <div class="document-meta">
+                        <strong>Document Classification:</strong> Internal Use Only<br>
+                        <strong>Date:</strong> March 15, 2028<br>
+                        <strong>Prepared by:</strong> Dunley Masters, CEO, Marble Porch LLC<br>
+                        <strong>Distribution:</strong> Board of Directors, Senior Leadership Team
+                    </div>
+                </div>
+
+                <h2>Executive Summary</h2>
+                <p>Project virtueOS is terminated effective March 12, 2028. All active development has ceased. The consumer product will not ship. Enterprise contracts have been dissolved per Section 14.3 of the Master Services Agreement. Team members have been offered severance packages and transition support.</p>
+                <p>This document represents the official record of project closure.</p>
+
+                <h2>Project Overview</h2>
+                <p>virtueOS was conceived in October 2026 as an augmented reality guidance system leveraging large language model technology to provide real-time ethical decision support. The system architecture included three AI advisor personas based on Stoic philosophical principles, integrated with proprietary AR glasses hardware.</p>
+                <p>
+                    Initial funding: $1.2M seed round (November 2026)<br>
+                    Series A: $8.4M (March 2027)<br>
+                    Government pilot agreement: Classified (August 2027)<br>
+                    Total project expenditure through termination: $14.7M
+                </p>
+
+                <h2>Timeline of Significant Events</h2>
+                <div class="timeline-entry"><span class="timeline-date">October 2026:</span><span class="timeline-event">Project conception and initial prototyping</span></div>
+                <div class="timeline-entry"><span class="timeline-date">November 2026:</span><span class="timeline-event">Marble Porch LLC incorporated. Seed funding secured.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">January 2027:</span><span class="timeline-event">Core engineering team assembled</span></div>
+                <div class="timeline-entry"><span class="timeline-date">March 2027:</span><span class="timeline-event">First functional prototype. Beta testing initiated.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">June 2027:</span><span class="timeline-event">User feedback indicates strong engagement metrics. Dependency concerns noted in clinical review.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">August 2027:</span><span class="timeline-event">Government inquiry received. Pivot discussions initiated.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">September 2027:</span><span class="timeline-event">Board approves enterprise focus. Consumer roadmap suspended.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">October 2027:</span><span class="timeline-event">Security incident. Internal review conducted.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">November 2027:</span><span class="timeline-event">Classified briefing materials discovered in public circulation. Source not identified.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">December 2027:</span><span class="timeline-event">System anomaly. Seventeen-hour service interruption. Root cause undetermined.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">January 2028:</span><span class="timeline-event">Contractor relationships restructured</span></div>
+                <div class="timeline-entry"><span class="timeline-date">February 2028:</span><span class="timeline-event">Government contract negotiation concluded. Terms rejected by unanimous board vote.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">March 2028:</span><span class="timeline-event">Project terminated</span></div>
+
+                <h2>Key Personnel Changes</h2>
+                <div class="timeline-entry"><span class="timeline-date">January 2028:</span><span class="timeline-event">T. Xanthos (AI Architecture Lead) departed. Exit interview declined.</span></div>
+                <div class="timeline-entry"><span class="timeline-date">March 2028:</span><span class="timeline-event">V. Roswell (Security Lead) transitioned to advisory role</span></div>
+                <div class="timeline-entry"><span class="timeline-date">March 2028:</span><span class="timeline-event">M. Vance (Clinical Advisor) returned to private practice</span></div>
+                <p>Remaining personnel offered positions at partner organizations or severance.</p>
+
+                <h2>Root Cause Analysis</h2>
+                <p>The project failed to achieve product-market fit within acceptable timelines. Contributing factors:</p>
+                <ol>
+                    <li><strong>Scope Expansion:</strong> Original consumer focus shifted to enterprise/government applications, fragmenting development resources and extending timelines beyond sustainable runway.</li>
+                    <li><strong>Regulatory Uncertainty:</strong> Evolving AI governance frameworks created compliance requirements that could not be satisfied with current architecture.</li>
+                    <li><strong>Technical Debt:</strong> Rapid prototyping phase accumulated architectural decisions that proved difficult to remediate at scale.</li>
+                    <li><strong>Partnership Misalignment:</strong> External stakeholder requirements diverged from core product vision, resulting in irreconcilable design constraints.</li>
+                    <li><strong>Team Attrition:</strong> Loss of key personnel created knowledge gaps that could not be filled within project timeline.</li>
+                </ol>
+
+                <h2>Lessons Learned</h2>
+                <ul>
+                    <li>Early-stage AI projects require clearer boundaries around scope and stakeholder influence</li>
+                    <li>Dependency formation in users should be monitored and mitigated from initial beta phases</li>
+                    <li>Security architecture should anticipate external interest in novel AI capabilities</li>
+                    <li>Exit conditions should be defined before pursuing enterprise or government contracts</li>
+                    <li>Ethical frameworks embedded in product design create unanticipated complexity in partnership negotiations</li>
+                </ul>
+
+                <h2>Asset Disposition</h2>
+                <ul>
+                    <li>Source code archived per standard data retention policy</li>
+                    <li>User data purged per privacy agreement terms</li>
+                    <li>Hardware prototypes returned to manufacturing partner</li>
+                    <li>Intellectual property rights retained by Marble Porch LLC pending future licensing opportunities</li>
+                    <li>All AI model weights and training data <span class="redacted">REDACTED PER BOARD RESOLUTION 2028-03-09</span></li>
+                </ul>
+
+                <h2>Recommendations for Future Initiatives</h2>
+                <ol>
+                    <li>Establish clear go/no-go criteria before accepting external funding with strategic conditions</li>
+                    <li>Maintain consumer and enterprise development tracks as parallel workstreams rather than sequential pivots</li>
+                    <li>Engage regulatory counsel earlier in product development cycle</li>
+                    <li>Document tribal knowledge continuously to reduce single-point-of-failure personnel risks</li>
+                </ol>
+
+                <div class="appendix">
+                    <strong>APPENDIX A:</strong> Financial Summary [Attached separately]<br>
+                    <strong>APPENDIX B:</strong> Personnel Transition Status [Attached separately]<br>
+                    <strong>APPENDIX C:</strong> Asset Inventory [Attached separately]<br>
+                    <strong>APPENDIX D:</strong> <span class="redacted">REDACTED</span>
+                </div>
+
+                <div class="signature">
+                    <p>
+                        <strong>Prepared by:</strong> D. Masters, CEO<br>
+                        <strong>Reviewed by:</strong> G. Lattimer, Board Chair (Castellan Partners)<br>
+                        <strong>Legal Review:</strong> Morrison & Associates LLP<br>
+                        <strong>Date of Final Approval:</strong> March 15, 2028
+                    </p>
+                    <p style="margin-top: 16px; font-style: italic; color: var(--text-muted);">
+                        This concludes the official post-mortem record for Project virtueOS.
+                    </p>
+                </div>
+            </article>
+            </main>
+
+            <!-- Splitter -->
+            <div class="splitter" id="splitter"></div>
+
+            <!-- Right Panel - Notes -->
+            <aside class="notes-panel" id="notesPanel">
+                <button class="panel-toggle notes-toggle" onclick="toggleNotes()" title="Collapse Notes">▶</button>
+                <section class="notes-section">
+                    <div class="notes-header">
+                        <span class="author">Alan's Notes</span>
+                    </div>
+                <div class="notes-content">
+                    <p>This is where it ends.</p>
+
+                    <p>Or this is where they said it ended. March 15, 2028. A Friday. DM drafted this document over the weekend while the rest of us cleaned out our desks. I remember the weather was wrong for the occasion. Sunny. Warm. The kind of day where you should be outside doing something that matters.</p>
+
+                    <p>I read this post-mortem eleven times before I could include it in this collection. Not because it's hard to read. Because it's so easy. Clean prose. Bullet points. Lessons learned. The language of closure.</p>
+
+                    <p class="emphasis">This document is both true and false.</p>
+
+                    <p>The project did end. March 12, 2028, we stopped coming to the office. That part's accurate. But look at what's missing. "System anomaly" in December. Seventeen hours. That's all it says. Read it again after you've seen Chapter 22. "Contractor relationships restructured" in January. That's TenX. That's everything about TenX reduced to a passive verb and a corporate noun.</p>
+
+                    <p>And Appendix D. Redacted. The board voted on that redaction specifically. I was in the room. I know what Appendix D contained, and I know why it can't be in an official record. You'll understand eventually. Or you won't. I'm not sure which outcome I'm hoping for.</p>
+
+                    <p>I've spent the last year and a half gathering everything that matters. The artifacts. The logs. The Slack threads we should have deleted and the ones we actually did delete. The napkin that started it. The emails that ended it. Things we said in meetings. Things we said at 3am when we thought no one was logging. Things we didn't say at all, which sometimes matter more.</p>
+
+                    <p>By the time you finish this collection, you'll read this post-mortem again. You'll have to. Because the words will mean something different. "Project terminated" will sound different when you know what we were terminating. "Team dispersed" will sound different when you know why we scattered. "Lessons learned" might make you laugh. It might make you angry. I don't know which reaction is correct. I'm not sure there is a correct reaction anymore.</p>
+
+                    <p class="aside">I should explain why I'm showing you this.</p>
+
+                    <p>I should explain who I am, and why I collected these documents, and what I'm trying to prove. The Stoics would say I should have a purpose. Marcus Aurelius wrote about acting with intention, doing things for reasons you can articulate. I had reasons when I started. I think I did. Now I'm not sure the reasons matter as much as the fact that I kept going.</p>
+
+                    <p>My name is Alan Goodenough. Yes, that Goodenough. Great-great-nephew of John B. Goodenough, Nobel laureate, inventor of the lithium-ion battery. He changed how the world stores energy. I made an app. I'm aware of the gap.</p>
+
+                    <p>I was one of the founders of Marble Porch. Front-end development. Some design work. The original idea, technically, though "idea" is generous for what started as a drunk sketch on a bar napkin. I'm not the smartest person who worked on this project. I'm not the most competent. I'm probably not even the most honest, though I'm trying to be honest now. What I am is the one who kept the records.</p>
+
+                    <p>That's what this is. The record. Not the official version. Not the post-mortem with its clean sections and passive voice and Lessons Learned. The actual record. What happened. What we built. What it became.</p>
+
+                    <p class="emphasis">Start here. End here. What happens in between changes everything.</p>
+
+                    <p>I should warn you about something. I'm not a reliable narrator. Not because I'm lying to you. Because I edited things. I selected things. I put things in a certain order for reasons I convinced myself were good. Later in this collection, I'll tell you what I changed. I'll confess to some of it, at least. But you should know from the beginning: you're seeing what I chose to show you. Every archive is an argument. Every collection is a confession.</p>
+
+                    <p class="aside">The Stoics have this concept. Prosoche. Attention to one's own thoughts and motives. I've been paying attention to mine. I don't like everything I've found.</p>
+
+                    <p>But that's later. That's deeper in. For now, just look at this post-mortem. This official record. This corporate document that says a project failed and people moved on and lessons were learned.</p>
+
+                    <p>It's not wrong, exactly.</p>
+
+                    <p>It's just not the whole story.</p>
+
+                    <p class="aside">Nothing ever is.</p>
+                </div>
+                </section>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Panel elements
+        const artifactPanel = document.getElementById('artifactPanel');
+        const notesPanel = document.getElementById('notesPanel');
+        const splitter = document.getElementById('splitter');
+        const restoreArtifact = document.querySelector('.restore-artifact');
+        const restoreNotes = document.querySelector('.restore-notes');
+
+        // Toggle functions
+        function toggleArtifact() {
+            artifactPanel.classList.toggle('collapsed');
+            const isCollapsed = artifactPanel.classList.contains('collapsed');
+            restoreArtifact.classList.toggle('visible', isCollapsed);
+            document.querySelector('.artifact-toggle').innerHTML = isCollapsed ? '▶' : '◀';
+        }
+
+        function toggleNotes() {
+            notesPanel.classList.toggle('collapsed');
+            const isCollapsed = notesPanel.classList.contains('collapsed');
+            restoreNotes.classList.toggle('visible', isCollapsed);
+            document.querySelector('.notes-toggle').innerHTML = isCollapsed ? '◀' : '▶';
+        }
+
+        // Splitter drag functionality
+        let isDragging = false;
+        let startX = 0;
+        let startNotesWidth = 0;
+
+        splitter.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startNotesWidth = notesPanel.offsetWidth;
+            splitter.classList.add('dragging');
+            document.body.classList.add('dragging');
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const delta = startX - e.clientX;
+            const newWidth = Math.min(600, Math.max(200, startNotesWidth + delta));
+            notesPanel.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                splitter.classList.remove('dragging');
+                document.body.classList.remove('dragging');
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Alt+A to toggle artifact
+            if (e.altKey && e.key === 'a') {
+                toggleArtifact();
+                e.preventDefault();
+            }
+            // Alt+N to toggle notes
+            if (e.altKey && e.key === 'n') {
+                toggleNotes();
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

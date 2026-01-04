@@ -36,40 +36,58 @@ Not every chapter needs all three layers. Some artifacts have only Alan's notes.
 
 ### Chapter 34: The Frame Breaks
 
-The final chapter has no artifact. Alan speaks directly. The dual-panel structure dissolves. This structural break is emotionally significant—after 33 chapters of mediated artifacts, we finally get unfiltered Alan.
+The final chapter has no artifact. Alan speaks directly. This structural break is emotionally significant—after 33 chapters of mediated artifacts, we finally get unfiltered Alan.
+
+**Visual treatment:**
+- The artifact panel remains but is empty—just a placeholder (Marble Porch logo or virtueOS logo, centered, muted)
+- Alan's notes appear in their normal position in the notes panel
+- The dual-panel structure is preserved, but one panel is deliberately void
+
+The emptiness *is* the artifact. The absence says: there's nothing left to show you. Just me.
 
 ---
 
 ## Visual Design
 
-### Dual-Panel Layout
+### Three-Column Layout
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ARTIFACT PANEL                                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │                                                       │  │
-│  │  [Formatted to look authentic]                        │  │
-│  │  - Slack threads look like Slack                      │  │
-│  │  - Emails look like emails                            │  │
-│  │  - Code has syntax highlighting                       │  │
-│  │  - Napkins are scanned images                         │  │
-│  │  - Government docs have redactions                    │  │
-│  │                                                       │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│  NOTES PANEL                                                │
-│                                                             │
-│  [Original character notes, if any]                         │
-│                                                             │
-│  [Alan's curatorial notes]                                  │
-│  - Context and timeline                                     │
-│  - His reactions and interpretations                        │
-│  - Connections to other artifacts                           │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────┬────────────────────────────────┬──────────────────┐
+│  LEFT        │  CENTER                        │  RIGHT           │
+│  SIDEBAR     │  ARTIFACT PANEL                │  ANNOTATIONS     │
+│              │                                │                  │
+│  ┌────────┐  │  ┌────────────────────────┐    │  ┌────────────┐  │
+│  │ TOC    │  │  │                        │    │  │ ALAN'S     │  │
+│  │        │  │  │  [Artifact content]    │    │  │ NOTES      │  │
+│  │ Ch 1 ✓ │  │  │                        │    │  │            │  │
+│  │ Ch 2 ✓ │  │  │  - Formatted to type   │    │  │ [Context,  │  │
+│  │ Ch 3 ✓ │  │  │  - Tabbed if multiple  │    │  │ reactions, │  │
+│  │ Ch 4   │  │  │                        │    │  │ confessions│  │
+│  │ ...    │  │  │                        │    │  └────────────┘  │
+│  │        │  │  └────────────────────────┘    │                  │
+│  └────────┘  │                                │  ┌────────────┐  │
+│              │  [Tab 1] [Tab 2] (if needed)   │  │ OTHER      │  │
+│  ┌────────┐  │                                │  │ ANNOTATIONS│  │
+│  │ ← Prev │  │                                │  │            │  │
+│  │ Next → │  │                                │  │ [Val, DM,  │  │
+│  └────────┘  │                                │  │ TenX, etc] │  │
+│              │                                │  └────────────┘  │
+└──────────────┴────────────────────────────────┴──────────────────┘
 ```
+
+**Left sidebar:**
+- TOC showing sequential reading progress (visited chapters marked)
+- Previous/Next navigation
+- Direct chapter access (with confirmation dialog if jumping to unvisited future chapter)
+
+**Center panel:**
+- The artifact itself, formatted to type
+- Tabbed interface if chapter has multiple artifacts
+
+**Right panel:**
+- Stacked annotation panels
+- Alan's curatorial notes always on top
+- Other characters' annotations appear below as needed
 
 ### Artifact Type Formatting
 
@@ -84,13 +102,32 @@ The final chapter has no artifact. Alan speaks directly. The dual-panel structur
 | Audio transcripts | Speaker labels, timestamps, [inaudible] markers |
 | Classified docs | Redaction bars, classification headers, marginalia |
 
+### Character Annotations
+
+How annotations appear depends on the artifact type—no one-size-fits-all approach:
+
+| Situation | Treatment |
+|-----------|-----------|
+| TenX's code comments | Inline in the code, naturally placed |
+| TenX's non-code thoughts | Dedicated panel in right sidebar |
+| Slack/chat conversations | Characters' words appear in the artifact itself |
+| Val's security marginalia | Right sidebar panel, or inline if handwritten on document |
+| DM's campaign notes | Often a separate artifact; if annotating, right sidebar |
+| Meri's clinical observations | Right sidebar panel |
+| Alan's curatorial notes | Always top of right sidebar |
+
+**Guiding principle:** If it would naturally appear *in* the document (code comments, chat messages, handwritten marginalia), show it there. If it's external commentary (like Word document comments or attached notes), use the right sidebar panels.
+
+Each chapter handles this based on what makes sense for its artifacts.
+
 ### Navigation Elements
 
+- **Left sidebar TOC** showing sequential reading progress
 - **Chapter title** in header
 - **Artifact date** prominently displayed
-- **Previous/Next** buttons
-- **Sidebar TOC** showing position in collection
-- **Progress indicator** ("You have explored 23 of 34 artifacts")
+- **Previous/Next** buttons in left sidebar
+- **Direct chapter access** with confirmation dialog if jumping ahead
+- **Tabs** in center panel when chapter has multiple artifacts
 
 ---
 
@@ -102,8 +139,8 @@ These enhance the narrative rather than distract from it:
 
 | Chapter | Element | Interaction |
 |---------|---------|-------------|
-| Ch 12 | Unread message from virtueOS | Reader can choose to open it or not. Alan didn't. Track this choice. |
-| Ch 12 | Two code review versions | Toggle between versions to see discrepancies |
+| Ch 12 | Unread message from virtueOS | Reader can open it; Alan never did. Creates dramatic irony—reader knows what Alan refused to learn. |
+| Ch 12 | Two code review versions | Tabbed interface with diff coloring to highlight discrepancies between versions |
 | Ch 16 | Fragmentary classified doc | Gaps in the document render as corrupted/missing |
 | Ch 16 | Redacted text | Some redactions reveal on click; others don't |
 | Ch 18 | Code file | Syntax highlighting; possibly "runnable" in simulated terminal |
@@ -147,6 +184,19 @@ Each chapter has an optional "Listen" button for text-to-speech or pre-recorded 
 
 ---
 
+## Design Philosophy
+
+Alan built this archive. He's a programmer, not a designer. The site reflects that:
+
+- **Clean and functional** — No faux paper textures, no archival visual effects, no skeuomorphic niceties
+- **Fast** — Maximize load and search speeds; don't waste cycles on graphics that don't serve the story
+- **Artifacts as-is** — Documents are digital by nature and presented in accurate preview format (Slack looks like Slack, code has syntax highlighting, etc.)
+- **Quiet** — The archive doesn't greet you, congratulate you, or gamify your reading
+
+This isn't a museum recreation. It's a programmer's file dump with good organization.
+
+---
+
 ## Reader Engagement
 
 ### Progress Tracking
@@ -166,6 +216,35 @@ Two options:
 
 Recommendation: Allow both. Cookie by default; login as optional upgrade.
 
+### Visited Chapter Indicators
+
+The TOC shows which chapters (artifacts) you've already read:
+
+- **Simple visual distinction** — Visited chapters have a subtle indicator (muted text, small checkmark, or similar)
+- **Not gamified** — No progress bars, no percentages, no achievements
+- **Accessible** — Distinction isn't color-only (screen readers announce "visited" state)
+- **Functional, not chatty** — No "Welcome back!" messages
+
+On first return after creating an account, a single line appears once:
+
+> *"Your place has been saved."*
+
+Then never again. The archive remembers quietly.
+
+### Spoiler Protection (or Lack Thereof)
+
+Readers can skip ahead if they want—nothing stops them, just like a physical book. We don't protect readers from themselves.
+
+**Sequential progress tracking:**
+- "Visited" status only advances through sequential reading
+- If you've read chapters 1-15, those show as visited
+- If you skip to chapter 25 to peek, chapter 25 does *not* get marked visited
+- Your progress marker stays at 15 until you read 16, then 17, etc.
+
+This keeps the visited indicator meaningful as a bookmark ("where I left off") rather than a literal page-load tracker. Readers who skip around can do so freely—they just won't lose their place in the natural reading order.
+
+**On chapter titles:** Most are thematic single words ("Napkin," "Schism," "Silence," "Message") that evoke without spoiling. The structure itself provides context: Chapter 1 opens with a post-mortem declaring the project a failure. Readers know from page one that something went wrong. The mystery is *how*, not *whether*.
+
 ### Email List Integration
 
 Framing: "Create an account to save your progress and receive updates from the archive."
@@ -184,9 +263,9 @@ This positions it in-world—the archive might update, Alan might add new artifa
 
 ### Responsive Design
 
-- Desktop: Side-by-side panels (artifact left, notes right)
-- Tablet: Stacked panels (artifact top, notes bottom)
-- Mobile: Tabbed interface (swipe between artifact and notes)
+- **Desktop:** Three-column layout (TOC left, artifact center, annotations right)
+- **Tablet:** Two-column (collapsible TOC drawer, artifact left, annotations right) or stacked (artifact top, annotations bottom)
+- **Mobile:** Single column with navigation drawer; tabbed interface to switch between artifact and annotations
 
 ### Accessibility
 
@@ -225,12 +304,16 @@ This positions it in-world—the archive might update, Alan might add new artifa
 
 ## Open Questions
 
-1. **Reader choices:** If readers can choose to open the Ch 12 message, do we show them what's inside? Or keep it hidden even if they click?
+### Resolved
 
-2. **Multiple readings:** Should the site acknowledge return visitors? ("Welcome back to the archive.")
+1. **Reader choices:** ~~If readers can choose to open the Ch 12 message, do we show them what's inside?~~ **YES.** Reader can open what Alan refused to read. This creates dramatic irony—from that point forward, the reader knows something Alan doesn't. (See Outline.md, Chapter 12 for the message content.)
 
-3. **Chapter 34:** How does the format change when there's no artifact? Full-width prose? Video of Alan? Audio only?
+2. **Multiple readings:** ~~Should the site acknowledge return visitors?~~ **MINIMALLY.** No "Welcome back!" messages. TOC quietly shows visited/unvisited state. On first return after account creation, a single line: *"Your place has been saved."* Then never again.
 
-4. **Spoiler protection:** How do we handle the TOC showing chapter titles that might spoil plot points?
+3. **Chapter 34:** ~~How does the format change when there's no artifact?~~ **EMPTY PANEL.** The artifact panel remains but shows only a placeholder (Marble Porch or virtueOS logo, muted). Alan's notes appear in their normal position. The dual-panel structure is preserved—one panel deliberately void. The emptiness is the artifact.
 
-5. **Annotations by other characters:** How do we visually distinguish Val's marginalia from TenX's code comments from Alan's notes?
+4. **Spoiler protection:** ~~How do we handle the TOC showing chapter titles that might spoil plot points?~~ **WE DON'T.** Readers can skip ahead freely, like a physical book. However, "visited" status only advances through sequential reading—skipping to chapter 25 doesn't mark it visited if you've only read through chapter 15. This preserves the bookmark function without restricting access. Chapter titles are thematic, not spoilery, and the post-mortem opening already signals the project's fate.
+
+5. **Annotations by other characters:** ~~How do we visually distinguish Val's marginalia from TenX's code comments from Alan's notes?~~ **CONTEXT-DEPENDENT.** No one-size-fits-all approach. If an annotation would naturally appear *in* the document (code comments, chat messages, handwritten marginalia), show it there. If it's external commentary, use the right sidebar annotation panels. Alan's notes always appear at the top of the right sidebar. Each chapter handles this based on what makes sense for its artifacts.
+
+### All Questions Resolved
