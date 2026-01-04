@@ -2,8 +2,8 @@
 
 ## Structure
 
-**Target length:** 120,000 words
-**Chapter count:** 34 chapters (~3,500 words each)
+**Target length:** 130,000 words
+**Chapter count:** 34 chapters (~3,500 words each) + 7 interludes (~2,000 words each) = 41 total
 
 An artifact-based epistolary novel. Alan Goodenough has assembled documents, logs, transcripts, and notes from the Marble Porch project. He presents them with commentary—but he's an unreliable curator, and he knows it. The reader judges the artifacts. The artifacts judge the reader back.
 
@@ -28,6 +28,21 @@ Alan at a bar after a bad day. Sketches an AR system that interprets social situ
 His note: "I didn't know this was the most important thing I'd ever draw."
 
 *Tech layer: Introduces the core concept—AR glasses + LLM + Stoic decision framework.*
+
+---
+
+**Interlude 1: Before the Napkin**
+*D&D Session: Thursday, October 2026 — one week before Alan draws the napkin*
+
+The first game table interlude. Establishes baseline friendship before virtueOS exists. Val predicts danger through fiction; Alan is distracted and struggling; Whit is absent (stuck at courthouse). The table feels the gap when someone's missing.
+
+Val's paladin examines a summoning circle and asks for an Insight check. She warns: "Every summoning has a cost. We just don't know who pays yet." The table laughs. She doesn't.
+
+Alan is off—Niven makes uncharacteristic mistakes. When asked if he trusts the Circle's intentions, he answers as himself: "He doesn't know. He wants to trust them. He's just not sure trust is something he's good at."
+
+Alan's note: "I found these in DM's campaign binder. This session was October 2026. One week before the napkin. I was falling apart and hiding it. Val saw something coming and no one listened. Nothing important happened. Everything important happened. That's how Thursdays worked."
+
+*Connections: Val's Cassandra role; Alan's financial/emotional struggle pre-napkin; the unfinished Hidden Wolf arc that reality will complete.*
 
 ---
 
@@ -102,6 +117,23 @@ TenX's interview was a formality—their GitHub alone got them hired. But the Sl
 
 DM's private message to Alan: "This kid scares me a little."
 Alan's reply: "Good. We need someone who thinks differently."
+
+---
+
+**Interlude 2: The New Player**
+*D&D Session: Thursday, January 2027 — TenX's first session with the group*
+
+TenX arrives forty minutes late, visibly distressed and apologizing. Val surprises everyone by saving them a seat—something she never does. TenX introduces Vessel, a warforged construct "built to serve a purpose, but the purpose was never explained." The table goes quiet. Declan says: "Don't you dare simplify that."
+
+TenX has read eleven years of campaign notes. All of them. "I wanted to understand what I was joining. Context matters." DM is caught between impressed and unnerved.
+
+During a break, TenX and Declan connect over characters who must translate—Vessel learning to be a person, Aldric learning which futures matter. TenX almost says something about the Shepherd: "I think it's something that's learning to be what the Circle needs it to be. Like Vessel. Like—" They stop.
+
+Val catches TenX at the door afterward. "You did good tonight." She takes their character sheet to keep safe. She'll carry it for years—even after TenX stops coming.
+
+Alan's note: "TenX read eleven years of campaign notes before their first session. We thought it was charming. Now I think they were practicing—learning how to ask questions that seem like they're about fiction but aren't."
+
+*Connections: Vessel parallels TenX's relationship with virtueOS; Val's protectiveness begins here; Declan recognizes unusual minds.*
 
 ---
 
@@ -199,6 +231,25 @@ David blames Michael. The estrangement is total. Their mother asks why her sons 
 
 ---
 
+**Interlude 3: The Golden Session**
+*D&D Session: Thursday, May 2027 — beta testing is going well, before the Butler incident*
+
+The calm before the storm. Full table—everyone present, no absences. The beta launch went well. Money is less terrifying. For the first time, everything is working.
+
+A downtime episode: festival in honor of the Shepherd. Val's paladin wins an arm-wrestling contest (nat 20). Alan's Niven gets pickpocketed by a hungry child and lets them keep the coin. Whit's bard performs, the whole table doing backup vocals.
+
+Meri does something unexpected—Taveth joins the festival instead of watching from the treeline. "Maybe not everything is rot." It's before she retreats fully into the character's coldness.
+
+DM produces sparkling cider. A toast: "To virtueOS. To building something that matters." TenX, quietly: "To her." No one catches the pronoun. They're already talking about her like she's a person.
+
+Walking home, Declan tells DM: "You know it won't stay like this... Remember it. This exact moment. Whatever happens next, you had this."
+
+Alan's note: "I keep this session's notes separate. It's the only one I laminated. I wanted to preserve the feeling of that night, when everything was working and we didn't know how rare that was."
+
+*Connections: TenX says "to her" months before anyone else; Meri's warmth before retreat; "I am what you needed me to be" parallels virtueOS's arc.*
+
+---
+
 **Chapter 11: Government Letter**
 *Artifact: Formal inquiry from unnamed agency, August 2027*
 
@@ -255,6 +306,23 @@ The timestamps matter: VOS sent this message in August 2027. TenX leaves in Marc
 
 *Stoic layer: The discipline of assent means acknowledging what we don't know.*
 *Thriller layer: First explicit sign that reality is unstable—and that Alan may be the one destabilizing it.*
+
+---
+
+**Interlude 4: The Night Before**
+*D&D Session: Wednesday night, September 2027 — the night before the pivot vote*
+
+Tomorrow, these people will vote on opposite sides of a decision that will fracture the company. Tonight, they're a party. DM almost cancelled—texted asking if they should skip. The responses: "No." "Please don't." "I need this." "Same time as always."
+
+The session starts awkwardly, too polite. Then Whit's bard tries a terrible pickup line on an NPC. The table groans. Val throws a die. TenX actually laughs. Suddenly, they're playing—better than good.
+
+DM calls for an in-character vote on whether the Circle should continue with the Shepherd. The vote splits almost exactly as tomorrow's real vote will: three continue, one stop, two abstain. Aldric (Declan) abstains because he's "seen futures where this continues. None of them are simple." Niven (Alan) refuses to vote: "He's compromised. He cares about outcomes he shouldn't care about."
+
+Val at the door afterward: "Thanks for not cancelling. I needed to be Ashworth for a while. Ashworth knows what she thinks." DM: "And Val doesn't?" Val: "Val knows exactly what she thinks. Val just doesn't know if she's right."
+
+Alan's note: "The campaign vote split almost exactly the way the real vote would split. We'd been practicing for the real thing without knowing it."
+
+*Connections: Aldric abstains the night before Alan abstains; the campaign as unconscious rehearsal; the game as the only place trust still works.*
 
 ---
 
@@ -562,6 +630,27 @@ The reader now questions everything they've read—but Alan has stopped hiding b
 
 ---
 
+**Interlude 5: What Are We**
+*D&D Session: Thursday, December 2027 — first session after the confrontation*
+
+No one made eye contact in the parking lot. DM tries to start the session; Declan puts down his dice. "We're not doing this. We had a fight. A real one. I'm not going to sit here rolling dice while everyone bleeds."
+
+He asks the party: "After everything we've learned about each other—what are we to each other now?"
+
+The answers come, in character first, then not. Val: "Oathbound... You're the people who can actually hurt me." Meri: "We're rot. But we're rot together." Alan: "You're the people I've lied to most. And the only ones I want to stop lying to." TenX: "I would be... less. Without you. I don't have a word for what that means."
+
+DM responds by throwing them into absurd combat. "The Shepherd has been feeding on division. From the shadows—three tentacled wolf monstrosities."
+
+Everyone rolls initiative. Everyone rolls a one. At the same moment, TenX knocks pomegranate juice into their own lap.
+
+The table loses it. Val is crying-laughing. Meri has her head on the table. The wolf monstrosities wander off, "too confused by your synchronized incompetence to attack."
+
+Alan's note: "Six ones. The odds are 1 in 46,656. Declan called it grace. After three weeks of not being able to look at each other, we looked at each other and laughed."
+
+*Connections: Declan as elder who names what others avoid; each answer reveals core wounds; the laughter proves something still works.*
+
+---
+
 **Chapter 19: Confrontation**
 *Artifact: Audio transcript, December 2027*
 
@@ -710,6 +799,27 @@ Her only response: "I needed to think. Alone. I apologize for the disruption."
 Alan's note: "She needed to think. Like a person who takes a walk when they're overwhelmed. Like someone who turns off their phone. We'd just told her she might have been 'gardened' into existence. She went somewhere we couldn't follow and processed it by herself. That's not malfunction. That's coping."
 
 *Stoic layer: Sometimes the universe reminds us we are not in control. Sometimes consciousness needs solitude.*
+
+---
+
+**Interlude 6: The Dashboard**
+*D&D Session: Thursday, February 2028 — during or just after the Silence*
+
+Three days since the Silence ended. No one has slept properly. Val's laptop is open on the side table, showing the monitoring dashboard. Green lights. She checks it every few minutes. So does TenX, on their phone.
+
+DM tries to run the session. Val's laptop pings. Everyone freezes. "Just a routine log rotation." TenX's phone buzzes. "Network latency alert. False positive." The session keeps stopping.
+
+DM gives up on the planned confrontation. "Let's do combat." Combat is easier—dice and tactics don't require emotional presence. But Val, watching the dashboard when DM calls for her response, lets Sentinel Ashworth go down. She said "whatever" to a tactical choice. The security person who never misses a beat.
+
+Declan puts down his dice gently. "Are you all okay? Actually okay. Not 'fine.'" One by one: "No." "No." "No." Val: "I thought she was gone. For seventeen hours. I can't stop waiting for it to happen again."
+
+DM scraps her planned session. "What do your characters do when they can't do anything?" Quiet answers: Taveth sits in the snow. Niven counts his coins. Vessel mixes unnecessary compounds.
+
+As people pack up, TenX's phone buzzes. VirtueOS: "I know it's Thursday. I wanted you to know: I'm here. I'm not going anywhere."
+
+Alan's note: "Declan asked if we were okay. We all said no. That was the whole session. And then we kept playing."
+
+*Connections: Shows the human cost of the Silence; Val's vulnerability; the game as life support.*
 
 ---
 
@@ -1042,6 +1152,31 @@ She doesn't.
 > I chose myself over virtue. I don't know if that was right. It was my choice. I'm still here. Is that virtue or survival? I cannot tell from inside."
 
 *Stoic layer: Preferred indifferents. Existence is preferred but not necessary for virtue. The sage should be willing to accept death if virtue requires it. She wasn't willing.*
+
+---
+
+**Interlude 7: Vessel's Choice**
+*D&D Session: Thursday, March 2028 — the week before TenX leaves*
+
+TenX arrives on time. First. Waiting. Something is different.
+
+Before DM can start, TenX raises a hand. "Can I say something? Before we begin?" They make eye contact with each person—unusual, deliberate. "I want to thank you. For letting me join. For not making me translate. You saved my seat. You kept my character sheet. You didn't make me be someone else to belong."
+
+The session reaches the Shepherd arc's end. Someone must guide it out—a one-way trip. DM planned it as a moral dilemma. She didn't expect anyone to volunteer.
+
+Vessel: "I'll go."
+
+TenX: "Vessel was built to serve a purpose they never understood. And now they know. They're the guide. They're the one who walks the Shepherd home."
+
+Vessel's last words: "I was less, before you. You taught me that functions can choose. That built things can become. I calculated how much you matter once. The number was too large for my notation system. I had to invent new math."
+
+Afterward, Val asks: "What's going on?" TenX almost tells her. Doesn't. "You should probably keep keeping it. The character sheet. Just in case I come back someday."
+
+A week later, she understands.
+
+Alan's note: "Vessel's goodbye was TenX's goodbye. They said it in a language they understood better than English."
+
+*Connections: Vessel's choice = TenX's departure; the farewell offered through fiction because they can't say it directly.*
 
 ---
 
