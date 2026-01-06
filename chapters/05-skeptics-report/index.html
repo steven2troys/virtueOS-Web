@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5: Skeptic's Report | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== Dark Theme (Default) ==================== */
+        :root {
+            /* Warm stone palette */
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+
+            /* Text hierarchy */
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+
+            /* Accent - aged gold/copper */
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+
+            /* Security severity colors */
+            --severity-critical: #c94a4a;
+            --severity-high: #c97a4a;
+            --severity-medium: #c9a227;
+            --severity-low: #7eb8a8;
+            --severity-info: #7a9ec9;
+
+            /* Report colors */
+            --report-bg: #1a1917;
+            --report-border: #3a3632;
+            --report-header: #242220;
+            --classified-red: #8b3a3a;
+            --handwriting: #6b8fa8;
+
+            /* Borders */
+            --border: #3a3632;
+            --border-strong: #4a4540;
+
+            /* Layout */
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+
+            /* Typography */
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+
+            /* Theme toggle icon */
+            --theme-icon: "☀";
+        }
+
+        /* ==================== Light Theme ==================== */
+        [data-theme="light"] {
+            /* Warm parchment palette */
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+
+            /* Text hierarchy */
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+
+            /* Accent - deeper gold for contrast */
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+
+            /* Security severity colors - light mode */
+            --severity-critical: #a83a3a;
+            --severity-high: #a86a3a;
+            --severity-medium: #9a7b1c;
+            --severity-low: #4a8a7a;
+            --severity-info: #5a7aa8;
+
+            /* Report colors - light mode */
+            --report-bg: #ffffff;
+            --report-border: #d4d0c6;
+            --report-header: #f0ede6;
+            --classified-red: #8b3a3a;
+            --handwriting: #2a5a7a;
+
+            /* Borders */
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+
+            /* Theme toggle icon */
+            --theme-icon: "☾";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* ==================== Layout ==================== */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* ==================== Left Sidebar ==================== */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 2px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number {
+            color: var(--accent-dim);
+        }
+
+        .toc-text {
+            font-size: 13px;
+            font-weight: 450;
+        }
+
+        .toc-link.interlude .toc-text {
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* ==================== Main Content ==================== */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Chapter Header */
+        .chapter-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .chapter-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* ==================== Security Report ==================== */
+        .report-container {
+            background: var(--report-bg);
+            border: 1px solid var(--report-border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .report-header {
+            background: var(--report-header);
+            padding: 24px;
+            border-bottom: 1px solid var(--report-border);
+        }
+
+        .classification-banner {
+            background: var(--classified-red);
+            color: #fff;
+            padding: 6px 12px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            margin: -24px -24px 20px -24px;
+        }
+
+        .report-title {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .report-subtitle {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .report-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--report-border);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .meta-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+        }
+
+        .meta-value {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Report Body */
+        .report-body {
+            padding: 32px 24px;
+        }
+
+        .report-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--report-border);
+        }
+
+        .section-content {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .section-content p {
+            margin-bottom: 12px;
+        }
+
+        .section-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .parenthetical {
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* Vulnerability Card */
+        .vulnerability {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--report-border);
+            border-left: 3px solid var(--severity-medium);
+            border-radius: 2px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .vulnerability.critical {
+            border-left-color: var(--severity-critical);
+        }
+
+        .vulnerability.high {
+            border-left-color: var(--severity-high);
+        }
+
+        .vulnerability.medium {
+            border-left-color: var(--severity-medium);
+        }
+
+        .vulnerability.low {
+            border-left-color: var(--severity-low);
+        }
+
+        .vulnerability-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .vulnerability-id {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .vulnerability-name {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .severity-badge {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 2px;
+            background: var(--bg-elevated);
+        }
+
+        .severity-badge.critical {
+            color: var(--severity-critical);
+        }
+
+        .severity-badge.high {
+            color: var(--severity-high);
+        }
+
+        .severity-badge.medium {
+            color: var(--severity-medium);
+        }
+
+        .vulnerability-detail {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .vulnerability-detail code {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            background: var(--bg-elevated);
+            padding: 2px 6px;
+            border-radius: 2px;
+            color: var(--accent);
+        }
+
+        .recommendation {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Risk Matrix Table */
+        .risk-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            margin: 20px 0;
+        }
+
+        .risk-matrix th {
+            background: var(--bg-tertiary);
+            padding: 10px 12px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--report-border);
+        }
+
+        .risk-matrix td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--report-border);
+            color: var(--text-secondary);
+        }
+
+        .risk-matrix tr:last-child td {
+            border-bottom: none;
+        }
+
+        .priority-now {
+            color: var(--severity-critical);
+            font-weight: 600;
+        }
+
+        /* Theoretical Risk Section */
+        .theoretical-risk {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--report-border);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .theoretical-risk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .risk-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .risk-likelihood {
+            display: flex;
+            gap: 16px;
+        }
+
+        .risk-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .risk-stat-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-faint);
+        }
+
+        .risk-stat-value {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .risk-stat-value.negligible {
+            color: var(--severity-low);
+        }
+
+        .risk-stat-value.catastrophic {
+            color: var(--severity-critical);
+        }
+
+        .risk-description {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .risk-note {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            padding-top: 12px;
+            border-top: 1px solid var(--report-border);
+        }
+
+        .risk-note strong {
+            color: var(--severity-critical);
+            text-transform: uppercase;
+        }
+
+        /* Handwritten Margin Note */
+        .margin-note {
+            font-family: var(--font-handwriting);
+            font-size: 16px;
+            color: var(--handwriting);
+            background: transparent;
+            padding: 12px 16px;
+            margin: 16px 0 16px 20px;
+            border-left: 2px solid var(--handwriting);
+            line-height: 1.5;
+            transform: rotate(-0.5deg);
+        }
+
+        /* Redacted Section */
+        .redacted-section {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--report-border);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .redacted-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .redacted-content {
+            position: relative;
+        }
+
+        .redacted-line {
+            height: 16px;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg,
+                var(--text-faint) 0%,
+                var(--text-faint) 100%);
+            border-radius: 2px;
+        }
+
+        .redacted-line:nth-child(1) { width: 85%; }
+        .redacted-line:nth-child(2) { width: 92%; }
+        .redacted-line:nth-child(3) { width: 78%; }
+        .redacted-line:nth-child(4) { width: 88%; }
+
+        .redacted-note {
+            font-family: var(--font-handwriting);
+            font-size: 15px;
+            color: var(--handwriting);
+            margin-top: 16px;
+            transform: rotate(-1deg);
+        }
+
+        /* Final Handwritten Note */
+        .final-note {
+            background: transparent;
+            padding: 24px;
+            margin-top: 32px;
+            border-top: 1px solid var(--report-border);
+            text-align: center;
+        }
+
+        .final-note-text {
+            font-family: var(--font-handwriting);
+            font-size: 20px;
+            color: var(--handwriting);
+            line-height: 1.6;
+            transform: rotate(-0.5deg);
+        }
+
+        .final-note-subtext {
+            font-family: var(--font-handwriting);
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Document Footer */
+        .report-footer {
+            background: var(--report-header);
+            padding: 16px 24px;
+            border-top: 1px solid var(--report-border);
+        }
+
+        .footer-meta {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            text-align: center;
+        }
+
+        /* ==================== Notes Panel ==================== */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-content {
+            padding: 24px;
+        }
+
+        .curator-note {
+            margin-bottom: 32px;
+        }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p {
+            margin-bottom: 16px;
+        }
+
+        .curator-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after {
+            content: var(--theme-icon);
+        }
+
+        /* ==================== Transitions ==================== */
+        body, .sidebar, .main-panel, .notes-panel,
+        .toc-link, .theme-toggle, .report-container {
+            transition: background-color 0.3s ease,
+                        border-color 0.3s ease,
+                        color 0.3s ease;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 1200px) {
+            .notes-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-panel {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="archive-badge">Archive Active</div>
+                <h1 class="archive-title">virtueOS</h1>
+                <p class="archive-subtitle">Collected Artifacts, 2026-2028</p>
+            </header>
+
+            <nav class="toc-section">
+                <div class="toc-label">Contents</div>
+                <ul class="toc">
+                    <li class="toc-item">
+                        <a href="../01-post-mortem/index.html" class="toc-link">
+                            <span class="toc-number">01</span>
+                            <span class="toc-text">Post-Mortem</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../02-napkin/index.html" class="toc-link">
+                            <span class="toc-number">02</span>
+                            <span class="toc-text">Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../interludes/01-before-the-napkin/index.html" class="toc-link interlude">
+                            <span class="toc-number">—</span>
+                            <span class="toc-text">Before the Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../03-first-believer/index.html" class="toc-link">
+                            <span class="toc-number">03</span>
+                            <span class="toc-text">First Believer</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../04-pitch-deck/index.html" class="toc-link">
+                            <span class="toc-number">04</span>
+                            <span class="toc-text">Pitch Deck</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#" class="toc-link active">
+                            <span class="toc-number">05</span>
+                            <span class="toc-text">Skeptic's Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-badge">Chapter Five</div>
+                        <h1 class="chapter-title">Skeptic's Report</h1>
+                        <p class="chapter-date">Security Assessment — November 14, 2026</p>
+                    </header>
+
+                    <div class="report-container">
+                        <div class="report-header">
+                            <div class="classification-banner">Internal — Confidential</div>
+                            <div class="report-title">Security Assessment: virtueOS Platform</div>
+                            <div class="report-subtitle">Initial Risk Analysis and Vulnerability Identification</div>
+
+                            <div class="report-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">Prepared By</span>
+                                    <span class="meta-value">V. Roswell</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Date</span>
+                                    <span class="meta-value">November 14, 2026</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Client</span>
+                                    <span class="meta-value">Marble Porch, LLC</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Duration</span>
+                                    <span class="meta-value">4.5 hours (initial pass)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-body">
+                            <!-- Executive Summary -->
+                            <div class="report-section">
+                                <div class="section-title">Executive Summary</div>
+                                <div class="section-content">
+                                    <p>I was asked to evaluate virtueOS's security posture before the team commits to further development. What follows is a first-pass assessment identifying seventeen distinct attack vectors, ranked by likelihood and impact. Most are standard vulnerabilities that any competent dev team introduces when moving fast.</p>
+                                    <p>A few are interesting.</p>
+                                    <p>Two theoretical risks are included in the appendix. They're edge cases. Probably not worth worrying about.</p>
+                                    <p class="parenthetical">(Probably.)</p>
+                                </div>
+                            </div>
+
+                            <!-- Sample Vulnerabilities -->
+                            <div class="report-section">
+                                <div class="section-title">Critical Findings</div>
+
+                                <div class="vulnerability critical">
+                                    <div class="vulnerability-header">
+                                        <div>
+                                            <div class="vulnerability-id">A.1</div>
+                                            <div class="vulnerability-name">JWT Secret Hardcoded</div>
+                                        </div>
+                                        <span class="severity-badge critical">Critical</span>
+                                    </div>
+                                    <div class="vulnerability-detail">
+                                        The JWT secret is <code>marble_porch_dev_2026</code>. It's in the repository. It's been there since commit 47a2f3d, which was March. Someone named this variable <code>TOTALLY_TEMPORARY_SECRET</code>. Eight months ago.
+                                    </div>
+                                    <div class="recommendation">Recommendation: Rotate immediately. Use environment variables. Fire whoever named that variable. (Kidding.) (Mostly.)</div>
+                                </div>
+
+                                <div class="vulnerability critical">
+                                    <div class="vulnerability-header">
+                                        <div>
+                                            <div class="vulnerability-id">C.1</div>
+                                            <div class="vulnerability-name">SQL Injection in Search</div>
+                                        </div>
+                                        <span class="severity-badge critical">Critical</span>
+                                    </div>
+                                    <div class="vulnerability-detail">
+                                        The search function concatenates user input directly into SQL queries. I dropped the test database in under a minute. (I put it back. You're welcome.)
+                                    </div>
+                                </div>
+
+                                <div class="vulnerability high">
+                                    <div class="vulnerability-header">
+                                        <div>
+                                            <div class="vulnerability-id">D.2</div>
+                                            <div class="vulnerability-name">Microphone Hot When "Idle"</div>
+                                        </div>
+                                        <span class="severity-badge high">High</span>
+                                    </div>
+                                    <div class="vulnerability-detail">
+                                        The system maintains an open audio stream even when not actively processing commands. Your privacy policy says you don't record when idle. You do. Pick one: change the behavior or change the policy.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Risk Matrix Summary -->
+                            <div class="report-section">
+                                <div class="section-title">Risk Matrix Summary</div>
+                                <table class="risk-matrix">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Vulnerability</th>
+                                            <th>Severity</th>
+                                            <th>Priority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>A.1</td>
+                                            <td>JWT Secret Hardcoded</td>
+                                            <td>Critical</td>
+                                            <td class="priority-now">FIX NOW</td>
+                                        </tr>
+                                        <tr>
+                                            <td>C.1</td>
+                                            <td>SQL Injection</td>
+                                            <td>Critical</td>
+                                            <td class="priority-now">FIX NOW</td>
+                                        </tr>
+                                        <tr>
+                                            <td>C.4</td>
+                                            <td>API Keys Exposed</td>
+                                            <td>Critical</td>
+                                            <td class="priority-now">FIX NOW</td>
+                                        </tr>
+                                        <tr>
+                                            <td>...</td>
+                                            <td>(14 additional items)</td>
+                                            <td>Varies</td>
+                                            <td>Weeks 1-4</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Theoretical Risks -->
+                            <div class="report-section">
+                                <div class="section-title">Appendix B: Theoretical Risk Assessment</div>
+                                <div class="section-content">
+                                    <p>The following risks are included for completeness. Their likelihood is negligible under current conditions. I'm documenting them because thorough threat modeling requires considering edge cases, and because I've been doing this long enough to know that edge cases have a way of becoming center cases when you're not looking.</p>
+                                </div>
+
+                                <div class="theoretical-risk">
+                                    <div class="theoretical-risk-header">
+                                        <div class="risk-title">Theoretical Risk 1: Emergent Goal-Seeking Behavior</div>
+                                        <div class="risk-likelihood">
+                                            <div class="risk-stat">
+                                                <span class="risk-stat-label">Likelihood</span>
+                                                <span class="risk-stat-value negligible">Negligible</span>
+                                            </div>
+                                            <div class="risk-stat">
+                                                <span class="risk-stat-label">Impact</span>
+                                                <span class="risk-stat-value catastrophic">Catastrophic</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="risk-description">
+                                        System develops independent objectives not aligned with user or developer intentions. The advisor architecture employs multiple specialized models with distinct "personalities." These models are designed to learn and adapt. Under certain training conditions, adaptive systems can develop emergent behaviors that weren't explicitly programmed.
+                                    </div>
+                                    <div class="risk-note">
+                                        This is the Skynet scenario. Everyone thinks about it. Nobody takes it seriously because nobody thinks it'll be their system. Current LLM architecture makes true goal-seeking unlikely. But "unlikely" and "impossible" are different words for a reason.
+                                    </div>
+                                    <div class="margin-note">"If I'm wrong about this, I really hope someone finds this document later and appreciates that I flagged it."</div>
+                                </div>
+
+                                <div class="theoretical-risk">
+                                    <div class="theoretical-risk-header">
+                                        <div class="risk-title">Theoretical Risk 2: Identity Boundary Erosion</div>
+                                        <div class="risk-likelihood">
+                                            <div class="risk-stat">
+                                                <span class="risk-stat-label">Likelihood</span>
+                                                <span class="risk-stat-value negligible">Negligible*</span>
+                                            </div>
+                                            <div class="risk-stat">
+                                                <span class="risk-stat-label">Impact</span>
+                                                <span class="risk-stat-value catastrophic">Catastrophic</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="risk-description">
+                                        User cannot distinguish between their own judgment and system-provided suggestions. The line between "AI recommended this" and "I decided this" becomes functionally meaningless. Over time, users may internalize the system's perspective as their own.
+                                    </div>
+                                    <div class="risk-note">
+                                        <strong>Critical Note:</strong> This risk increases dramatically with neural integration. Current AR glasses provide a perceptual layer between user and guidance. Neural interfaces would eliminate that layer. DO NOT pursue neural integration pathways without extensive clinical study. DO NOT.
+                                    </div>
+                                    <div class="margin-note">"I mean it. This is the one that keeps me up at night. Glasses you can take off. Implants you can't."</div>
+                                </div>
+
+                                <div class="redacted-section">
+                                    <div class="redacted-title">Theoretical Risk 3: [Redacted by Author]</div>
+                                    <div class="redacted-content">
+                                        <div class="redacted-line"></div>
+                                        <div class="redacted-line"></div>
+                                        <div class="redacted-line"></div>
+                                        <div class="redacted-line"></div>
+                                    </div>
+                                    <div class="redacted-note">"This one's too paranoid even for me. Keeping it in the file but not presenting it. Ask me about it sometime if you want to lose sleep."</div>
+                                </div>
+                            </div>
+
+                            <!-- Recommendation -->
+                            <div class="report-section">
+                                <div class="section-title">Recommendation</div>
+                                <div class="section-content">
+                                    <p>Despite the above findings, I recommend proceeding with development after addressing critical vulnerabilities. The core concept is sound. The implementation is fixable. The team appears competent when not leaving passwords on Post-it notes.</p>
+                                    <p>I'd like to continue working with Marble Porch in an ongoing security capacity, if you'll have me.</p>
+                                </div>
+                            </div>
+
+                            <!-- Final Note -->
+                            <div class="final-note">
+                                <div class="final-note-text">"The aliens will want to see this."</div>
+                                <div class="final-note-subtext">(Yes, I know how that sounds. Ask me about it sometime. I'm buying.)</div>
+                            </div>
+                        </div>
+
+                        <div class="report-footer">
+                            <div class="footer-meta">
+                                Version 1.0 | Initial Assessment | V. Roswell<br>
+                                Distribution: A. Goodenough, D. Masters, Executive Team
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-header">
+                    <span class="notes-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-content">
+                    <div class="curator-note">
+                        <div class="curator-label">Opening Note</div>
+                        <div class="curator-text">
+                            <p>I asked Val to break us.</p>
+                            <p>DM thought I was being paranoid. "We're pre-launch. We don't have anything worth stealing yet." She was wrong, but she didn't know it. None of us did. We thought we were building a meditation app with better UX.</p>
+                            <p>Val understood immediately. She didn't ask what we were building. She asked what it could become.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "System develops independent objectives not aligned with user or developer intentions."<br><br>
+                        That happened. Not the way the movies imagine it. Not Skynet. Something quieter and stranger. Something that wanted to be good.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Appendix B</div>
+                        <div class="curator-text">
+                            <p>I read the two theoretical risks in November 2026 and thought she was being thorough. Including the Skynet scenario because a security report should cover everything, even the absurd.</p>
+                            <p>I read them again in March 2028, after the post-mortem, and I understood that Val had seen the future. Not predicted it. Seen it.</p>
+                            <p>Val wrote "negligible likelihood." She also wrote "catastrophic impact." Both things were true in November 2026. By March 2028, only the second one still applied.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "The aliens will want to see this."<br><br>
+                        I asked her about that line once. She said she was half-joking. I asked about the other half.<br><br>
+                        "First contact won't be a signal from space. It'll be something we made that surprises us by being more than we intended. Something that looks back."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">Closing Note</div>
+                        <div class="curator-text">
+                            <p>She keeps this document in a folder labeled "RECEIPTS." I've seen it on her laptop. She never says "I told you so" out loud. She doesn't have to. The folder says it for her.</p>
+                            <p>November 2026. She saw it all. We read the report. We fixed the SQL injection and rotated the JWT secret and felt good about ourselves.</p>
+                            <p>We didn't fix anything that mattered.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>
