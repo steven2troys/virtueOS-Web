@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6: Money Meeting | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== Dark Theme (Default) ==================== */
+        :root {
+            /* Warm stone palette */
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+
+            /* Text hierarchy */
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+
+            /* Accent - aged gold/copper */
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+
+            /* Meeting notes colors */
+            --notes-bg: #1a1917;
+            --notes-border: #3a3632;
+            --notes-header: #242220;
+            --speaker-angel: #c9a227;
+            --speaker-dm: #7eb8a8;
+            --speaker-val: #c97a7a;
+            --speaker-alan: #7a9ec9;
+            --handwriting: #6b8fa8;
+            --pencil: #8a8580;
+            --notebook-bg: #1e1c1a;
+            --notebook-lines: #2a2825;
+
+            /* Borders */
+            --border: #3a3632;
+            --border-strong: #4a4540;
+
+            /* Layout */
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+
+            /* Typography */
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+
+            /* Theme toggle icon */
+            --theme-icon: "☀";
+        }
+
+        /* ==================== Light Theme ==================== */
+        [data-theme="light"] {
+            /* Warm parchment palette */
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+
+            /* Text hierarchy */
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+
+            /* Accent - deeper gold for contrast */
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+
+            /* Meeting notes colors - light mode */
+            --notes-bg: #ffffff;
+            --notes-border: #d4d0c6;
+            --notes-header: #f0ede6;
+            --speaker-angel: #8b6914;
+            --speaker-dm: #4a8a7a;
+            --speaker-val: #a85a5a;
+            --speaker-alan: #5a7aa8;
+            --handwriting: #2a5a7a;
+            --pencil: #6a665f;
+            --notebook-bg: #f9f7f4;
+            --notebook-lines: #e8e5de;
+
+            /* Borders */
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+
+            /* Theme toggle icon */
+            --theme-icon: "☾";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* ==================== Layout ==================== */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* ==================== Left Sidebar ==================== */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 2px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number {
+            color: var(--accent-dim);
+        }
+
+        .toc-text {
+            font-size: 13px;
+            font-weight: 450;
+        }
+
+        .toc-link.interlude .toc-text {
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* ==================== Main Content ==================== */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Chapter Header */
+        .chapter-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .chapter-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* ==================== Meeting Notes Document ==================== */
+        .document-container {
+            background: var(--notes-bg);
+            border: 1px solid var(--notes-border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .document-header {
+            background: var(--notes-header);
+            padding: 24px;
+            border-bottom: 1px solid var(--notes-border);
+        }
+
+        .document-title {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .document-subtitle {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .document-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--notes-border);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .meta-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+        }
+
+        .meta-value {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .meta-value.redacted {
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        /* Document Body */
+        .document-body {
+            padding: 32px 24px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--notes-border);
+        }
+
+        .section-content {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .section-content p {
+            margin-bottom: 12px;
+        }
+
+        /* Dialogue / Q&A */
+        .qa-block {
+            margin: 20px 0;
+            padding-left: 16px;
+            border-left: 2px solid var(--notes-border);
+        }
+
+        .question {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--speaker-angel);
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .question::before {
+            content: "Q: ";
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        .response {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .speaker {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .speaker.angel { color: var(--speaker-angel); }
+        .speaker.dm { color: var(--speaker-dm); }
+        .speaker.val { color: var(--speaker-val); }
+        .speaker.alan { color: var(--speaker-alan); }
+
+        .angel-quote {
+            font-style: italic;
+            color: var(--speaker-angel);
+        }
+
+        /* Timestamp markers */
+        .timestamp {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            margin: 24px 0 12px;
+            padding: 8px 0;
+            border-top: 1px dashed var(--notes-border);
+        }
+
+        /* Pencil annotations */
+        .pencil-note {
+            font-family: var(--font-handwriting);
+            font-size: 15px;
+            color: var(--pencil);
+            background: var(--bg-tertiary);
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 2px;
+            line-height: 1.5;
+            transform: rotate(-0.3deg);
+        }
+
+        .pencil-note .speaker-label {
+            font-size: 13px;
+            color: var(--text-faint);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Action Items */
+        .action-items {
+            background: var(--bg-tertiary);
+            padding: 16px 20px;
+            border-radius: 4px;
+            margin-top: 24px;
+        }
+
+        .action-items-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .action-item {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .action-item::before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            color: var(--text-faint);
+        }
+
+        /* ==================== Notebook Entry ==================== */
+        .notebook-container {
+            background: var(--notebook-bg);
+            border: 1px solid var(--notes-border);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .notebook-header {
+            background: var(--notes-header);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--notes-border);
+            text-align: center;
+        }
+
+        .notebook-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+        }
+
+        .notebook-body {
+            padding: 32px 48px;
+            background-image: repeating-linear-gradient(
+                var(--notebook-bg) 0px,
+                var(--notebook-bg) 27px,
+                var(--notebook-lines) 28px
+            );
+            background-size: 100% 28px;
+            min-height: 300px;
+        }
+
+        .notebook-text {
+            font-family: var(--font-handwriting);
+            font-size: 19px;
+            line-height: 28px;
+            color: var(--handwriting);
+        }
+
+        .notebook-text p {
+            margin-bottom: 28px;
+        }
+
+        .notebook-text .crossed-out {
+            text-decoration: line-through;
+            color: var(--text-faint);
+            opacity: 0.6;
+        }
+
+        .notebook-text .emphasis {
+            font-weight: 600;
+        }
+
+        .later-addition {
+            margin-top: 56px;
+            padding-top: 28px;
+            border-top: 1px solid var(--notes-border);
+            color: var(--text-secondary);
+            font-size: 17px;
+        }
+
+        .later-addition .ink-note {
+            font-size: 14px;
+            color: var(--text-faint);
+            font-style: italic;
+            margin-bottom: 14px;
+        }
+
+        /* ==================== Notes Panel ==================== */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-content {
+            padding: 24px;
+        }
+
+        .curator-note {
+            margin-bottom: 32px;
+        }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p {
+            margin-bottom: 16px;
+        }
+
+        .curator-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after {
+            content: var(--theme-icon);
+        }
+
+        /* ==================== Transitions ==================== */
+        body, .sidebar, .main-panel, .notes-panel,
+        .toc-link, .theme-toggle, .document-container, .notebook-container {
+            transition: background-color 0.3s ease,
+                        border-color 0.3s ease,
+                        color 0.3s ease;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 1200px) {
+            .notes-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-panel {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="archive-badge">Archive Active</div>
+                <h1 class="archive-title">virtueOS</h1>
+                <p class="archive-subtitle">Collected Artifacts, 2026-2028</p>
+            </header>
+
+            <nav class="toc-section">
+                <div class="toc-label">Contents</div>
+                <ul class="toc">
+                    <li class="toc-item">
+                        <a href="../01-post-mortem/index.html" class="toc-link">
+                            <span class="toc-number">01</span>
+                            <span class="toc-text">Post-Mortem</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../02-napkin/index.html" class="toc-link">
+                            <span class="toc-number">02</span>
+                            <span class="toc-text">Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../interludes/01-before-the-napkin/index.html" class="toc-link interlude">
+                            <span class="toc-number">—</span>
+                            <span class="toc-text">Before the Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../03-first-believer/index.html" class="toc-link">
+                            <span class="toc-number">03</span>
+                            <span class="toc-text">First Believer</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../04-pitch-deck/index.html" class="toc-link">
+                            <span class="toc-number">04</span>
+                            <span class="toc-text">Pitch Deck</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../05-skeptics-report/index.html" class="toc-link">
+                            <span class="toc-number">05</span>
+                            <span class="toc-text">Skeptic's Report</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#" class="toc-link active">
+                            <span class="toc-number">06</span>
+                            <span class="toc-text">Money Meeting</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-badge">Chapter Six</div>
+                        <h1 class="chapter-title">Money Meeting</h1>
+                        <p class="chapter-date">First VC Pitch — December 8, 2026</p>
+                    </header>
+
+                    <!-- Meeting Notes Document -->
+                    <div class="document-container">
+                        <div class="document-header">
+                            <div class="document-title">Seed Funding Meeting</div>
+                            <div class="document-subtitle">Meeting Notes</div>
+
+                            <div class="document-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">Date</span>
+                                    <span class="meta-value">December 8, 2026</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Location</span>
+                                    <span class="meta-value">The Dossier Hotel, Pearl District</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Investor</span>
+                                    <span class="meta-value redacted">[Name Redacted] — "the Angel"</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Note-Taker</span>
+                                    <span class="meta-value">Alan Goodenough</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="document-body">
+                            <div class="section">
+                                <div class="section-title">Meeting Summary</div>
+                                <div class="section-content">
+                                    <p>The Angel arrived twelve minutes early. He was already seated when we entered, reviewing something on his tablet. He stood to shake hands. His grip was firm but not performative. He smelled like sandalwood and money.</p>
+                                    <p>The private dining room had been reserved under "Philosophical Ventures LLC." The Angel ordered sparkling water. DM ordered coffee. Val ordered nothing. I ordered a gin and tonic, then changed it to just tonic. The Angel noticed and didn't comment.</p>
+                                </div>
+                            </div>
+
+                            <div class="section">
+                                <div class="section-title">Technical Architecture</div>
+                                <div class="timestamp">2:18 PM - 2:47 PM</div>
+
+                                <div class="qa-block">
+                                    <div class="question">"Your context engine processes audio and video from the user's environment. Walk me through the data flow."</div>
+                                    <div class="response">
+                                        <span class="speaker dm">DM:</span> Local processing on device, minimal cloud footprint for model updates only, user owns all data, can export or delete at any time.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"And the raw sensory input. The audio and video before processing. Where does that live?"</span>
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker dm">DM:</span> Transient buffer. Processed and discarded. Nothing stored.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"Nothing?"</span>
+                                    </div>
+                                </div>
+
+                                <div class="qa-block">
+                                    <div class="question">"The advisor selection algorithm. How does it decide which philosophical framework to apply?"</div>
+                                    <div class="response">
+                                        <span class="speaker alan">Alan:</span> The three advisors have different specializations. Matrix Aurelius for strategic perspective. Async-Seneca for resilience and preparation. Epic-teach-us for moment-to-moment action. The system evaluates context and routes to the appropriate advisor.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"Who decides what's appropriate?"</span>
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker alan">Alan:</span> The model. Based on training data.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"And if someone wanted to... expand the training data. Add other frameworks. Other voices. The architecture would accommodate that?"</span>
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker dm">DM:</span> It's extensible. That's good engineering.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"Yes. It is."</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section">
+                                <div class="section-title">User Data & Privacy</div>
+                                <div class="timestamp">3:05 PM - 3:38 PM</div>
+
+                                <div class="section-content">
+                                    <p>The Angel returned to data. He circled back three times. Each time from a different angle.</p>
+                                </div>
+
+                                <div class="qa-block">
+                                    <div class="question">"Your privacy policy. I read it. Very standard. Very reassuring. But I'm curious about edge cases."</div>
+                                    <div class="response">
+                                        <span class="speaker val">Val:</span> What kind of edge cases?
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"Let's say a user wears virtueOS during a sensitive conversation. A negotiation. A medical appointment. A... personal moment. The system is listening, processing, advising. Even if you don't store the raw data, you're creating behavioral profiles. Patterns. Preferences. That's the product."</span>
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker val">Val:</span> The behavioral profiles are anonymized and aggregated.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"For now."</span>
+                                    </div>
+                                </div>
+
+                                <div class="qa-block">
+                                    <div class="question">"Adaptive behavioral modeling. That's the term in your technical appendix. Walk me through what that means in practice."</div>
+                                    <div class="response">
+                                        <span class="speaker alan">Alan:</span> The system learns what works for each user. Which advisor resonates. Which framing is effective. Over time, it becomes more personalized.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"So the system builds a psychological profile of each user. Their values. Their decision-making patterns. Their vulnerabilities."</span>
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker alan">Alan:</span> Their preferences.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"Preferences. Vulnerabilities. Interesting how those overlap."</span>
+                                    </div>
+                                </div>
+
+                                <div class="qa-block">
+                                    <div class="response">
+                                        <span class="speaker val">Val:</span> Is there a question here?
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"Several. But let me ask just one: if someone wanted access to those profiles, what would stop them?"</span>
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker val">Val:</span> Us.
+                                    </div>
+                                    <div class="response">
+                                        The Angel laughed. Genuine amusement. <span class="angel-quote">"Yes. You. Three people in a room above a hotel restaurant, with eleven weeks of runway and no legal department. You would stop them."</span>
+                                    </div>
+                                </div>
+
+                                <div class="section-content">
+                                    <p>Nobody asked how he knew about our runway.</p>
+                                </div>
+                            </div>
+
+                            <div class="section">
+                                <div class="section-title">Closing</div>
+                                <div class="timestamp">4:02 PM - 4:15 PM</div>
+
+                                <div class="section-content">
+                                    <p>The Angel stood. <span class="angel-quote">"I believe in what you're building. The philosophy is sound. The technology is elegant. The market is real. Let's see where it goes."</span></p>
+                                    <p>He left a card on the table. No name. Just an email address and a number.</p>
+                                </div>
+
+                                <div class="qa-block">
+                                    <div class="response">
+                                        <span class="speaker dm">DM:</span> That's it? No negotiation?
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel:</span> <span class="angel-quote">"What would you like me to negotiate?"</span>
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker dm">DM:</span> Usually investors push back on valuation. Terms. Timeline.
+                                    </div>
+                                    <div class="response">
+                                        <span class="speaker angel">The Angel, at the door:</span> <span class="angel-quote">"Usually investors don't understand what they're buying."</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="action-items">
+                                <div class="action-items-title">Action Items</div>
+                                <div class="action-item">Review term sheet (DM)</div>
+                                <div class="action-item">Background check on referenced investments (Val)</div>
+                                <div class="action-item">Draft response (Alan)</div>
+                            </div>
+
+                            <div class="pencil-note">
+                                <span class="speaker-label">Post-Meeting Notes (added later, in pencil)</span>
+                                <strong>DM, on the walk back:</strong> "He knew things he shouldn't know. Our runway. The technical appendix wording. He's done homework we can't trace."<br><br>
+                                <strong>Val, same conversation:</strong> "I don't trust him."<br><br>
+                                <strong>DM:</strong> "Do you trust anyone?"<br><br>
+                                <strong>Val:</strong> "Not particularly. But I especially don't trust him."<br><br>
+                                <strong>My response:</strong> (I said nothing. I was watching a pigeon fight over a pretzel on the sidewalk.)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Notebook Entry -->
+                    <div class="notebook-container">
+                        <div class="notebook-header">
+                            <div class="notebook-label">Personal Notebook Entry — Undated — Found Later</div>
+                        </div>
+                        <div class="notebook-body">
+                            <div class="notebook-text">
+                                <p>The meeting went exactly like he said it would.</p>
+                                <p>The questions about access, the probing about data architecture. I'd heard them before, in a coffee shop three weeks ago. I knew what was coming and I couldn't warn anyone. I just sat there nodding while DM got suspicious and Val got defensive, and I thought: this is what it feels like to be a traitor.</p>
+                                <p>You don't feel evil.</p>
+                                <p>You feel tired. You feel like you're watching yourself from outside, doing something you can't stop.</p>
+                                <p>Val said "I don't trust him" on the walk back. She was looking at me when she said it. At least I think she was. I was watching a pigeon. Or pretending to watch a pigeon. I don't remember.</p>
+                                <p>I remember thinking: <span class="emphasis">eleven weeks</span>. I have eleven weeks of rent. And this man is offering me a way out.</p>
+
+                                <div class="later-addition">
+                                    <div class="ink-note">[Below this, in different ink, added much later:]</div>
+                                    <p>I found this in a box when I was assembling this collection. I almost didn't include it.</p>
+                                    <p>But I said I'd be honest. This is honest.</p>
+                                    <p>I knew the Angel before that meeting. I knew what he wanted. I didn't tell anyone.</p>
+                                    <p>If you want to know why, read the bank statement from Chapter 3.</p>
+                                    <p><span class="emphasis">Eleven weeks of rent makes you do things.</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-header">
+                    <span class="notes-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-content">
+                    <div class="curator-note">
+                        <div class="curator-label">Opening Note</div>
+                        <div class="curator-text">
+                            <p>We should have walked out.</p>
+                            <p>I've said that to myself a hundred times since that afternoon. But "we" is doing a lot of work in that sentence. DM couldn't have walked out. She didn't know there was anything to walk out from. Neither could Val.</p>
+                            <p>I'm the one who should have walked out. I'm the one who knew.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "He knew our runway. Eleven weeks. I've never told anyone how he knew that."<br><br>
+                        "He knew because I told him."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Notebook Entry</div>
+                        <div class="curator-text">
+                            <p>I include both documents here because I promised honesty. The meeting notes are what happened. The notebook entry is why.</p>
+                            <p>For months I told myself the notebook page was lost. I'd thrown it away, burned it, shredded it at 2am. I invented a dozen scenarios where it no longer existed.</p>
+                            <p>Then I found it in a shoebox with my passport and a birthday card from my mother. Just sitting there. Waiting.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Val said 'I don't trust him' on the walk back. She was looking at me when she said it."<br><br>
+                        "I don't know if she suspects. I don't know if she suspects now. We don't talk about the Angel anymore."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">Closing Note</div>
+                        <div class="curator-text">
+                            <p>Seneca wrote: "It is not that we have a short time to live, but that we waste a lot of it."</p>
+                            <p>I've wasted three years pretending I didn't know what I knew. Pretending the Angel was just an investor. Pretending the questions were just due diligence.</p>
+                            <p>This document is me stopping. Standing still and admitting it.</p>
+                            <p>I don't know what comes after that. But at least I'm not pretending anymore.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>
