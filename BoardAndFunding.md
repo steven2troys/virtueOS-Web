@@ -69,7 +69,7 @@ Eight seats. Four founders, four outside.
 
 ### Founder Seats
 
-**1. Dunley Masters (DM) — CEO, Chair**
+**1. Danielle Masters (DM) — CEO, Chair**
 The only founder with previous board experience (she was on the board of her database company before the acquisition). Runs the meetings. Tries to balance vision against fiduciary duty.
 
 **2. Alan Goodenough — Co-Founder**

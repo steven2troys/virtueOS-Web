@@ -9,7 +9,7 @@
 | Name | Nickname | Role |
 |------|----------|------|
 | Alan T. Goodenough | Alan | Narrator/curator, front-end dev |
-| Dunley Masters | DM | CEO, database architect |
+| Danielle Masters | DM | CEO, database architect |
 | Valeria Roswell | Val | Security lead |
 | Tennyson Xanthos | TenX | AI architect |
 | Meridian Vance | Meri | Clinical advisor (PMHNP) |

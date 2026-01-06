@@ -1,4 +1,4 @@
-# Text Message Thread: Alan Goodenough ↔ Dunley Masters
+# Text Message Thread: Alan Goodenough ↔ Danielle Masters
 
 **Source:** Alan's phone backup, exported October 2026
 **Format:** iMessage thread, timestamps in PST

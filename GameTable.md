@@ -4,7 +4,7 @@
 
 | Player | Character | Class | Level | Lens on virtueOS |
 |--------|-----------|-------|-------|------------------|
-| **Dunley Masters (DM)** | — | Dungeon Master | — | Stewardship, leadership, narrative control |
+| **Danielle Masters (DM)** | — | Dungeon Master | — | Stewardship, leadership, narrative control |
 | **Alan Goodenough** | Niven the Uncertain | Rogue, Arcane Trickster | 14 | Indecision, unreliable action, theft of agency |
 | **Val Roswell** | Sentinel Ashworth | Paladin | 14 | Threat assessment, worst-case thinking, protection as oath |
 | **Meridian Vance** | Taveth Winterborne | Druid, Circle of the Land (Tundra) | 14 | Clinical ethics, civilization as rot |

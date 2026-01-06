@@ -217,9 +217,9 @@ Frustration and protection. Alan's indecision drives Declan crazy—"You have al
 > "Alan and I are opposites. I see too clearly and act too slowly. He sees too much and decides too little. Between us, we almost make one functional person."
 
 **To DM:**
-Deep respect, occasional conflict. Dunley makes decisions; Declan questions them. This is healthy for both of them. When DM gets too confident, Declan's questions slow her down. When Declan gets too analytical, DM's decisiveness cuts through.
+Deep respect, occasional conflict. Danielle makes decisions; Declan questions them. This is healthy for both of them. When DM gets too confident, Declan's questions slow her down. When Declan gets too analytical, DM's decisiveness cuts through.
 
-> "Dunley is the only person who consistently wins arguments against me. Not by out-reasoning me—by out-deciding me. At some point, analysis is just procrastination. She knows when to stop and move. I'm still learning."
+> "Danielle is the only person who consistently wins arguments against me. Not by out-reasoning me—by out-deciding me. At some point, analysis is just procrastination. She knows when to stop and move. I'm still learning."
 
 **To Val:**
 Kindred skeptics. They share a fundamental distrust of systems, though for different reasons—Val sees security threats, Declan sees manipulation vectors. They've had long conversations about whether virtueOS is more dangerous if it works or if it fails.

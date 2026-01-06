@@ -123,7 +123,7 @@ Sees potential. Also sees weakness.
 
 Respects. Possibly the only one they truly respect.
 
-> "Dunley makes decisions. This is rare. Most people in rooms like these wait for someone else to go first. She goes first. She understands trade-offs. She'd be an excellent operator if she weren't so loyal to Alan's vision of purity. I've tried to recruit her twice. She declined politely. I respect the decline. I'll try again."
+> "Danielle makes decisions. This is rare. Most people in rooms like these wait for someone else to go first. She goes first. She understands trade-offs. She'd be an excellent operator if she weren't so loyal to Alan's vision of purity. I've tried to recruit her twice. She declined politely. I respect the decline. I'll try again."
 
 ### With Val
 

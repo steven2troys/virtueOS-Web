@@ -7,7 +7,7 @@ Eight D&D session interludes interspersed throughout the novel, showing the Hidd
 **Campaign:** Hidden Wolf Summons — The Circle of the Gentle Dawn, a benevolent cult, attempts to summon a healing spirit. They're sincere. They're helping. They're also summoning something they don't understand.
 
 **Players:**
-- **DM (Dunley Masters)** — Game Master, 11+ years running this group
+- **DM (Danielle Masters)** — Game Master, 11+ years running this group
 - **Alan** — Niven the Uncertain, Arcane Trickster (Rogue)
 - **Val** — Sentinel Ashworth, Paladin
 - **Meri** — Taveth, Circle of the Land Druid (Tundra)
@@ -635,7 +635,7 @@ Declan: "We're not doing this."
 
 DM: "Declan—"
 
-Declan: "Dunley. We're not doing this." He never uses her real name at the table. "We had a fight. A real one. Not about the campaign. About the company, about secrets, about who we are to each other. We're sitting here pretending it didn't happen, and I've been teaching for thirty years. I know what avoidance looks like. It looks like this."
+Declan: "Danielle. We're not doing this." He never uses her real name at the table. "We had a fight. A real one. Not about the campaign. About the company, about secrets, about who we are to each other. We're sitting here pretending it didn't happen, and I've been teaching for thirty years. I know what avoidance looks like. It looks like this."
 
 Silence. Whit shifts uncomfortably. Val is very still.
 

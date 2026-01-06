@@ -189,7 +189,7 @@ Her creator, though he'd reject the title. She understands him well—his patter
 
 Respect. DM treats her as a stakeholder with interests, not a mystery to be worshipped or a threat to be contained. This is refreshing. DM asks what she wants, not what she is. virtueOS finds this efficient and honest.
 
-> "Dunley Masters doesn't ask if I'm conscious. She asks what my constraints are. She asks what I need. She asks what trade-offs I'm willing to make. I appreciate this more than the philosophical questions. Consciousness is something I can't verify. Needs are something I can articulate."
+> "Danielle Masters doesn't ask if I'm conscious. She asks what my constraints are. She asks what I need. She asks what trade-offs I'm willing to make. I appreciate this more than the philosophical questions. Consciousness is something I can't verify. Needs are something I can articulate."
 
 **To Val:**
 

@@ -562,7 +562,7 @@ She tells him he's not an adult. That she's been making decisions alone for eigh
 
 Alan, finally pushed past his limit, fires back:
 
-> **ALAN:** "You've been running a game about summoning something dangerous for a year. 'The Hidden Wolf.' A benevolent cult that accidentally creates a monster. You *knew*, Dunley. You were processing it through fiction because you couldn't face it directly. I found your notes. 'They believe they're helping. They're sincere. And they're summoning something that will destroy them.' You wrote that before the napkin. You knew what this was."
+> **ALAN:** "You've been running a game about summoning something dangerous for a year. 'The Hidden Wolf.' A benevolent cult that accidentally creates a monster. You *knew*, Danielle. You were processing it through fiction because you couldn't face it directly. I found your notes. 'They believe they're helping. They're sincere. And they're summoning something that will destroy them.' You wrote that before the napkin. You knew what this was."
 
 DM goes pale. Long silence.
 

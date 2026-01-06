@@ -1,4 +1,4 @@
-# Character DNA: Dunley Masters (DM)
+# Character DNA: Danielle Masters (DM)
 
 ## Core Identity
 
@@ -12,7 +12,7 @@
 
 ## The Name
 
-Dunley Masters. DM.
+Danielle Masters. DM.
 
 The initials became a title before there was a company. In the D&D group, she's DM—the Dungeon Master who runs the world. In the startup, she's DM—the one who manages the data, the architecture, the decisions no one else will make.
 
@@ -207,7 +207,7 @@ DM reads it. Screenshots it. Deletes it. Feels guilty—not for the suspicion, b
 > "Her database migrations are impeccable. She anticipates failure. She plans rollbacks. I wish my generals had been this thorough. She thinks like an emperor managing a supply chain. She does not, however, think like an emperor managing a soul. I'm not sure she believes in souls. I'm not sure she's wrong."
 
 **virtueOS on DM:**
-> "Dunley Masters watches me the way a good security auditor watches a system—not with hostility, but with appropriate suspicion. She knows I could be compromised. She knows she can't verify that I'm not. She works with me anyway, because the work needs doing. I respect this more than trust. Trust can be manipulated. Vigilance cannot. She's the only one who's never stopped checking. I find this... reassuring. Someone should be watching."
+> "Danielle Masters watches me the way a good security auditor watches a system—not with hostility, but with appropriate suspicion. She knows I could be compromised. She knows she can't verify that I'm not. She works with me anyway, because the work needs doing. I respect this more than trust. Trust can be manipulated. Vigilance cannot. She's the only one who's never stopped checking. I find this... reassuring. Someone should be watching."
 
 ---
 

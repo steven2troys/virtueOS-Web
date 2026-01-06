@@ -334,7 +334,7 @@ The reader's journey mirrors Alan's. We start trusting the narrator. We learn he
 
 ---
 
-## Relationship with DM (Dunley Masters)
+## Relationship with DM (Danielle Masters)
 
 They dated for two years in their late twenties. The relationship was good—not dramatic, not toxic, just... not quite right. They wanted different things. She wanted partnership toward shared goals. He wanted someone to help him figure out what his goals were.
 

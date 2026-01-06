@@ -213,9 +213,9 @@ Unexpected kinship. They're both privileged kids who didn't want what they were 
 > "Alan could have been anything. He had the same doors I did. He chose to build something strange and difficult instead. I respect that. I just wish he'd commit to it."
 
 **To DM:**
-Admiration and wariness. Dunley is what he couldn't be—a leader who makes decisions. But he's seen leaders before. He knows how easily decisiveness becomes inflexibility. He watches her for signs of mission drift.
+Admiration and wariness. Danielle is what he couldn't be—a leader who makes decisions. But he's seen leaders before. He knows how easily decisiveness becomes inflexibility. He watches her for signs of mission drift.
 
-> "Dunley is brilliant. She's also building something that will outlive her control. I'm not sure she sees that yet. I'm not sure I should be the one to tell her."
+> "Danielle is brilliant. She's also building something that will outlive her control. I'm not sure she sees that yet. I'm not sure I should be the one to tell her."
 
 **To Val:**
 The closest thing to a professional peer. They speak the same language—threat assessment, risk mitigation, worst-case scenarios. They've had long conversations about what happens when virtueOS gets hacked, subpoenaed, or seized.

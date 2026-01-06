@@ -8,7 +8,7 @@ A quick reference for all characters in virtueOS. For detailed character develop
 
 Four members of a long-running D&D group who founded a startup together.
 
-### Dunley Masters (DM)
+### Danielle Masters (DM)
 **Role:** CEO, Board Chair, Co-Founder
 **Background:** DBA and backend programmer. Has run the same D&D campaign for 11+ years—the group calls her "DM" for both her name and Dungeon Master role. Previous exit from a database company gave her the savings to bootstrap.
 **D&D Character:** The Dungeon Master (doesn't play a PC)
@@ -306,7 +306,7 @@ TenX has played for ~4 years but their character isn't specified.
 
 Detailed character documents:
 - `/characters/AlanGoodenough.md`
-- `/characters/DunleyMasters.md`
+- `/characters/DanielleMasters.md`
 - `/characters/ValRoswell.md`
 - `/characters/MeridianVance.md`
 - `/characters/TennysonXanthos.md`

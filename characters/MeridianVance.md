@@ -218,9 +218,9 @@ Impatience laced with affection. He frustrates her—the indecision, the abstent
 > "Alan's a good person with an anxiety disorder he refuses to address. I've offered referrals. He changes the subject. At some point, you have to let people suffer the way they choose to suffer."
 
 **To DM:**
-Deep respect. Dunley makes decisions. Meri doesn't always agree with them, but she trusts the process. They've clashed on product direction—DM pushes for scale, Meri pushes for safety—but it's the clash of people who respect each other.
+Deep respect. Danielle makes decisions. Meri doesn't always agree with them, but she trusts the process. They've clashed on product direction—DM pushes for scale, Meri pushes for safety—but it's the clash of people who respect each other.
 
-> "Dunley is the only person in this company who actually leads. The rest of us have opinions. She has direction."
+> "Danielle is the only person in this company who actually leads. The rest of us have opinions. She has direction."
 
 **To Val:**
 Professional kinship. They're both in the business of seeing threats before they materialize. Val's threats are technical; Meri's are psychological. They trade notes. Val's paranoia and Meri's clinical skepticism reinforce each other.
