@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4: Pitch Deck | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== Dark Theme (Default) ==================== */
+        :root {
+            /* Warm stone palette */
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+
+            /* Text hierarchy */
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+
+            /* Accent - aged gold/copper */
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+
+            /* Slide colors */
+            --slide-bg: #1e1d1b;
+            --slide-border: #3a3632;
+            --slide-accent: #c9a227;
+            --slide-text: #e8e4df;
+
+            /* Borders */
+            --border: #3a3632;
+            --border-strong: #4a4540;
+
+            /* Layout */
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+
+            /* Typography */
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+            /* Theme toggle icon */
+            --theme-icon: "☀";
+        }
+
+        /* ==================== Light Theme ==================== */
+        [data-theme="light"] {
+            /* Warm parchment palette */
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+
+            /* Text hierarchy */
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+
+            /* Accent - deeper gold for contrast */
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+
+            /* Slide colors - light mode */
+            --slide-bg: #ffffff;
+            --slide-border: #d4d0c6;
+            --slide-accent: #9a7b1c;
+            --slide-text: #1a1917;
+
+            /* Borders */
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+
+            /* Theme toggle icon */
+            --theme-icon: "☾";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* ==================== Layout ==================== */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* ==================== Left Sidebar ==================== */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 2px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 28px;
+        }
+
+        .toc-title {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .toc-type {
+            margin-left: auto;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toc-link.interlude {
+            opacity: 0.7;
+        }
+
+        .toc-link.interlude .toc-title {
+            font-style: italic;
+        }
+
+        /* ==================== Main Content ==================== */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        /* Chapter Header */
+        .chapter-header {
+            margin-bottom: 40px;
+        }
+
+        .chapter-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 42px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .chapter-meta {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .meta-item::before {
+            content: "";
+            width: 4px;
+            height: 4px;
+            background: var(--accent-dim);
+            border-radius: 50%;
+        }
+
+        /* Slide Viewer */
+        .slides-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .slides-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .slides-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+        }
+
+        .slide-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .slide-nav-btn {
+            width: 28px;
+            height: 28px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.15s ease;
+        }
+
+        .slide-nav-btn:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .slide-counter {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 0 12px;
+        }
+
+        /* Slide Display */
+        .slide-viewport {
+            padding: 32px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .slide {
+            background: var(--slide-bg);
+            border: 1px solid var(--slide-border);
+            border-radius: 4px;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16/9;
+            padding: 40px 48px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide-tag {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--slide-accent);
+            margin-bottom: 16px;
+        }
+
+        .slide h1 {
+            font-family: var(--font-sans);
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--slide-text);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .slide h2 {
+            font-family: var(--font-sans);
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--slide-text);
+            margin-bottom: 8px;
+        }
+
+        .slide h3 {
+            font-family: var(--font-serif);
+            font-size: 18px;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .slide p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .slide ul {
+            list-style: none;
+            margin-bottom: 16px;
+        }
+
+        .slide li {
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .slide li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--slide-accent);
+        }
+
+        .slide .tagline {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            font-style: italic;
+            color: var(--slide-accent);
+            margin-top: auto;
+        }
+
+        .slide .company-mark {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 24px;
+        }
+
+        /* Slide-specific layouts */
+        .slide-title-layout {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide-title-layout h1 {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .slide-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .stat-box {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 4px;
+        }
+
+        .stat-number {
+            font-family: var(--font-mono);
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--slide-accent);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .slide-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .slide-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .slide-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .advisor-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .advisor-card {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .advisor-name {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--slide-accent);
+            margin-bottom: 4px;
+        }
+
+        .advisor-based {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .advisor-focus {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Slide thumbnails */
+        .slides-thumbnails {
+            display: flex;
+            gap: 8px;
+            padding: 16px 24px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .thumb {
+            width: 64px;
+            height: 36px;
+            background: var(--bg-secondary);
+            border: 2px solid transparent;
+            border-radius: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+        .thumb:hover {
+            border-color: var(--border-strong);
+        }
+
+        .thumb.active {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ==================== Notes Panel ==================== */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-content {
+            padding: 24px;
+        }
+
+        .curator-note {
+            margin-bottom: 32px;
+        }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p {
+            margin-bottom: 16px;
+        }
+
+        .curator-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .curator-text em {
+            color: var(--text-primary);
+            font-style: italic;
+        }
+
+        .pullquote {
+            border-left: 2px solid var(--accent-dim);
+            padding-left: 16px;
+            margin: 20px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after {
+            content: var(--theme-icon);
+        }
+
+        /* ==================== Transitions ==================== */
+        body, .sidebar, .main-panel, .notes-panel,
+        .toc-link, .theme-toggle, .slides-container, .slide {
+            transition: background-color 0.3s ease,
+                        border-color 0.3s ease,
+                        color 0.3s ease;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 1200px) {
+            .notes-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-panel {
+                padding: 24px;
+            }
+
+            .slide {
+                padding: 24px;
+            }
+
+            .slide h1 {
+                font-size: 24px;
+            }
+
+            .slide-title-layout h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="archive-badge">Archive Active</div>
+                <h1 class="archive-title">virtueOS</h1>
+                <p class="archive-subtitle">Collected Artifacts, 2026-2028</p>
+            </header>
+
+            <nav class="toc-section">
+                <div class="toc-label">Contents</div>
+                <ul class="toc">
+                    <li class="toc-item">
+                        <a href="../01-post-mortem/index.html" class="toc-link">
+                            <span class="toc-number">01</span>
+                            <span class="toc-title">Post-Mortem</span>
+                            <span class="toc-type">doc</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../02-napkin/index.html" class="toc-link">
+                            <span class="toc-number">02</span>
+                            <span class="toc-title">Napkin</span>
+                            <span class="toc-type">artifact</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../interludes/01-before-the-napkin/index.html" class="toc-link interlude">
+                            <span class="toc-number">I-1</span>
+                            <span class="toc-title">Before the Napkin</span>
+                            <span class="toc-type">game</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../03-first-believer/index.html" class="toc-link">
+                            <span class="toc-number">03</span>
+                            <span class="toc-title">First Believer</span>
+                            <span class="toc-type">msg</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#" class="toc-link active">
+                            <span class="toc-number">04</span>
+                            <span class="toc-title">Pitch Deck</span>
+                            <span class="toc-type">slides</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#" class="toc-link">
+                            <span class="toc-number">05</span>
+                            <span class="toc-title">Skeptic's Report</span>
+                            <span class="toc-type">doc</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-label">Chapter Four</div>
+                        <h1 class="chapter-title">Pitch Deck</h1>
+                        <div class="chapter-meta">
+                            <span class="meta-item">PowerPoint Presentation</span>
+                            <span class="meta-item">November 2026</span>
+                            <span class="meta-item">Seed Round</span>
+                        </div>
+                    </header>
+
+                    <div class="slides-container">
+                        <div class="slides-header">
+                            <span class="slides-title">virtueOS: Augmented Wisdom</span>
+                            <div class="slide-nav">
+                                <button class="slide-nav-btn" onclick="prevSlide()">←</button>
+                                <span class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">10</span></span>
+                                <button class="slide-nav-btn" onclick="nextSlide()">→</button>
+                            </div>
+                        </div>
+
+                        <div class="slide-viewport">
+                            <!-- Slide 1: Title -->
+                            <div class="slide slide-title-layout active" data-slide="1">
+                                <div class="slide-tag">Marble Porch LLC</div>
+                                <h1>virtueOS</h1>
+                                <h3>Augmented Wisdom for the Modern Mind</h3>
+                                <p class="tagline">The operating system that helps you become who you want to be.</p>
+                                <div class="company-mark">Seed Round · November 2026 · Confidential</div>
+                            </div>
+
+                            <!-- Slide 2: Problem -->
+                            <div class="slide" data-slide="2">
+                                <div class="slide-tag">The Problem</div>
+                                <h2>We're drowning in information.</h2>
+                                <h3>We're starving for wisdom.</h3>
+                                <div class="slide-stats">
+                                    <div class="stat-box">
+                                        <div class="stat-number">10,000+</div>
+                                        <div class="stat-label">Daily micro-decisions</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-number">78%</div>
+                                        <div class="stat-label">Adults with decision fatigue</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-number">$300B+</div>
+                                        <div class="stat-label">Annual productivity loss</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-number">24%</div>
+                                        <div class="stat-label">Wellness market CAGR</div>
+                                    </div>
+                                </div>
+                                <p class="tagline">We have more data than ever. We have less clarity than ever.</p>
+                            </div>
+
+                            <!-- Slide 3: Solution -->
+                            <div class="slide" data-slide="3">
+                                <div class="slide-tag">The Solution</div>
+                                <h2>Introducing virtueOS</h2>
+                                <h3>Ambient wisdom when you need it most.</h3>
+                                <ul>
+                                    <li>Observes your real-world context through smart glasses</li>
+                                    <li>Processes situations using advanced LLM technology</li>
+                                    <li>Delivers timely, personalized wisdom interventions</li>
+                                    <li>Learns your patterns to improve over time</li>
+                                </ul>
+                                <p class="tagline">Not a meditation app. A thinking partner that's always with you.</p>
+                            </div>
+
+                            <!-- Slide 4: Philosophy -->
+                            <div class="slide" data-slide="4">
+                                <div class="slide-tag">The Philosophy Engine</div>
+                                <h2>Grounded in 2,000 years of tested wisdom.</h2>
+                                <p>Our system is built on <strong>Stoic philosophy</strong>—the practical ethics of Marcus Aurelius, Seneca, and Epictetus.</p>
+                                <ul>
+                                    <li>Focus on what you can control</li>
+                                    <li>Respond to reality, not emotional reactions</li>
+                                    <li>Evidence-based positive outcomes</li>
+                                    <li>Secular, compatible with any belief system</li>
+                                </ul>
+                                <p class="tagline">Ancient wisdom, modern delivery.</p>
+                            </div>
+
+                            <!-- Slide 5: Advisors -->
+                            <div class="slide" data-slide="5">
+                                <div class="slide-tag">Three Advisors</div>
+                                <h2>Personalized wisdom through distinct voices.</h2>
+                                <div class="advisor-grid">
+                                    <div class="advisor-card">
+                                        <div class="advisor-name">Matrix Aurelius</div>
+                                        <div class="advisor-based">Marcus Aurelius</div>
+                                        <div class="advisor-focus">Leadership, duty, big-picture thinking</div>
+                                    </div>
+                                    <div class="advisor-card">
+                                        <div class="advisor-name">Async-Seneca</div>
+                                        <div class="advisor-based">Seneca</div>
+                                        <div class="advisor-focus">Emotional resilience, setback recovery</div>
+                                    </div>
+                                    <div class="advisor-card">
+                                        <div class="advisor-name">Epic-teach-us</div>
+                                        <div class="advisor-based">Epictetus</div>
+                                        <div class="advisor-focus">Present-moment focus, what's in your control</div>
+                                    </div>
+                                </div>
+                                <p class="tagline">Users develop relationships with their advisors.</p>
+                            </div>
+
+                            <!-- Slide 6: Market -->
+                            <div class="slide" data-slide="6">
+                                <div class="slide-tag">Market Opportunity</div>
+                                <h2>$47B addressable market by 2030</h2>
+                                <table class="slide-table">
+                                    <tr>
+                                        <th>Segment</th>
+                                        <th>Size</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Consumer wellness</td>
+                                        <td>$12B</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Corporate training</td>
+                                        <td>$18B</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Healthcare adjacent</td>
+                                        <td>$9B</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Education</td>
+                                        <td>$8B</td>
+                                    </tr>
+                                </table>
+                                <p class="tagline">We're building mindfulness that works.</p>
+                            </div>
+
+                            <!-- Slide 7: Business Model -->
+                            <div class="slide" data-slide="7">
+                                <div class="slide-tag">Business Model</div>
+                                <h2>Premium subscription with expansion paths.</h2>
+                                <div class="slide-stats">
+                                    <div class="stat-box">
+                                        <div class="stat-number">$29</div>
+                                        <div class="stat-label">/month base</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-number">$79</div>
+                                        <div class="stat-label">/month premium</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-number">$150</div>
+                                        <div class="stat-label">/seat enterprise</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-number">10:1</div>
+                                        <div class="stat-label">LTV:CAC target</div>
+                                    </div>
+                                </div>
+                                <p class="tagline">Hardware at cost drives subscription.</p>
+                            </div>
+
+                            <!-- Slide 8: Team -->
+                            <div class="slide" data-slide="8">
+                                <div class="slide-tag">The Team</div>
+                                <h2>Deep expertise across philosophy, AI, and product.</h2>
+                                <ul>
+                                    <li><strong>Danielle Masters</strong> — CEO. 15 years engineering leadership. Previous exit.</li>
+                                    <li><strong>Alan Goodenough</strong> — Product. Applied philosophy background. Creator of virtueOS concept.</li>
+                                    <li><strong>Meridian Vance</strong> — Clinical Advisor (pending). PMHNP, TMS specialist.</li>
+                                    <li><strong>Valentina Roswell</strong> — Security (pending). White-hat security specialist.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Slide 9: The Ask -->
+                            <div class="slide" data-slide="9">
+                                <div class="slide-tag">The Ask</div>
+                                <h2>$2.4M Seed Round</h2>
+                                <table class="slide-table">
+                                    <tr>
+                                        <th>Use of Funds</th>
+                                        <th>Allocation</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Engineering expansion</td>
+                                        <td>40%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hardware prototyping</td>
+                                        <td>25%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Clinical validation</td>
+                                        <td>15%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Operations & legal</td>
+                                        <td>12%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Reserve</td>
+                                        <td>8%</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Slide 10: Vision -->
+                            <div class="slide slide-title-layout" data-slide="10">
+                                <div class="slide-tag">The Vision</div>
+                                <h2>A world where wisdom is accessible.</h2>
+                                <p>Marcus Aurelius journaled every night to become a better emperor.<br>
+                                Their wisdom shouldn't require a philosophy degree to access.</p>
+                                <p class="tagline">"The obstacle is the way."</p>
+                                <div class="company-mark">dm@marbleporch.io · alan@marbleporch.io</div>
+                            </div>
+                        </div>
+
+                        <div class="slides-thumbnails">
+                            <div class="thumb active" onclick="goToSlide(1)">1</div>
+                            <div class="thumb" onclick="goToSlide(2)">2</div>
+                            <div class="thumb" onclick="goToSlide(3)">3</div>
+                            <div class="thumb" onclick="goToSlide(4)">4</div>
+                            <div class="thumb" onclick="goToSlide(5)">5</div>
+                            <div class="thumb" onclick="goToSlide(6)">6</div>
+                            <div class="thumb" onclick="goToSlide(7)">7</div>
+                            <div class="thumb" onclick="goToSlide(8)">8</div>
+                            <div class="thumb" onclick="goToSlide(9)">9</div>
+                            <div class="thumb" onclick="goToSlide(10)">10</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-header">
+                    <span class="notes-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Compromise</div>
+                        <div class="curator-text">
+                            <p>We made it sound like a meditation app.</p>
+                            <p>Look at slide four. "Ambient wisdom when you need it most." That's not wrong, exactly. It's just... smaller than what I meant. Smaller than what I drew on the napkin.</p>
+                            <p>The napkin said: what if you could have Marcus Aurelius in your ear, helping you become the person you're supposed to be? The pitch deck says: what if we could reduce your decision fatigue by 23%?</p>
+                        </div>
+                    </div>
+
+                    <div class="pullquote">
+                        "Both things are true. One of them is the truth."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">The Angel's Questions</div>
+                        <div class="curator-text">
+                            <p>The Angel asked good questions. Uncomfortable ones.</p>
+                            <p>"Your context engine," he said. "It processes audio and video from the user's environment. What happens to that data?"</p>
+                            <p>DM had the answer ready. Local processing, minimal cloud footprint, user ownership. All the right words. But he wasn't really asking about privacy. He was asking something else.</p>
+                        </div>
+                    </div>
+
+                    <div class="pullquote">
+                        "The architecture is quite flexible. Isn't it."<br>
+                        <span style="font-size: 12px; color: var(--text-faint);">It wasn't a question.</span>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">The Appendix</div>
+                        <div class="curator-text">
+                            <p>The appendix is the only part of this deck I still believe in.</p>
+                            <p>Matrix Aurelius. Async-Seneca. Epic-teach-us. I named them myself, late one night when DM was asleep on her couch. She woke up and laughed at the puns.</p>
+                            <p>In the main deck, they're "advisor personas." Marketing differentiation.</p>
+                            <p>In my head, they're teachers.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">Closing Note</div>
+                        <div class="curator-text">
+                            <p>The Angel wrote us a check that day. Two million dollars. He didn't negotiate the terms much.</p>
+                            <p>That should have been a warning sign.</p>
+                            <p>Maybe that was our first compromise. Making it possible. I don't know if it was our worst.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function updateSlide() {
+            // Update slide display
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            document.querySelector(`.slide[data-slide="${currentSlide}"]`).classList.add('active');
+
+            // Update thumbnails
+            document.querySelectorAll('.thumb').forEach((thumb, index) => {
+                thumb.classList.toggle('active', index + 1 === currentSlide);
+            });
+
+            // Update counter
+            document.getElementById('currentSlide').textContent = currentSlide;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            updateSlide();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('totalSlides').textContent = totalSlides;
+        });
+    </script>
+</body>
+</html>
