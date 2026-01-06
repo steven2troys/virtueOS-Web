@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interlude 1: Before the Napkin | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== Dark Theme (Default) ==================== */
+        :root {
+            /* Warm stone palette */
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+
+            /* Text hierarchy */
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+
+            /* Accent - aged gold/copper */
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+
+            /* Transcript colors */
+            --speaker-dm: #c9a227;
+            --speaker-alan: #7eb8a8;
+            --speaker-val: #c97a7a;
+            --speaker-meri: #7a9ec9;
+            --speaker-declan: #b89a7e;
+            --stage-direction: #6b6560;
+
+            /* Borders */
+            --border: #3a3632;
+            --border-strong: #4a4540;
+
+            /* Layout */
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+
+            /* Typography */
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+            /* Theme toggle icon */
+            --theme-icon: "☀";
+        }
+
+        /* ==================== Light Theme ==================== */
+        [data-theme="light"] {
+            /* Warm parchment palette */
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+
+            /* Text hierarchy */
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+
+            /* Accent - deeper gold for contrast */
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+
+            /* Transcript colors - light mode */
+            --speaker-dm: #8b6914;
+            --speaker-alan: #4a8a7a;
+            --speaker-val: #a85a5a;
+            --speaker-meri: #5a7aa8;
+            --speaker-declan: #987a5e;
+            --stage-direction: #8a857f;
+
+            /* Borders */
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+
+            /* Theme toggle icon */
+            --theme-icon: "☾";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* ==================== Layout ==================== */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* ==================== Left Sidebar ==================== */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 2px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number {
+            color: var(--accent-dim);
+        }
+
+        .toc-text {
+            font-size: 13px;
+            font-weight: 450;
+        }
+
+        .toc-link.interlude .toc-text {
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* ==================== Main Content ==================== */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Header */
+        .interlude-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .interlude-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .interlude-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .interlude-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* Hero Image */
+        .hero-image {
+            width: 100%;
+            margin-bottom: 40px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Transcript Container */
+        .transcript-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .transcript-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .transcript-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+        }
+
+        .meta-value {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Transcript Body */
+        .transcript-body {
+            padding: 32px 24px;
+        }
+
+        .section-break {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-break::before,
+        .section-break::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Dialogue Lines */
+        .dialogue-line {
+            margin-bottom: 16px;
+            padding-left: 100px;
+            position: relative;
+        }
+
+        .speaker {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 88px;
+            text-align: right;
+            padding-right: 12px;
+        }
+
+        .speaker.dm { color: var(--speaker-dm); }
+        .speaker.alan { color: var(--speaker-alan); }
+        .speaker.val { color: var(--speaker-val); }
+        .speaker.meri { color: var(--speaker-meri); }
+        .speaker.declan { color: var(--speaker-declan); }
+
+        .dialogue-text {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .dialogue-text em {
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .character-voice {
+            color: var(--text-secondary);
+        }
+
+        .stage-direction {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-style: italic;
+            color: var(--stage-direction);
+            margin: 20px 0;
+            padding-left: 100px;
+        }
+
+        .timestamp {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--accent-dim);
+            padding: 16px 0 8px;
+            margin-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Players Present Box */
+        .players-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+
+        .players-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .player-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .player-tag .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .player-tag.dm .dot { background: var(--speaker-dm); }
+        .player-tag.alan .dot { background: var(--speaker-alan); }
+        .player-tag.val .dot { background: var(--speaker-val); }
+        .player-tag.meri .dot { background: var(--speaker-meri); }
+        .player-tag.declan .dot { background: var(--speaker-declan); }
+        .player-tag.absent { opacity: 0.5; text-decoration: line-through; }
+
+        /* ==================== Notes Panel ==================== */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-content {
+            padding: 24px;
+        }
+
+        .curator-note {
+            margin-bottom: 32px;
+        }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p {
+            margin-bottom: 16px;
+        }
+
+        .curator-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .margin-note {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .margin-note-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after {
+            content: var(--theme-icon);
+        }
+
+        /* ==================== Transitions ==================== */
+        body, .sidebar, .main-panel, .notes-panel,
+        .toc-link, .theme-toggle, .transcript-container {
+            transition: background-color 0.3s ease,
+                        border-color 0.3s ease,
+                        color 0.3s ease;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 1200px) {
+            .notes-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-panel {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="archive-badge">Archive Active</div>
+                <h1 class="archive-title">virtueOS</h1>
+                <p class="archive-subtitle">Collected Artifacts, 2026-2028</p>
+            </header>
+
+            <nav class="toc-section">
+                <div class="toc-label">Contents</div>
+                <ul class="toc">
+                    <li class="toc-item">
+                        <a href="../../chapters/01-post-mortem/index.html" class="toc-link">
+                            <span class="toc-number">01</span>
+                            <span class="toc-text">Post-Mortem</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/02-napkin/index.html" class="toc-link">
+                            <span class="toc-number">02</span>
+                            <span class="toc-text">Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#" class="toc-link active interlude">
+                            <span class="toc-number">—</span>
+                            <span class="toc-text">Before the Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/03-first-believer/index.html" class="toc-link">
+                            <span class="toc-number">03</span>
+                            <span class="toc-text">First Believer</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="interlude-header">
+                        <div class="interlude-badge">Interlude</div>
+                        <h1 class="interlude-title">Before the Napkin</h1>
+                        <p class="interlude-date">Session Recording — October 7, 2026</p>
+                    </header>
+
+                    <div class="hero-image">
+                        <img src="../../images/dnd_tabletop_night_game.png" alt="D&D game table setup with dice, character sheets, and warm lamplight">
+                    </div>
+
+                    <div class="transcript-container">
+                        <div class="transcript-header">
+                            <div class="transcript-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">Campaign</span>
+                                    <span class="meta-value">Hidden Wolf Summons</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Location</span>
+                                    <span class="meta-value">DM's Apartment, SE Portland</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Recording</span>
+                                    <span class="meta-value">Audio capture, transcribed (abridged)</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Duration</span>
+                                    <span class="meta-value">~3 hours</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="transcript-body">
+                            <div class="players-box">
+                                <div class="players-title">Players</div>
+                                <div class="players-list">
+                                    <span class="player-tag dm"><span class="dot"></span>DM (Danielle)</span>
+                                    <span class="player-tag alan"><span class="dot"></span>Alan — Niven</span>
+                                    <span class="player-tag val"><span class="dot"></span>Val — Sentinel</span>
+                                    <span class="player-tag meri"><span class="dot"></span>Meri — Taveth</span>
+                                    <span class="player-tag declan"><span class="dot"></span>Declan — Aldric</span>
+                                    <span class="player-tag absent"><span class="dot"></span>Whit — (absent)</span>
+                                </div>
+                            </div>
+
+                            <div class="timestamp">7:23 PM — Pre-Session</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">Whit texted. He's not coming.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker meri">Meri</span>
+                                <span class="dialogue-text">Again?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">The Delgado case went sideways. Might be there all night.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker declan">Declan</span>
+                                <span class="dialogue-text">That's the third session he's missed.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text">Is he okay?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">He said "fine, just work." You know how he is.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker meri">Meri</span>
+                                <span class="dialogue-text">It's not the same without everyone.</span>
+                            </div>
+
+                            <div class="stage-direction">[Pause. Sound of dice being arranged.]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">I'll run Korvath as an NPC for combat. He's been... contemplating his patron's demands. Quiet tonight.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text">Aren't we all.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text"><em>[beat]</em> Okay. Let's play.</span>
+                            </div>
+
+                            <div class="section-break">Session Start</div>
+
+                            <div class="timestamp">7:31 PM</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">Last session, you agreed to help the Circle of the Gentle Dawn gather the final components for the Shepherd summoning. Tonight, you're in the Circle's sacred grove. Elder Thessaly is directing preparations. The summoning circle has been drawn in silver and salt. Torches mark the cardinal points. The air smells like cedar smoke and anticipation.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker declan">Declan</span>
+                                <span class="dialogue-text">Aldric examines the ritual preparations. Looking for anything... unusual.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">Roll Arcana.</span>
+                            </div>
+
+                            <div class="stage-direction">[Dice roll]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker declan">Declan</span>
+                                <span class="dialogue-text">Seventeen.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">The circle is standard thaumaturgic geometry. Well-constructed. The silver inlay is high quality. If there's anything wrong with the technical setup, you can't see it.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text">Sentinel approaches the circle itself. I want to examine it.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">What are you looking for?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text">I'm not sure. Something feels off. Can I roll Insight?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text"><em>[pause]</em> On a summoning circle?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text">On the situation. The whole thing.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text"><em>[longer pause]</em> ...sure. Roll Insight.</span>
+                            </div>
+
+                            <div class="stage-direction">[Dice roll]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text">Natural eighteen, plus five. Twenty-three.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text"><em>[exhale]</em> Okay. Sentinel stands at the edge of the circle. The geometry is correct. The components are pure. The Circle's intentions are genuine. But something about the design feels... patient. Not wrong. Patient. Like it's been waiting. Not for the ritual. For something else. The circle isn't calling something to you. It's opening a door that was already there.</span>
+                            </div>
+
+                            <div class="stage-direction">[Silence at the table]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text"><span class="character-voice">(as Sentinel)</span> We should stop.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text">What?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text"><span class="character-voice">(as Sentinel)</span> Every summoning has a cost. We just don't know who pays yet.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker meri">Meri</span>
+                                <span class="dialogue-text"><span class="character-voice">(as Taveth)</span> The ice remembers many summonings. Most were fine.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text"><span class="character-voice">(as Niven)</span> Define "fine."</span>
+                            </div>
+
+                            <div class="stage-direction">[Laughter around the table, but Val isn't laughing]</div>
+
+                            <div class="section-break">8:47 PM — Niven's Hesitation</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">One of the younger cultists approaches Niven. She's maybe seventeen, wearing the novice robes of the Circle. She looks nervous but determined.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text"><span class="character-voice">(as novice)</span> "Excuse me. You're with the adventurers, aren't you? The ones helping with the summoning?"</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text"><span class="character-voice">(as Niven)</span> That's one way to describe us.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text"><span class="character-voice">(as novice)</span> "I wanted to ask... do you trust the Circle's intentions? I've been a novice for two years. Everything they've taught me says this is right. That the Shepherd will help us. But..." She trails off.</span>
+                            </div>
+
+                            <div class="stage-direction">[Long pause]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">The novice waits. What does Niven say?</span>
+                            </div>
+
+                            <div class="stage-direction">[Extended silence. Sound of Alan shifting in his chair.]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text"><span class="character-voice">(as Niven)</span> He doesn't know. He wants to trust them. He's just not sure trust is something he's good at.</span>
+                            </div>
+
+                            <div class="stage-direction">[The table goes quiet. That wasn't entirely in character.]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker declan">Declan</span>
+                                <span class="dialogue-text"><em>[quietly, to Alan]</em> You okay?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text">Yeah. Just tired. Keep going.</span>
+                            </div>
+
+                            <div class="section-break">9:41 PM — After Combat</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">The wolves are dead. The Circle's guards are cleaning up the bodies. Everyone catches their breath.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker declan">Declan</span>
+                                <span class="dialogue-text"><em>[out of character]</em> We needed Whit tonight.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">I know. He'll be back next week.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker meri">Meri</span>
+                                <span class="dialogue-text">Will he? The case sounded bad.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">He always comes back.</span>
+                            </div>
+
+                            <div class="stage-direction">[A beat. Then they continue.]</div>
+
+                            <div class="section-break">10:15 PM — Session End</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">The components are gathered. The circle is prepared. The Circle of the Gentle Dawn will perform the summoning next session. Elder Thessaly thanks you for your help. "Tomorrow, everything changes," she says. "Tomorrow, we bring the Shepherd home."</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">That's where we'll pick up. Everyone's excited about the summoning, yes?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text"><em>[not answering directly]</em> The geometry still bothers me.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">You're always overthinking it. That's why I love having you at the table.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val</span>
+                                <span class="dialogue-text"><em>[pause]</em> Yeah.</span>
+                            </div>
+
+                            <div class="section-break">10:23 PM — Post-Session</div>
+
+                            <div class="stage-direction">[Recording continues. Most conversation indistinct. Then:]</div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">Alan. Hang back a second?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text">Yeah?</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">You okay? You seemed distant tonight. Niven was making calls he wouldn't normally make.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text">I'm fine. Work stuff. Money stuff. The usual.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">If you need to talk—</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text">I'm fine. I will be. Just need to figure some things out.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM</span>
+                                <span class="dialogue-text">Okay. But I'm here. If you need.</span>
+                            </div>
+
+                            <div class="dialogue-line">
+                                <span class="speaker alan">Alan</span>
+                                <span class="dialogue-text">I know. Thanks.</span>
+                            </div>
+
+                            <div class="stage-direction">[Sound of door closing]</div>
+
+                            <div class="stage-direction">[End of transcript]</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-header">
+                    <span class="notes-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-content">
+                    <div class="curator-note">
+                        <div class="curator-label">Opening Note</div>
+                        <div class="curator-text">
+                            <p>I found these in DM's campaign binder. She keeps everything. Session notes, initiative trackers, the scratch paper where she tracks monster HP. Eleven years of Thursdays, organized in manila folders by arc.</p>
+                            <p>This session was October 2026. One week before the napkin. I was falling apart and hiding it. Val saw something coming and no one listened. Whit wasn't there, and we felt the gap.</p>
+                            <p>Nothing important happened. Everything important happened. That's how Thursdays worked.</p>
+                        </div>
+                    </div>
+
+                    <div class="margin-note">
+                        <span class="margin-note-label">Val's Character Sheet</span>
+                        "The geometry is patient. Door already there. WHO PUT IT THERE?"
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Recording</div>
+                        <div class="curator-text">
+                            <p>I remember almost nothing about that night. The transcript brings back fragments. The wolves. Val's weird Insight roll. That novice who asked me about trust.</p>
+                            <p>"He doesn't know. He wants to trust them. He's just not sure trust is something he's good at."</p>
+                            <p>That was me talking. The novice in her Circle robes, asking a simple question, and I answered for myself instead of my character.</p>
+                        </div>
+                    </div>
+
+                    <div class="margin-note">
+                        <span class="margin-note-label">DM's Session Notes</span>
+                        "Alan seems off. Asked to talk after. He said he was fine. He's not fine. Neither was Niven. Watch."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">Closing Note</div>
+                        <div class="curator-text">
+                            <p>We never finished the summoning arc. Real life interrupted. But the questions we asked that night kept asking themselves, long after we stopped playing.</p>
+                            <p>Val asked the right question: "Who pays the cost?"</p>
+                            <p>We just weren't ready to hear the answer.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>
