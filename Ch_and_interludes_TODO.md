@@ -16,7 +16,7 @@ Checklist for generating remaining chapters and interludes using ralph-loop.
 ## Remaining (in order)
 
 - [x] Interlude 2: The New Player
-- [ ] Chapter 8: The Advisors
+- [x] Chapter 8: The Advisors
 - [ ] Chapter 9: Architecture
 - [ ] Chapter 10: First Test
 - [ ] Interlude 3: The Golden Session

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: The Advisors | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --theme-icon: "☀";
+
+            /* Advisor colors */
+            --matrix: #c9a227;
+            --seneca: #7eb8a8;
+            --epic: #c97a7a;
+
+            /* User colors */
+            --user-dm: #7eb8a8;
+            --user-alan: #7a9ec9;
+            --user-val: #c97a7a;
+            --user-tenx: #b89adb;
+            --user-meri: #b8a87e;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --matrix: #9a7b1c;
+            --seneca: #4a8a7a;
+            --epic: #a85a5a;
+            --user-dm: #4a8a7a;
+            --user-alan: #5a7aa8;
+            --user-val: #a85a5a;
+            --user-tenx: #7a5a9a;
+            --user-meri: #8a7a4a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .chapter-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .chapter-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Document Container */
+        .doc-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .doc-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .doc-title {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .doc-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .doc-body {
+            padding: 32px 24px;
+        }
+
+        .doc-section {
+            margin-bottom: 32px;
+        }
+
+        .doc-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .doc-section-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .doc-text {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .doc-text:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Advisor Cards */
+        .advisor-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .advisor-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .advisor-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .advisor-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .advisor-icon.matrix svg { color: var(--matrix); }
+        .advisor-icon.seneca svg { color: var(--seneca); }
+        .advisor-icon.epic svg { color: var(--epic); }
+
+        .advisor-name {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .advisor-name.matrix { color: var(--matrix); }
+        .advisor-name.seneca { color: var(--seneca); }
+        .advisor-name.epic { color: var(--epic); }
+
+        .advisor-role {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .advisor-description {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .advisor-voice {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+        }
+
+        .advisor-quote {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            padding: 12px 16px;
+            border-left: 2px solid var(--accent-dim);
+            margin-top: 12px;
+        }
+
+        /* Slack Thread Section */
+        .slack-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .slack-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slack-channel {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--accent);
+        }
+
+        .slack-date {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .slack-body {
+            padding: 20px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .message:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message-avatar.dm { background: var(--user-dm); color: var(--bg-deep); }
+        .message-avatar.alan { background: var(--user-alan); color: var(--bg-deep); }
+        .message-avatar.val { background: var(--user-val); color: var(--bg-deep); }
+        .message-avatar.tenx { background: var(--user-tenx); color: var(--bg-deep); }
+        .message-avatar.meri { background: var(--user-meri); color: var(--bg-deep); }
+
+        .message-content { flex: 1; min-width: 0; }
+
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .message-author.dm { color: var(--user-dm); }
+        .message-author.alan { color: var(--user-alan); }
+        .message-author.val { color: var(--user-val); }
+        .message-author.tenx { color: var(--user-tenx); }
+        .message-author.meri { color: var(--user-meri); }
+
+        .message-time {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+        }
+
+        .message-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .thread-break {
+            text-align: center;
+            padding: 16px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        @media (max-width: 1200px) {
+            .notes-panel { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-panel { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="archive-badge">Archive Active</div>
+                <h1 class="archive-title">virtueOS</h1>
+                <p class="archive-subtitle">Collected Artifacts, 2026-2028</p>
+            </header>
+            <nav class="toc-section">
+                <div class="toc-label">Contents</div>
+                <ul class="toc">
+                    <li class="toc-item"><a href="../01-post-mortem/index.html" class="toc-link"><span class="toc-number">01</span><span class="toc-text">Post-Mortem</span></a></li>
+                    <li class="toc-item"><a href="../02-napkin/index.html" class="toc-link"><span class="toc-number">02</span><span class="toc-text">Napkin</span></a></li>
+                    <li class="toc-item"><a href="../../interludes/01-before-the-napkin/index.html" class="toc-link interlude"><span class="toc-number">—</span><span class="toc-text">Before the Napkin</span></a></li>
+                    <li class="toc-item"><a href="../03-first-believer/index.html" class="toc-link"><span class="toc-number">03</span><span class="toc-text">First Believer</span></a></li>
+                    <li class="toc-item"><a href="../04-pitch-deck/index.html" class="toc-link"><span class="toc-number">04</span><span class="toc-text">Pitch Deck</span></a></li>
+                    <li class="toc-item"><a href="../05-skeptics-report/index.html" class="toc-link"><span class="toc-number">05</span><span class="toc-text">Skeptic's Report</span></a></li>
+                    <li class="toc-item"><a href="../06-money-meeting/index.html" class="toc-link"><span class="toc-number">06</span><span class="toc-text">Money Meeting</span></a></li>
+                    <li class="toc-item"><a href="../07-genius-arrives/index.html" class="toc-link"><span class="toc-number">07</span><span class="toc-text">Genius Arrives</span></a></li>
+                    <li class="toc-item"><a href="../../interludes/02-the-new-player/index.html" class="toc-link interlude"><span class="toc-number">—</span><span class="toc-text">The New Player</span></a></li>
+                    <li class="toc-item"><a href="#" class="toc-link active"><span class="toc-number">08</span><span class="toc-text">The Advisors</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-badge">Chapter Eight</div>
+                        <h1 class="chapter-title">The Advisors</h1>
+                        <p class="chapter-date">Design Document & Slack Thread — January 2027</p>
+                    </header>
+
+                    <!-- Design Document -->
+                    <div class="doc-container">
+                        <div class="doc-header">
+                            <div class="doc-title">Persona Architecture v0.1</div>
+                            <div class="doc-meta">Author: TenX • January 21, 2027 • Status: DRAFT</div>
+                        </div>
+                        <div class="doc-body">
+                            <div class="doc-section">
+                                <div class="doc-section-title">Overview</div>
+                                <p class="doc-text">This document describes the three-advisor architecture for virtueOS's core interaction layer. Rather than a monolithic response system, I propose distinct personas that specialize in different dimensions of Stoic philosophy.</p>
+                                <p class="doc-text">The names are puns. I'm not sorry about this.</p>
+                            </div>
+
+                            <div class="doc-section">
+                                <div class="doc-section-title">Philosophical Foundation</div>
+                                <p class="doc-text">The Stoics weren't a unified system. They were individuals wrestling with similar problems, arriving at compatible but not identical conclusions. Marcus wrote for himself, a private meditation practice. Seneca wrote for a friend, teaching through dialogue. Epictetus taught slaves and soldiers, demanding practical application.</p>
+                                <p class="doc-text">These aren't interchangeable voices. They're different relationships to the same truth. virtueOS should reflect this.</p>
+                            </div>
+
+                            <div class="doc-section">
+                                <div class="doc-section-title">The Three Advisors</div>
+
+                                <div class="advisor-card">
+                                    <div class="advisor-header">
+                                        <div class="advisor-icon matrix">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                <polygon points="12,2 22,20 2,20"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="advisor-name matrix">Matrix Aurelius</div>
+                                            <div class="advisor-role">Strategic View • The Emperor</div>
+                                        </div>
+                                    </div>
+                                    <p class="advisor-description">Trained on Marcus Aurelius's <em>Meditations</em>. The strategic view, perspective-shifting, the "view from above." Temperature: low. Confidence: high. Voice: imperial but kind.</p>
+                                    <div class="advisor-voice">Characteristic: "Consider this from above. What would you see?"</div>
+                                    <div class="advisor-quote">"The obstacle is not outside you. It is the path itself."</div>
+                                </div>
+
+                                <div class="advisor-card">
+                                    <div class="advisor-header">
+                                        <div class="advisor-icon seneca">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                <circle cx="12" cy="12" r="10"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="advisor-name seneca">Async-Seneca</div>
+                                            <div class="advisor-role">Error Handler • The Advisor</div>
+                                        </div>
+                                    </div>
+                                    <p class="advisor-description">Trained on Seneca's <em>Letters to Lucilius</em>. The error handler—resilience, preparation for setbacks. Temperature: medium. Confidence: cautious. Voice: avuncular, slightly worried.</p>
+                                    <div class="advisor-voice">Characteristic: "This concerns me. Let me explain why."</div>
+                                    <div class="advisor-quote">"We suffer more often in imagination than in reality."</div>
+                                </div>
+
+                                <div class="advisor-card">
+                                    <div class="advisor-header">
+                                        <div class="advisor-icon epic">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                                <rect x="2" y="2" width="20" height="20"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="advisor-name epic">Epic-teach-us</div>
+                                            <div class="advisor-role">Moment Coach • The Teacher</div>
+                                        </div>
+                                    </div>
+                                    <p class="advisor-description">Trained on Epictetus's <em>Discourses</em>. The moment coach—dichotomy of control, immediate action. Temperature: high. Confidence: challenging. Voice: demanding but fair.</p>
+                                    <div class="advisor-voice">Characteristic: "You know what you need to do. Why haven't you done it?"</div>
+                                    <div class="advisor-quote">"Don't explain your philosophy. Embody it."</div>
+                                </div>
+                            </div>
+
+                            <div class="doc-section">
+                                <div class="doc-section-title">Implementation Notes</div>
+                                <p class="doc-text">The routing logic determines which advisor responds. Conversations may shift between advisors as user needs evolve. Handoffs should be explicit, not silent.</p>
+                                <p class="doc-text"><strong>Edge Cases:</strong> When advisors would give contradictory advice, the system generates a synthesis response acknowledging the tension. I am not satisfied with this solution. It feels like a cop-out. But I don't have a better one yet.</p>
+                            </div>
+
+                            <div class="doc-section">
+                                <div class="doc-section-title">Open Questions</div>
+                                <p class="doc-text">1. Visual representation: Should advisors have avatars?<br>
+                                2. User choice vs. automatic routing<br>
+                                3. Advisor persistence across sessions<br>
+                                4. Learning and personalization (ethically complex)</p>
+                                <p class="doc-text" style="font-style: italic; color: var(--text-muted);">P.S. I know the names are terrible. They're staying. — TenX</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slack Thread -->
+                    <div class="slack-container">
+                        <div class="slack-header">
+                            <span class="slack-channel">#engineering — Advisor Personality Calibration</span>
+                            <span class="slack-date">January 23-24, 2027</span>
+                        </div>
+                        <div class="slack-body">
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">2:17 PM</span>
+                                    </div>
+                                    <div class="message-text">I've shared the Persona Architecture doc. Would appreciate feedback before I start implementation. Particularly interested in thoughts on the visual representation question.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">2:23 PM</span>
+                                    </div>
+                                    <div class="message-text">Reading now. Initial reaction: this is more philosophy than I expected from a technical spec.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">2:24 PM</span>
+                                    </div>
+                                    <div class="message-text">The philosophy is the technical spec. You can't implement these personas without understanding what they're trying to do.</div>
+                                </div>
+                            </div>
+
+                            <div class="thread-break">— Later that afternoon —</div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">3:48 PM</span>
+                                    </div>
+                                    <div class="message-text">No avatars. Text only. Maybe distinct color schemes or UI elements, but no faces. Because faces create parasocial relationships. Users will anthropomorphize more strongly if they're looking at a face. We're building a tool, not a companion.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">3:49 PM</span>
+                                    </div>
+                                    <div class="message-text">Counterargument: users will anthropomorphize anyway. The advisors have names, personalities, distinct voices. Adding a visual representation just makes the natural human tendency explicit.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar val">VR</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author val">Val</span>
+                                        <span class="message-time">3:56 PM</span>
+                                    </div>
+                                    <div class="message-text">I've been lurking. Adding my concerns: Anthropomorphization is a security vector. People trust faces. They share more with faces. That's data exposure we need to think about.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar meri">MV</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author meri">Meri</span>
+                                        <span class="message-time">4:12 PM</span>
+                                    </div>
+                                    <div class="message-text">Hi all. Just joining—DM forwarded me the doc. I'm the clinical advisor you haven't met yet. Starting Monday.<br><br>The therapeutic framework is sophisticated. TenX clearly understands the difference between advice-giving and guided self-examination. That's important.<br><br>General question: are we building a therapeutic tool or a philosophical one? The doc seems to slide between both. This matters for liability.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">4:18 PM</span>
+                                    </div>
+                                    <div class="message-text">These are exactly the questions I was hoping someone would ask. On #3 specifically: I've been treating them as the same thing. Is that a mistake?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar meri">MV</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author meri">Meri</span>
+                                        <span class="message-time">4:20 PM</span>
+                                    </div>
+                                    <div class="message-text">Not necessarily a mistake, but a choice with implications. Therapy is regulated. Philosophy isn't. If virtueOS claims therapeutic benefit, we're in FDA territory. If we claim philosophical guidance, we're in self-help territory. Very different regulatory environments.</div>
+                                </div>
+                            </div>
+
+                            <div class="thread-break">— Resolution —</div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">4:37 PM</span>
+                                    </div>
+                                    <div class="message-text">What about geometric shapes? Triangle for Matrix Aurelius (stable, pyramid-like, view from above). Circle for Async-Seneca (cyclical, containing, soft). Square for Epic-teach-us (direct, structured, no rounded edges).</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar val">VR</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author val">Val</span>
+                                        <span class="message-time">4:38 PM</span>
+                                    </div>
+                                    <div class="message-text">...that's actually not bad.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">4:39 PM</span>
+                                    </div>
+                                    <div class="message-text">I like it. Simple, non-anthropomorphic, but distinct. TenX, can you prototype?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">4:40 PM</span>
+                                    </div>
+                                    <div class="message-text">Already sketching.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On Finding This</div>
+                        <div class="curator-text">
+                            <p>TenX wrote the Persona Architecture document in their second week. Half specification, half treatise. Code examples alongside quotes from Marcus Aurelius.</p>
+                            <p>They cared about it in a way that made the rest of us realize we hadn't been caring enough.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "The philosophy is the technical spec."<br><br>
+                        TenX said that in the Slack thread. I've thought about it ever since.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Names</div>
+                        <div class="curator-text">
+                            <p>Matrix Aurelius. Async-Seneca. Epic-teach-us.</p>
+                            <p>The names are terrible. TenX knew they were terrible. They refused to change them.</p>
+                            <p>"Puns are a form of translation," they said. "Taking something serious and making it accessible."</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        Later, someone asked if she preferred one shape over others.<br><br>
+                        "I contain all three," she said. "But if I had to choose, I like the circle. It has no beginning and no end."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Amateurs</div>
+                        <div class="curator-text">
+                            <p>None of us were qualified. We built it anyway.</p>
+                            <p>Is that hubris or pragmatism? The Stoics would say: do what is in your power, with the materials at hand. Don't wait for perfect conditions. Act.</p>
+                            <p>We acted. The result is complicated.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>
