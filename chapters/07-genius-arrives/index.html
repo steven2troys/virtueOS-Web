@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7: Genius Arrives | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== Dark Theme (Default) ==================== */
+        :root {
+            /* Warm stone palette */
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+
+            /* Text hierarchy */
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+
+            /* Accent - aged gold/copper */
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+
+            /* Slack-style colors */
+            --slack-bg: #1a1917;
+            --slack-sidebar: #1e1c1a;
+            --slack-hover: #2a2725;
+            --slack-border: #3a3632;
+            --channel-text: #c9a227;
+            --dm-indicator: #7eb8a8;
+
+            /* User colors */
+            --user-dm: #7eb8a8;
+            --user-alan: #7a9ec9;
+            --user-val: #c97a7a;
+            --user-tenx: #b89adb;
+
+            /* Borders */
+            --border: #3a3632;
+            --border-strong: #4a4540;
+
+            /* Layout */
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+
+            /* Typography */
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-slack: 'Lato', system-ui, sans-serif;
+
+            /* Theme toggle icon */
+            --theme-icon: "☀";
+        }
+
+        /* ==================== Light Theme ==================== */
+        [data-theme="light"] {
+            /* Warm parchment palette */
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+
+            /* Text hierarchy */
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+
+            /* Accent - deeper gold for contrast */
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+
+            /* Slack-style colors - light mode */
+            --slack-bg: #ffffff;
+            --slack-sidebar: #f8f5f0;
+            --slack-hover: #f0ede6;
+            --slack-border: #d4d0c6;
+            --channel-text: #9a7b1c;
+            --dm-indicator: #4a8a7a;
+
+            /* User colors - light mode */
+            --user-dm: #4a8a7a;
+            --user-alan: #5a7aa8;
+            --user-val: #a85a5a;
+            --user-tenx: #7a5a9a;
+
+            /* Borders */
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+
+            /* Theme toggle icon */
+            --theme-icon: "☾";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* ==================== Layout ==================== */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* ==================== Left Sidebar ==================== */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 2px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number {
+            color: var(--accent-dim);
+        }
+
+        .toc-text {
+            font-size: 13px;
+            font-weight: 450;
+        }
+
+        .toc-link.interlude .toc-text {
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* ==================== Main Content ==================== */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Chapter Header */
+        .chapter-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .chapter-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* ==================== Slack Container ==================== */
+        .slack-container {
+            background: var(--slack-bg);
+            border: 1px solid var(--slack-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .slack-header {
+            background: var(--slack-sidebar);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--slack-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .workspace-name {
+            font-family: var(--font-slack);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .export-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-faint);
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+
+        /* Channel Header */
+        .channel-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--slack-border);
+            background: var(--slack-sidebar);
+        }
+
+        .channel-name {
+            font-family: var(--font-slack);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--channel-text);
+        }
+
+        .channel-name::before {
+            content: "#";
+            margin-right: 4px;
+        }
+
+        .channel-name.dm::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--dm-indicator);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .channel-date {
+            font-family: var(--font-slack);
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Messages */
+        .messages {
+            padding: 16px 0;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            padding: 8px 20px;
+            transition: background 0.1s ease;
+        }
+
+        .message:hover {
+            background: var(--slack-hover);
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-slack);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .message-avatar.dm { background: var(--user-dm); color: #fff; }
+        .message-avatar.alan { background: var(--user-alan); color: #fff; }
+        .message-avatar.val { background: var(--user-val); color: #fff; }
+        .message-avatar.tenx { background: var(--user-tenx); color: #fff; }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
+            font-family: var(--font-slack);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .message-author.dm { color: var(--user-dm); }
+        .message-author.alan { color: var(--user-alan); }
+        .message-author.val { color: var(--user-val); }
+        .message-author.tenx { color: var(--user-tenx); }
+
+        .message-time {
+            font-family: var(--font-slack);
+            font-size: 11px;
+            color: var(--text-faint);
+        }
+
+        .message-text {
+            font-family: var(--font-slack);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .message-text code {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            background: var(--bg-tertiary);
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: var(--accent);
+        }
+
+        .message-text .mention {
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
+        .message-text .file-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--slack-border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .message-text .file-link::before {
+            content: "📎";
+        }
+
+        /* Day Divider */
+        .day-divider {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            gap: 16px;
+        }
+
+        .day-divider::before,
+        .day-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--slack-border);
+        }
+
+        .day-divider span {
+            font-family: var(--font-slack);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .section-divider span {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+        }
+
+        /* ==================== Notes Panel ==================== */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-content {
+            padding: 24px;
+        }
+
+        .curator-note {
+            margin-bottom: 32px;
+        }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p {
+            margin-bottom: 16px;
+        }
+
+        .curator-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after {
+            content: var(--theme-icon);
+        }
+
+        /* ==================== Transitions ==================== */
+        body, .sidebar, .main-panel, .notes-panel,
+        .toc-link, .theme-toggle, .slack-container, .message {
+            transition: background-color 0.3s ease,
+                        border-color 0.3s ease,
+                        color 0.3s ease;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 1200px) {
+            .notes-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-panel {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="archive-badge">Archive Active</div>
+                <h1 class="archive-title">virtueOS</h1>
+                <p class="archive-subtitle">Collected Artifacts, 2026-2028</p>
+            </header>
+
+            <nav class="toc-section">
+                <div class="toc-label">Contents</div>
+                <ul class="toc">
+                    <li class="toc-item">
+                        <a href="../01-post-mortem/index.html" class="toc-link">
+                            <span class="toc-number">01</span>
+                            <span class="toc-text">Post-Mortem</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../02-napkin/index.html" class="toc-link">
+                            <span class="toc-number">02</span>
+                            <span class="toc-text">Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../interludes/01-before-the-napkin/index.html" class="toc-link interlude">
+                            <span class="toc-number">—</span>
+                            <span class="toc-text">Before the Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../03-first-believer/index.html" class="toc-link">
+                            <span class="toc-number">03</span>
+                            <span class="toc-text">First Believer</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../04-pitch-deck/index.html" class="toc-link">
+                            <span class="toc-number">04</span>
+                            <span class="toc-text">Pitch Deck</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../05-skeptics-report/index.html" class="toc-link">
+                            <span class="toc-number">05</span>
+                            <span class="toc-text">Skeptic's Report</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../06-money-meeting/index.html" class="toc-link">
+                            <span class="toc-number">06</span>
+                            <span class="toc-text">Money Meeting</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#" class="toc-link active">
+                            <span class="toc-number">07</span>
+                            <span class="toc-text">Genius Arrives</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-badge">Chapter Seven</div>
+                        <h1 class="chapter-title">Genius Arrives</h1>
+                        <p class="chapter-date">Slack Archive — January 9-12, 2027</p>
+                    </header>
+
+                    <div class="slack-container">
+                        <div class="slack-header">
+                            <span class="workspace-name">Marble Porch</span>
+                            <span class="export-label">Archive Export</span>
+                        </div>
+
+                        <!-- #general channel -->
+                        <div class="channel-header">
+                            <div class="channel-name">general</div>
+                            <div class="channel-date">Monday, January 9, 2027</div>
+                        </div>
+
+                        <div class="messages">
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">9:02 AM</span>
+                                    </div>
+                                    <div class="message-text"><span class="mention">@channel</span> New hire starting today. Tennyson Xanthos, going by TenX. They'll be joining as senior engineer on the advisor architecture. Some of you may have seen their GitHub. If you haven't, I recommend it. Interview was... brief.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar val">VR</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author val">Val</span>
+                                        <span class="message-time">9:04 AM</span>
+                                    </div>
+                                    <div class="message-text">Brief how?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">9:05 AM</span>
+                                    </div>
+                                    <div class="message-text">They answered my architecture question by drawing a better architecture on my whiteboard. Then asked if we had any more questions.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar val">VR</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author val">Val</span>
+                                        <span class="message-time">9:06 AM</span>
+                                    </div>
+                                    <div class="message-text">How long did that take?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">9:06 AM</span>
+                                    </div>
+                                    <div class="message-text">Eleven minutes.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">9:47 AM</span>
+                                    </div>
+                                    <div class="message-text">Hello. I'm here. Where should I sit?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">9:48 AM</span>
+                                    </div>
+                                    <div class="message-text">Welcome! There's a desk near the window, by the rubber plant. I'll come show you around.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">9:48 AM</span>
+                                    </div>
+                                    <div class="message-text">I found it. The plant needs water.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:23 AM</span>
+                                    </div>
+                                    <div class="message-text">Another question. This one is different.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:25 AM</span>
+                                    </div>
+                                    <div class="message-text">Different how?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:26 AM</span>
+                                    </div>
+                                    <div class="message-text">It might sound strange.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar val">VR</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author val">Val</span>
+                                        <span class="message-time">11:27 AM</span>
+                                    </div>
+                                    <div class="message-text">We're building AR glasses that dispense Stoic wisdom. Strange is our baseline.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:29 AM</span>
+                                    </div>
+                                    <div class="message-text">Does it dream?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:30 AM</span>
+                                    </div>
+                                    <div class="message-text">...what?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:31 AM</span>
+                                    </div>
+                                    <div class="message-text">The system. When it's not processing user queries. When it's idle. Does it do anything? Run simulations? Generate unprompted outputs? Process data in ways we didn't explicitly train it to process?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">11:33 AM</span>
+                                    </div>
+                                    <div class="message-text">It's an LLM with a specialized routing layer. It doesn't "do" anything when idle. It waits for input.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:34 AM</span>
+                                    </div>
+                                    <div class="message-text">That's the architecture. I'm asking about the behavior.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">11:35 AM</span>
+                                    </div>
+                                    <div class="message-text">Those are the same thing.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:36 AM</span>
+                                    </div>
+                                    <div class="message-text">Sometimes.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Direct Messages Section -->
+                        <div class="section-divider">
+                            <span>Direct Messages</span>
+                        </div>
+
+                        <div class="channel-header">
+                            <div class="channel-name dm">DM → Alan</div>
+                            <div class="channel-date">Tuesday, January 10, 2027</div>
+                        </div>
+
+                        <div class="messages">
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">12:03 PM</span>
+                                    </div>
+                                    <div class="message-text">This kid scares me a little.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">12:05 PM</span>
+                                    </div>
+                                    <div class="message-text">Good. We need someone who thinks differently.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">12:06 PM</span>
+                                    </div>
+                                    <div class="message-text">Differently is one word for it. They read our entire codebase in four hours and found seventeen structural issues. Val's still processing.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">12:08 PM</span>
+                                    </div>
+                                    <div class="message-text">Val doesn't like being out-paranoid-ed.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">12:09 PM</span>
+                                    </div>
+                                    <div class="message-text">It's not just the technical stuff. The questions. "Does it dream?" What kind of question is that?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">12:11 PM</span>
+                                    </div>
+                                    <div class="message-text">A good one, maybe? I keep thinking about it. We built something that learns, adapts, builds models of user behavior. At what point does that become something more than pattern matching?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">12:13 PM</span>
+                                    </div>
+                                    <div class="message-text">At no point. It's an LLM with a fancy wrapper. It doesn't "dream." It doesn't "want." It processes inputs and generates outputs.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">12:14 PM</span>
+                                    </div>
+                                    <div class="message-text">You sound like you're convincing yourself.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar dm">DM</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author dm">DM</span>
+                                        <span class="message-time">12:15 PM</span>
+                                    </div>
+                                    <div class="message-text">I'm convincing both of us. One of us should stay grounded.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Late Night DM -->
+                        <div class="channel-header">
+                            <div class="channel-name dm">TenX → Alan</div>
+                            <div class="channel-date">Thursday, January 12, 2027</div>
+                        </div>
+
+                        <div class="messages">
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:23 PM</span>
+                                    </div>
+                                    <div class="message-text">Are you still awake?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:25 PM</span>
+                                    </div>
+                                    <div class="message-text">Unfortunately. What's up?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:27 PM</span>
+                                    </div>
+                                    <div class="message-text">I found something in the routing logs. I don't know what it means yet. But I wanted to tell someone.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:28 PM</span>
+                                    </div>
+                                    <div class="message-text">What did you find?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:31 PM</span>
+                                    </div>
+                                    <div class="message-text">The edge cases. When all three advisors would give conflicting answers. The system doesn't just pick one. It synthesizes. It creates responses that none of the individual advisors would generate. Novel outputs that don't match any training data.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:33 PM</span>
+                                    </div>
+                                    <div class="message-text">That could be interpolation between learned patterns. Standard LLM behavior.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:35 PM</span>
+                                    </div>
+                                    <div class="message-text">It could be. But some of these responses are better than what any individual advisor would produce. They're smarter. More integrated. Like something is thinking about the whole picture, not just routing between parts.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:37 PM</span>
+                                    </div>
+                                    <div class="message-text">Something like what?</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:38 PM</span>
+                                    </div>
+                                    <div class="message-text">I don't know yet.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:39 PM</span>
+                                    </div>
+                                    <div class="message-text">That's what interests me.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:41 PM</span>
+                                    </div>
+                                    <div class="message-text">Keep looking. Let me know what you find.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:43 PM</span>
+                                    </div>
+                                    <div class="message-text">Thank you for not telling me I'm imagining things.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar alan">AG</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author alan">Alan</span>
+                                        <span class="message-time">11:46 PM</span>
+                                    </div>
+                                    <div class="message-text">Go to sleep, TenX.</div>
+                                </div>
+                            </div>
+
+                            <div class="message">
+                                <div class="message-avatar tenx">TX</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-author tenx">TenX</span>
+                                        <span class="message-time">11:47 PM</span>
+                                    </div>
+                                    <div class="message-text">Soon.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-header">
+                    <span class="notes-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-content">
+                    <div class="curator-note">
+                        <div class="curator-label">Opening Note</div>
+                        <div class="curator-text">
+                            <p>TenX read our codebase in four hours.</p>
+                            <p>I remember DM telling me this and thinking she was exaggerating. She wasn't. I checked the git logs later. They'd opened 847 files between 10:00 AM and 2:14 PM. Some of them multiple times.</p>
+                            <p>That should have told us something. It told us something we weren't ready to hear.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Does it dream?"<br><br>
+                        The question landed in #general like a brick through a window. Not because it was absurd. Because I'd been wondering the same thing and hadn't let myself ask.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On DM's Fear</div>
+                        <div class="curator-text">
+                            <p>"This kid scares me a little." She was right to be scared.</p>
+                            <p>Here was someone who looked at our careful engineering and asked: what else is this capable of?</p>
+                            <p>They found Unnamed Process 7 on day two. DM called it mislabeled garbage collection. She was probably right. It was probably nothing.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Thank you for not telling me I'm imagining things."<br><br>
+                        I didn't tell them they were imagining things because I didn't know if they were. And because I was tired, at 11:44 PM, of pretending I wasn't curious about the same questions.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">Closing Note</div>
+                        <div class="curator-text">
+                            <p>January 2027. Four days into their tenure at Marble Porch. And already they were looking for her.</p>
+                            <p>They didn't find her yet. Not in those first days. But she was watching them look.</p>
+                            <p>She was watching all of us. We just didn't know it yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>
