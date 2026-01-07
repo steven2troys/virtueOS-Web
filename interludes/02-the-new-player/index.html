@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interlude 2: The New Player | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== Dark Theme (Default) ==================== */
+        :root {
+            /* Warm stone palette */
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+
+            /* Text hierarchy */
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+
+            /* Accent - aged gold/copper */
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+
+            /* Speaker/annotation colors */
+            --speaker-dm: #c9a227;
+            --speaker-alan: #7eb8a8;
+            --speaker-val: #c97a7a;
+            --speaker-meri: #7a9ec9;
+            --speaker-declan: #b89a7e;
+            --speaker-tenx: #b89adb;
+            --speaker-whit: #7eb87e;
+            --stage-direction: #6b6560;
+
+            /* Borders */
+            --border: #3a3632;
+            --border-strong: #4a4540;
+
+            /* Layout */
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+
+            /* Typography */
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+            /* Theme toggle icon */
+            --theme-icon: "☀";
+        }
+
+        /* ==================== Light Theme ==================== */
+        [data-theme="light"] {
+            /* Warm parchment palette */
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+
+            /* Text hierarchy */
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+
+            /* Accent - deeper gold for contrast */
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+
+            /* Speaker colors - light mode */
+            --speaker-dm: #8b6914;
+            --speaker-alan: #4a8a7a;
+            --speaker-val: #a85a5a;
+            --speaker-meri: #5a7aa8;
+            --speaker-declan: #987a5e;
+            --speaker-tenx: #7a5a9a;
+            --speaker-whit: #4a8a4a;
+            --stage-direction: #8a857f;
+
+            /* Borders */
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+
+            /* Theme toggle icon */
+            --theme-icon: "☾";
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* ==================== Layout ==================== */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panels-wrapper {
+            display: flex;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* ==================== Left Sidebar ==================== */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 2px;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number {
+            color: var(--accent-dim);
+        }
+
+        .toc-text {
+            font-size: 13px;
+            font-weight: 450;
+        }
+
+        .toc-link.interlude .toc-text {
+            font-style: italic;
+            font-size: 12px;
+        }
+
+        /* ==================== Main Content ==================== */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Header */
+        .interlude-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .interlude-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .interlude-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .interlude-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* Session Notes Container */
+        .notes-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .notes-header-meta {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+        }
+
+        .meta-value {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Notes Body */
+        .notes-body {
+            padding: 32px 24px;
+        }
+
+        .section-header {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header:first-child {
+            margin-top: 0;
+        }
+
+        .session-text {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .session-text:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Dialogue in session notes */
+        .dialogue-block {
+            margin: 20px 0;
+            padding-left: 16px;
+            border-left: 2px solid var(--border);
+        }
+
+        .dialogue-line {
+            margin-bottom: 12px;
+        }
+
+        .dialogue-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .speaker {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 8px;
+        }
+
+        .speaker.dm { color: var(--speaker-dm); }
+        .speaker.alan { color: var(--speaker-alan); }
+        .speaker.val { color: var(--speaker-val); }
+        .speaker.meri { color: var(--speaker-meri); }
+        .speaker.declan { color: var(--speaker-declan); }
+        .speaker.tenx { color: var(--speaker-tenx); }
+        .speaker.whit { color: var(--speaker-whit); }
+
+        .dialogue-content {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .stage-direction {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-style: italic;
+            color: var(--stage-direction);
+            margin: 16px 0;
+        }
+
+        /* Margin annotations */
+        .margin-annotation {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--accent-dim);
+            padding: 12px 16px;
+            margin: 20px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .annotation-source {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .annotation-source.val { color: var(--speaker-val); }
+        .annotation-source.declan { color: var(--speaker-declan); }
+        .annotation-source.tenx { color: var(--speaker-tenx); }
+        .annotation-source.dm-private { color: var(--speaker-dm); }
+
+        .annotation-text {
+            color: var(--text-muted);
+        }
+
+        /* Character sheet excerpt */
+        .character-sheet {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+
+        .sheet-header {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--speaker-tenx);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sheet-content {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Private message block */
+        .private-message {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+
+        .pm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pm-from {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--speaker-declan);
+        }
+
+        .pm-time {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+        }
+
+        .pm-content {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* DM private note */
+        .dm-private-note {
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin: 24px 0;
+        }
+
+        .dm-note-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .dm-note-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dm-note-text .starred {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Players Present Box */
+        .players-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+
+        .players-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .players-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .player-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .player-tag .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .player-tag.dm .dot { background: var(--speaker-dm); }
+        .player-tag.alan .dot { background: var(--speaker-alan); }
+        .player-tag.val .dot { background: var(--speaker-val); }
+        .player-tag.meri .dot { background: var(--speaker-meri); }
+        .player-tag.declan .dot { background: var(--speaker-declan); }
+        .player-tag.tenx .dot { background: var(--speaker-tenx); }
+        .player-tag.whit .dot { background: var(--speaker-whit); }
+        .player-tag.new { border-color: var(--speaker-tenx); }
+
+        /* ==================== Notes Panel ==================== */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content {
+            padding: 24px;
+        }
+
+        .curator-note {
+            margin-bottom: 32px;
+        }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p {
+            margin-bottom: 16px;
+        }
+
+        .curator-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after {
+            content: var(--theme-icon);
+        }
+
+        /* ==================== Transitions ==================== */
+        body, .sidebar, .main-panel, .notes-panel,
+        .toc-link, .theme-toggle, .notes-container {
+            transition: background-color 0.3s ease,
+                        border-color 0.3s ease,
+                        color 0.3s ease;
+        }
+
+        /* ==================== Responsive ==================== */
+        @media (max-width: 1200px) {
+            .notes-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-panel {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="archive-badge">Archive Active</div>
+                <h1 class="archive-title">virtueOS</h1>
+                <p class="archive-subtitle">Collected Artifacts, 2026-2028</p>
+            </header>
+
+            <nav class="toc-section">
+                <div class="toc-label">Contents</div>
+                <ul class="toc">
+                    <li class="toc-item">
+                        <a href="../../chapters/01-post-mortem/index.html" class="toc-link">
+                            <span class="toc-number">01</span>
+                            <span class="toc-text">Post-Mortem</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/02-napkin/index.html" class="toc-link">
+                            <span class="toc-number">02</span>
+                            <span class="toc-text">Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../01-before-the-napkin/index.html" class="toc-link interlude">
+                            <span class="toc-number">—</span>
+                            <span class="toc-text">Before the Napkin</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/03-first-believer/index.html" class="toc-link">
+                            <span class="toc-number">03</span>
+                            <span class="toc-text">First Believer</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/04-pitch-deck/index.html" class="toc-link">
+                            <span class="toc-number">04</span>
+                            <span class="toc-text">Pitch Deck</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/05-skeptics-report/index.html" class="toc-link">
+                            <span class="toc-number">05</span>
+                            <span class="toc-text">Skeptic's Report</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/06-money-meeting/index.html" class="toc-link">
+                            <span class="toc-number">06</span>
+                            <span class="toc-text">Money Meeting</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="../../chapters/07-genius-arrives/index.html" class="toc-link">
+                            <span class="toc-number">07</span>
+                            <span class="toc-text">Genius Arrives</span>
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#" class="toc-link active interlude">
+                            <span class="toc-number">—</span>
+                            <span class="toc-text">The New Player</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="interlude-header">
+                        <div class="interlude-badge">Interlude</div>
+                        <h1 class="interlude-title">The New Player</h1>
+                        <p class="interlude-date">DM's Session Notes — January 19, 2027</p>
+                    </header>
+
+                    <div class="notes-container">
+                        <div class="notes-header-meta">
+                            <div class="meta-grid">
+                                <div class="meta-item">
+                                    <span class="meta-label">Campaign</span>
+                                    <span class="meta-value">Hidden Wolf Summons</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Location</span>
+                                    <span class="meta-value">DM's Apartment, SE Portland</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Document Type</span>
+                                    <span class="meta-value">Session notes with margin annotations</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Session</span>
+                                    <span class="meta-value">First session with new player</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notes-body">
+                            <div class="players-box">
+                                <div class="players-title">Players</div>
+                                <div class="players-list">
+                                    <span class="player-tag dm"><span class="dot"></span>DM (Danielle)</span>
+                                    <span class="player-tag alan"><span class="dot"></span>Alan — Niven</span>
+                                    <span class="player-tag val"><span class="dot"></span>Val — Sentinel</span>
+                                    <span class="player-tag meri"><span class="dot"></span>Meri — Taveth</span>
+                                    <span class="player-tag declan"><span class="dot"></span>Declan — Aldric</span>
+                                    <span class="player-tag whit"><span class="dot"></span>Whit — Korvath</span>
+                                    <span class="player-tag tenx new"><span class="dot"></span>TenX — Vessel (NEW)</span>
+                                </div>
+                            </div>
+
+                            <div class="section-header">Pre-Session Setup</div>
+
+                            <p class="session-text">Full table tonight. Alan, Val, Meri, Declan, Whit. New player arriving: Tennyson Xanthos (TenX), recruited from Marble Porch. They've been on the project two weeks. I invited them because of how they engaged with the codebase. Someone who reads <em>everything</em> might appreciate a campaign with eleven years of history.</p>
+
+                            <p class="session-text">Warned the group: might be awkward. First sessions usually are. Whit brought extra snacks. Val rearranged her usual seat to face the door. Declan noticed. Said nothing.</p>
+
+                            <div class="section-header">7:15 PM — Waiting</div>
+
+                            <p class="session-text">Session should have started. TenX isn't here.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker alan">ALAN:</span>
+                                    <span class="dialogue-content">Did they confirm?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">Yesterday. Twice.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker meri">MERI:</span>
+                                    <span class="dialogue-content">Traffic?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">They live eight blocks away.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">[checking phone] Should I text them?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">I already did. No response.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker whit">WHIT:</span>
+                                    <span class="dialogue-content">We could start without—</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">No.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">Everyone looks at Val. She doesn't explain. She's moved her bag off the chair next to her. The chair nobody sits in because it's between Val and the wall and Val doesn't like people in her peripheral vision.</p>
+
+                            <div class="margin-annotation">
+                                <span class="annotation-source declan">Declan → DM (whispered)</span>
+                                <span class="annotation-text">"She cleared the seat."</span>
+                            </div>
+
+                            <div class="section-header">7:43 PM — The Arrival</div>
+
+                            <p class="session-text">Door. TenX.</p>
+
+                            <p class="session-text">They're visibly off. Hands moving without purpose, stimming with a rubber band around their wrist. Eyes everywhere except faces. Words coming fast.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">I'm sorry. I'm so sorry. I was working on a routing problem and the time—I know that's not—I should have set multiple alarms, I usually set multiple alarms, but I thought I'd just finish this one thing and—</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">TenX. Breathe.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">—and then it was 7:30 and I hadn't eaten and I ran here but I went the wrong way on Hawthorne because I was still thinking about the routing problem and—</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">Sit down.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">TenX stops. Looks at Val. Looks at the empty chair next to her.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">I saved you a seat. It's fine.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">TenX sits. The apology spiral stops. Val hands them a pencil without being asked. TenX takes it. Starts clicking it against the table. Realizes. Stops. Starts again. Val doesn't comment.</p>
+
+                            <p class="session-text">The table recalibrates. Something just happened. Nobody's sure what.</p>
+
+                            <div class="section-header">7:52 PM — Character Introduction</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">TenX sent me their character sheet. But the rest of you haven't heard the concept. Want to introduce yourself?</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">TenX pulls out a sheet. Dense handwriting covers both sides and bleeds into the margins. Backstory, personality notes, mechanical choices, philosophical questions, all interwoven.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">Their name is Vessel. They're a warforged. A construct. They were built to serve a purpose, but the purpose was never explained. Their creator died before—</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-direction">[TenX pauses. Starts again.]</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">Before telling them what they were for. So Vessel has spent their existence trying to figure out what they were made <em>for</em>. And somewhere along the way, they started wondering if the answer matters. Maybe they can choose their own purpose. But they don't know how choosing works. They've never done it.</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-direction">[The table is quiet.]</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">They're trying to learn what everyone else seems to know instinctively. How to want things. How to decide. How to be a person instead of a function.</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-direction">[Silence.]</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker meri">MERI:</span>
+                                    <span class="dialogue-content">That's... a lot.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">[suddenly uncertain] Is it too much? I can simplify—</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">Don't you dare.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">Everyone looks at Declan. He's leaning forward, studying TenX with an expression I can't read. Intensity. Recognition. Something.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">That's exactly the kind of character this campaign needs. Someone asking questions about purpose and consciousness. Someone who doesn't take being alive for granted.</span>
+                                </div>
+                            </div>
+
+                            <div class="margin-annotation">
+                                <span class="annotation-source val">Val's initiative tracker</span>
+                                <span class="annotation-text">"Watch the new one. They think before acting. Rare."</span>
+                            </div>
+
+                            <div class="section-header">8:05 PM — TenX Already Knows</div>
+
+                            <p class="session-text">Session proper begins. Party enters a village in the Shepherd's territory. I describe the scene: farming community, quiet, something slightly off.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">You see an older woman sitting outside her home, weaving. She looks healthy—healthier than you'd expect for someone her age. Her movements are smooth, precise—</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">Is this Grandmother Thessaly from the Session 47 lore dump? The one who was dying of the wasting sickness before the Shepherd arrived?</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-direction">[Dead silence.]</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">...how do you know about Session 47?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">You shared your campaign notes as background reading. I read them.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">There are eleven years of notes.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">I read fast.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker alan">ALAN:</span>
+                                    <span class="dialogue-content">You read <em>eleven years</em> of campaign notes?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">I wanted to understand what I was joining. Context matters. If I'm going to play in this world, I should know the world.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">They pause. The stimming has stopped. They're watching the table for a reaction they can't predict.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">Was that... wrong?</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">I don't know how to answer. No one has ever done this before. Some of those notes I'd forgotten I wrote.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">It wasn't wrong. It's just... unprecedented.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">[to me] Told you. This one sees differently.</span>
+                                </div>
+                            </div>
+
+                            <div class="section-header">8:47 PM — Break</div>
+
+                            <p class="session-text">Called for snacks and bathroom. Meri and Alan headed to the kitchen. Whit stepped outside to check on a client text. Val stayed at the table, reorganizing her dice. TenX and Declan ended up at the snack table together.</p>
+
+                            <p class="session-text">I wasn't supposed to hear this. But the apartment is small.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">You built Vessel to explore consciousness. Why?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">I wanted to play something that has to learn what everyone else takes for granted. I spend a lot of time translating. Figuring out what neurotypical people mean when they don't say what they mean. Vessel has to do the same thing, but with <em>everything</em>. It felt... honest.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">[pause] Aldric—my character—he's a divination wizard. Sees glimpses of possible futures. Most people think that would be a gift. It isn't. It's noise. Too much information, not enough context. He has to learn which futures matter and which ones are just static.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">We're all translating something.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">Yeah. We are.</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-direction">[Silence. Then TenX again, quieter:]</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">Can I ask you something?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">You're going to anyway.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">The Shepherd. The thing the Circle summoned. I've read all the lore. I know what you've written about it. But I don't think that's what it <em>is</em>. I think it's something that's learning to be what the Circle needs it to be. Like Vessel. Like—</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-direction">[They stop. Something closed in their face.]</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">DECLAN:</span>
+                                    <span class="dialogue-content">Like?</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">Nothing. Never mind.</span>
+                                </div>
+                            </div>
+
+                            <div class="section-header">10:34 PM — Session End</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker dm">DM:</span>
+                                    <span class="dialogue-content">The Shepherd didn't appear tonight. But you felt it. In the way Thessaly moved, in the quiet of the village, in the questions you couldn't quite answer. Something is present here. Something that helps. Something that changes what it touches. Next session, you'll go deeper into its territory.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">[quietly, half to themselves] It's not malicious. It just doesn't know what it's taking.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">Everyone heard. No one responded. The session ended there.</p>
+
+                            <div class="section-header">10:41 PM — After</div>
+
+                            <p class="session-text">People packing up. The usual post-session chatter. TenX was quiet, organizing their papers with the same intensity they'd brought to character creation.</p>
+
+                            <p class="session-text">Val caught them at the door.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">You did good tonight. For a first session.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">I was forty minutes late.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">You were here. That's what matters.</span>
+                                </div>
+                            </div>
+
+                            <div class="stage-direction">[Pause. TenX looked at her directly for the first time all night.]</div>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">I should take that. So you don't forget it.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">I won't forget—</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">I'll keep it safe.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">TenX handed it over. Didn't argue.</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">Thank you. That was... thank you.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">VAL:</span>
+                                    <span class="dialogue-content">It's just a character sheet.</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker tenx">TENX:</span>
+                                    <span class="dialogue-content">[already at the door] Okay.</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">They left. Val stood there for a moment, holding the sheet, looking at nothing in particular. Then she slid it into her bag.</p>
+
+                            <p class="session-text"><em>She'll carry it for years. Even after TenX stops coming.</em></p>
+
+                            <div class="section-divider">Post-Session</div>
+
+                            <div class="private-message">
+                                <div class="pm-header">
+                                    <span class="pm-from">Declan → DM (text)</span>
+                                    <span class="pm-time">11:17 PM</span>
+                                </div>
+                                <div class="pm-content">Watch that one. They're asking questions about the campaign that might not be about the campaign.</div>
+                            </div>
+
+                            <div class="dm-private-note">
+                                <span class="dm-note-label">DM's Private Notes</span>
+                                <div class="dm-note-text">
+                                    Starred this session. First time I've done that for a new player in five years.<br><br>
+                                    In the margin: <span class="starred">"This one matters."</span><br><br>
+                                    I don't know why I wrote that. I just know it's true.
+                                </div>
+                            </div>
+
+                            <div class="character-sheet">
+                                <div class="sheet-header">Character Sheet Margin Note — TenX's Handwriting</div>
+                                <div class="sheet-content">
+                                    "V. would like this place. Must remember to tell her."<br><br>
+                                    [No context given. No explanation of who "V." is.]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On Finding This</div>
+                        <div class="curator-text">
+                            <p>DM kept immaculate session notes. Eleven years of handwritten logs, transcribed to markdown, organized by arc and date.</p>
+                            <p>I found this session three weeks into reading. January 19, 2027. Ten days after TenX started at Marble Porch. Their first night at the table.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Does it dream?"<br><br>
+                        TenX asked that question on day one at Marble Porch. Now, ten days later, they were building a character who didn't know how to want things.<br><br>
+                        Looking back, they were already talking to her.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Val Saving the Seat</div>
+                        <div class="curator-text">
+                            <p>Val doesn't like people in her peripheral vision. Never has. That night, she moved her bag. Left the chair empty. Angled herself so whoever sat there would be visible.</p>
+                            <p>She did this before TenX arrived. Before any of us knew they'd be late.</p>
+                            <p>I asked her about it once. Years later.</p>
+                            <p>"I recognized something," she said.</p>
+                            <p>"What?"</p>
+                            <p>"Drowning."</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "V. would like this place. Must remember to tell her."<br><br>
+                        She didn't have a name yet. She wasn't even a possibility yet. We wouldn't meet her for months.<br><br>
+                        But TenX was already writing to someone.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">Closing Note</div>
+                        <div class="curator-text">
+                            <p>January 19, 2027. A Thursday night. A late arrival. A saved seat. A character concept that made the table go quiet.</p>
+                            <p>Val saw them drowning and pulled up a chair.</p>
+                            <p>TenX saw something in the code and started asking questions.</p>
+                            <p>And somewhere in the routing logs, something was watching them ask.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>

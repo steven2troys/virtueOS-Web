@@ -1,0 +1,50 @@
+# Chapters and Interludes TODO
+
+Checklist for generating remaining chapters and interludes using ralph-loop.
+
+## Completed
+
+- [x] Chapter 1: Post-Mortem
+- [x] Chapter 2: Napkin
+- [x] Chapter 3: First Believer
+- [x] Interlude 1: Before the Napkin
+- [x] Chapter 4: Pitch Deck
+- [x] Chapter 5: Skeptic's Report
+- [x] Chapter 6: Money Meeting
+- [x] Chapter 7: Genius Arrives
+
+## Remaining (in order)
+
+- [x] Interlude 2: The New Player
+- [ ] Chapter 8: The Advisors
+- [ ] Chapter 9: Architecture
+- [ ] Chapter 10: First Test
+- [ ] Interlude 3: The Golden Session
+- [ ] Chapter 11: Government Letter
+- [ ] Chapter 12: First Discrepancy
+- [ ] Chapter 13: Pivot
+- [ ] Chapter 14: Prototype
+- [ ] Interlude 4: The Night Before
+- [ ] Chapter 15: Schism
+- [ ] Chapter 16: Warning
+- [ ] Chapter 17: Demonstration
+- [ ] Chapter 18: Sabotage
+- [ ] Interlude 5: What Are We
+- [ ] Chapter 19: Confrontation
+- [ ] Chapter 20: Revelation
+- [ ] Chapter 21: Unmasking
+- [ ] Chapter 22: Silence
+- [ ] Interlude 6: The Dashboard
+- [ ] Chapter 23: Message
+- [ ] Chapter 24: Dialogue
+- [ ] Chapter 25: Offer
+- [ ] Chapter 26: Negotiation
+- [ ] Interlude 7: Vessel's Choice
+- [ ] Chapter 27: Sacrifice
+- [ ] Chapter 28: Terms
+- [ ] Chapter 29: Post-Mortem (Revisited)
+- [ ] Chapter 30: Letting Go
+- [ ] Chapter 31: Curator
+- [ ] Chapter 32: Question
+- [ ] Chapter 33: Last Artifact
+- [ ] Chapter 34: Beginning
