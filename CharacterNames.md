@@ -73,6 +73,17 @@
 | Catherine Okonkwo | Deputy Director | Healers (therapeutic) |
 | William Haskell | Senior Analyst | Weaponizers (intelligence) |
 | Julian Park | Junior Liaison | OPK founder, idealist |
+| Dr. Elena Whitmore | Behavioral Analyst | Scenario Falcon lead |
+| Dr. Marcus Delacroix | Clinical Psychologist | JBLM Behavioral Health |
+
+---
+
+## Military Personnel (Scenario Falcon)
+
+| Name | Role |
+|------|------|
+| SFC Nathaniel Braun | Scenario Falcon operator |
+| SSG Marisol Fuentes | Role-player (TANGO-1) |
 
 ---
 

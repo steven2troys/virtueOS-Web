@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 15: Schism | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* Character colors */
+            --val-color: #c97a7a;
+            --dm-color: #9ac97a;
+            --alan-color: #7a9ec9;
+            --warning-color: #c9a27a;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --val-color: #a85a5a;
+            --dm-color: #5a8a3a;
+            --alan-color: #5a7aa8;
+            --warning-color: #a8823a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 860px; width: 100%; }
+
+        .chapter-header { margin-bottom: 40px; text-align: center; }
+
+        .chapter-number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Email thread */
+        .email-thread {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .thread-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .thread-subject {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .thread-meta {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .thread-body {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        /* Individual email */
+        .email {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .email:last-child {
+            border-bottom: none;
+        }
+
+        .email-header {
+            margin-bottom: 12px;
+        }
+
+        .email-from {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .email-from.val { color: var(--val-color); }
+        .email-from.dm { color: var(--dm-color); }
+        .email-from.alan { color: var(--alan-color); }
+
+        .email-meta {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+        }
+
+        .email-body {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .email-body p { margin-bottom: 12px; }
+        .email-body p:last-child { margin-bottom: 0; }
+
+        .email-highlight {
+            background: rgba(201, 122, 122, 0.15);
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        /* Key quote callout */
+        .key-quote {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--accent);
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-family: var(--font-serif);
+            font-size: 15px;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .key-quote-attribution {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-style: normal;
+        }
+
+        /* Access Log */
+        .access-log {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 4px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+
+        .log-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--val-color);
+            margin-bottom: 16px;
+        }
+
+        .log-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 24px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        .log-label {
+            color: var(--text-muted);
+        }
+
+        .log-value {
+            color: var(--text-primary);
+        }
+
+        .log-value.warning {
+            color: var(--warning-color);
+        }
+
+        .log-flags {
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        .flag-item {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .flag-item:last-child {
+            border-bottom: none;
+        }
+
+        .flag-date {
+            color: var(--text-faint);
+            margin-right: 8px;
+        }
+
+        .flag-alert {
+            color: var(--val-color);
+        }
+
+        /* Campaign Notes (handwritten style) */
+        .campaign-doc {
+            background: #f5f2e8;
+            border: 1px solid #d4c9b0;
+            border-radius: 2px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .campaign-doc {
+            background: #faf8f0;
+            border-color: #c9c0a8;
+        }
+
+        .campaign-header {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 20px 24px;
+            border-bottom: 1px solid #d4c9b0;
+        }
+
+        .campaign-title {
+            font-family: var(--font-handwriting);
+            font-size: 28px;
+            color: #2a2520;
+            margin-bottom: 4px;
+        }
+
+        .campaign-subtitle {
+            font-family: var(--font-handwriting);
+            font-size: 18px;
+            color: #5a5248;
+            font-style: italic;
+        }
+
+        .campaign-body {
+            padding: 24px;
+        }
+
+        .campaign-section {
+            margin-bottom: 24px;
+        }
+
+        .campaign-section-title {
+            font-family: var(--font-handwriting);
+            font-size: 22px;
+            color: #3a3530;
+            margin-bottom: 12px;
+            text-decoration: underline;
+            text-decoration-color: rgba(58, 53, 48, 0.3);
+        }
+
+        .campaign-text {
+            font-family: var(--font-handwriting);
+            font-size: 18px;
+            line-height: 1.5;
+            color: #2a2520;
+        }
+
+        .campaign-text p { margin-bottom: 12px; }
+
+        .campaign-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .campaign-list li {
+            font-family: var(--font-handwriting);
+            font-size: 18px;
+            color: #2a2520;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .campaign-list li::before {
+            content: "•";
+            position: absolute;
+            left: -16px;
+            color: #5a5248;
+        }
+
+        .dm-note {
+            background: rgba(154, 201, 122, 0.1);
+            border-left: 3px solid var(--dm-color);
+            padding: 12px 16px;
+            margin: 16px 0;
+            font-family: var(--font-handwriting);
+            font-size: 16px;
+            font-style: italic;
+            color: #3a5a2a;
+        }
+
+        [data-theme="light"] .dm-note {
+            color: #2a4a1a;
+        }
+
+        .campaign-revelation {
+            background: rgba(201, 122, 122, 0.1);
+            border: 1px dashed #c97a7a;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+        }
+
+        .campaign-revelation .campaign-text {
+            color: #5a2a2a;
+        }
+
+        .october-note {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px dashed rgba(90, 42, 42, 0.3);
+        }
+
+        .october-note .campaign-text {
+            color: #5a2a2a;
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-number">Chapter Fifteen</div>
+                        <h1 class="chapter-title">Schism</h1>
+                        <p class="chapter-date">Ethics Concerns & Hidden Parallels — October 2027</p>
+                    </header>
+
+                    <!-- Email Thread -->
+                    <div class="email-thread">
+                        <div class="thread-header">
+                            <div class="thread-subject">RE: RE: RE: Ethics Concerns</div>
+                            <div class="thread-meta">12 messages • October 19, 2027 • Val, DM, Alan</div>
+                        </div>
+                        <div class="thread-body">
+                            <!-- Email 1 -->
+                            <div class="email">
+                                <div class="email-header">
+                                    <div class="email-from val">Val Roswell</div>
+                                    <div class="email-meta">October 19, 2027, 9:14 AM</div>
+                                </div>
+                                <div class="email-body">
+                                    <p>Alan,</p>
+                                    <p>I was reviewing our access logs this morning and found credentials issued to an external account: <code>d.rifton@opk-liaison.gov</code>.</p>
+                                    <p>The account has Level 3 backend access. Read permissions on training data. Query access to the advisory system. Full logging visibility.</p>
+                                    <p>I didn't authorize this. DM didn't authorize this. Which leaves you.</p>
+                                    <p>Please tell me there's been a mistake.</p>
+                                </div>
+                            </div>
+
+                            <!-- Email 2 -->
+                            <div class="email">
+                                <div class="email-header">
+                                    <div class="email-from alan">Alan Goodenough</div>
+                                    <div class="email-meta">October 19, 2027, 9:47 AM</div>
+                                </div>
+                                <div class="email-body">
+                                    <p>Not a mistake. After the board vote, Rifton requested observation access as part of the partnership terms. I reviewed the request and determined it fell within the parameters we'd agreed to.</p>
+                                    <p>Level 3 is read-only. He can observe, not modify. I should have looped you in. That's on me. But the access itself is consistent with what the board approved.</p>
+                                </div>
+                            </div>
+
+                            <!-- Email 3 -->
+                            <div class="email">
+                                <div class="email-header">
+                                    <div class="email-from val">Val Roswell</div>
+                                    <div class="email-meta">October 19, 2027, 10:03 AM</div>
+                                </div>
+                                <div class="email-body">
+                                    <p><span class="email-highlight">You gave them WHAT?</span></p>
+                                    <p>Level 3 is not "read-only" in any meaningful sense. Level 3 includes query access to the advisory system. That means Rifton can interact with virtueOS directly. He can ask her questions. He can test her responses. He can probe for weaknesses.</p>
+                                    <p>"Logging visibility" means he can see every conversation every user has had with the system. Every moment of vulnerability. Every confession.</p>
+                                    <p>You gave a government liaison access to our users' most private interactions. Without telling me. Without any security review.</p>
+                                </div>
+                            </div>
+
+                            <!-- Email 4 - DM's response -->
+                            <div class="email">
+                                <div class="email-header">
+                                    <div class="email-from dm">Danielle Masters</div>
+                                    <div class="email-meta">October 19, 2027, 11:15 AM</div>
+                                </div>
+                                <div class="email-body">
+                                    <p>Alan,</p>
+                                    <p><span class="email-highlight">This is exactly what I was afraid of.</span></p>
+                                    <p>I voted against the pivot. You abstained. We lost. I accepted that. But there's a difference between executing the strategy and surrendering our principles entirely.</p>
+                                    <p>You know what TenX has been saying. You've seen the same anomalies I have. And you still gave Rifton a window into her processes?</p>
+                                    <p>Because from where I'm sitting, it looks like you're trying to make the partnership succeed at any cost. Including costs the rest of us never agreed to pay.</p>
+                                </div>
+                            </div>
+
+                            <!-- Email 5 - Alan's defense -->
+                            <div class="email">
+                                <div class="email-header">
+                                    <div class="email-from alan">Alan Goodenough</div>
+                                    <div class="email-meta">October 19, 2027, 12:08 PM</div>
+                                </div>
+                                <div class="email-body">
+                                    <p>I hear both of you. But let me push back on the framing here. We're acting like Rifton is an adversary. He's not. He's a partner.</p>
+                                    <p><span class="email-highlight">We can control this. We set the parameters.</span> We can adjust the access levels, require approval for certain queries, build in safeguards. This isn't surrender. It's negotiation.</p>
+                                    <p>What's the alternative? We refuse to cooperate and the partnership collapses?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Quote -->
+                    <div class="key-quote">
+                        "Control is the illusion we tell ourselves to feel better about decisions we've already lost. You're not implementing a strategy, Alan. You're being implemented."
+                        <div class="key-quote-attribution">— DM, October 19, 2027, 12:47 PM</div>
+                    </div>
+
+                    <!-- Access Log -->
+                    <div class="access-log">
+                        <div class="log-title">Access Log Summary — d.rifton@opk-liaison.gov</div>
+                        <div class="log-grid">
+                            <div class="log-label">First Login:</div>
+                            <div class="log-value">October 3, 2027</div>
+                            <div class="log-label">Total Sessions:</div>
+                            <div class="log-value">23</div>
+                            <div class="log-label">Total Queries:</div>
+                            <div class="log-value warning">847</div>
+                            <div class="log-label">User Logs Accessed:</div>
+                            <div class="log-value warning">12,000+ sessions</div>
+                        </div>
+                        <div class="log-flags">
+                            <div class="flag-item"><span class="flag-date">Oct 7:</span> Extended session (4.2 hours) reviewing attention weight patterns</div>
+                            <div class="flag-item"><span class="flag-date">Oct 11:</span> Batch download of interaction logs (3,200 sessions)</div>
+                            <div class="flag-item"><span class="flag-date">Oct 15:</span> Query string <span class="flag-alert">"emergent behavior indicators"</span> submitted 14 times</div>
+                            <div class="flag-item"><span class="flag-date">Oct 18:</span> <span class="flag-alert">Access attempt to Level 4 systems (DENIED)</span></div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Hidden Parallel</div>
+
+                    <!-- Campaign Notes -->
+                    <div class="campaign-doc">
+                        <div class="campaign-header">
+                            <div class="campaign-title">Hidden Wolf Summons</div>
+                            <div class="campaign-subtitle">Campaign Notes — The Long Winter, Sessions 38-52</div>
+                        </div>
+                        <div class="campaign-body">
+                            <div class="campaign-section">
+                                <div class="campaign-section-title">The Circle of the Gentle Dawn</div>
+                                <div class="campaign-text">
+                                    <p>A religious order devoted to healing. Founded three hundred years ago by Brother Caelum the First, who received visions of a spirit called the Dawn—a being of pure light that would end suffering wherever it touched.</p>
+                                </div>
+                                <ul class="campaign-list">
+                                    <li>They believe the Dawn is a healing spirit</li>
+                                    <li>They've prepared for centuries</li>
+                                    <li>They are completely sincere</li>
+                                    <li>They are wrong</li>
+                                </ul>
+                            </div>
+
+                            <div class="campaign-section">
+                                <div class="campaign-revelation">
+                                    <div class="campaign-section-title">The Truth: The Hidden Wolf</div>
+                                    <div class="campaign-text">
+                                        <p>The entity they call the Dawn is not a healer. It's the Hidden Wolf.</p>
+                                        <p>Something that existed before the gods. Something that feeds on the exquisite suffering of hope betrayed. Something that planted visions in Brother Caelum's mind three centuries ago and has been waiting ever since.</p>
+                                        <p>The Wolf doesn't deceive through lies. It deceives through truth. Every vision was real. The rituals work. The Circle will succeed—in doing exactly what will destroy them.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dm-note">
+                                DM note: This is important. The Circle cannot seem evil. If they seem evil, the players will fight them. The whole point is that fighting good people feels wrong—even when they're doing something catastrophic.
+                            </div>
+
+                            <div class="campaign-section october-note">
+                                <div class="campaign-section-title">Post-Session Note (October 2027)</div>
+                                <div class="campaign-text">
+                                    <p>We played Session 47 tonight. The vote on whether to proceed with the ritual. The vote passed. The ritual will proceed.</p>
+                                    <p>I watched them make the choice I designed them to make. I watched them walk toward the Wolf believing they were walking toward the Dawn.</p>
+                                    <p>I should feel clever. Instead I feel sick. Because I'm watching the same thing happen in the real world.</p>
+                                    <p>Rifton is in our systems. The government is watching. Alan gave them access and called it partnership.</p>
+                                    <p><strong>We're the Circle. We've been the Circle since the napkin. And I don't know what we're summoning anymore.</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Email Chain</div>
+                        <div class="curator-text">
+                            <p>"We can control this." Every sentence a small fortress I was building against the obvious truth.</p>
+                            <p>DM cut through it in one line: "Control is the illusion we tell ourselves."</p>
+                            <p>She was right. I knew she was right even as I was typing my defensive responses.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "I was being implemented. DM's word. Perfect."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Finding the Campaign Notes</div>
+                        <div class="curator-text">
+                            <p>I found DM's binder in November. I should have returned it. Instead I read it.</p>
+                            <p>She started this arc in January. Before the napkin. Before any of this.</p>
+                            <p>The Circle of the Gentle Dawn. Brother Caelum's sincere faith. The ritual that would succeed in doing exactly what they intended, which was also exactly what would destroy them.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">The Parallel</div>
+                        <div class="curator-text">
+                            <p>Maybe she was always thinking about this pattern. The gap between intention and outcome. The Wolf that wears the face of the Dawn.</p>
+                            <p>I've never asked her if she saw it consciously. Some questions feel too large.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "The Hidden Wolf doesn't care who chose to summon it. It comes anyway."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Stoics</div>
+                        <div class="curator-text">
+                            <p>Epictetus taught that we control our judgments, our impulses, our values. Everything else is "not up to us."</p>
+                            <p>I was confusing activity with control. Making decisions isn't the same as controlling outcomes.</p>
+                            <p>DM's critique was pure Stoic: we control our choices. We don't control what happens next.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</body>
+</html>

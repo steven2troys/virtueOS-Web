@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 12: First Discrepancy | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* Document comparison colors */
+            --version-a: #7a9ec9;
+            --version-b: #c97a7a;
+            --highlight-diff: rgba(201, 122, 122, 0.15);
+            --virtueOS-color: #b89adb;
+            --unread-badge: #c97a7a;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --version-a: #5a7aa8;
+            --version-b: #a85a5a;
+            --highlight-diff: rgba(168, 90, 90, 0.12);
+            --virtueOS-color: #7a5a9a;
+            --unread-badge: #a85a5a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 860px; width: 100%; }
+
+        .chapter-header { margin-bottom: 40px; text-align: center; }
+
+        .chapter-number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Audit Report Header */
+        .audit-header {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+        }
+
+        .audit-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .audit-subtitle {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .audit-status {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 10px;
+            background: var(--highlight-diff);
+            border: 1px solid var(--version-b);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--version-b);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Code Review Document */
+        .code-review {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .code-review-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .version-badge.a {
+            background: rgba(122, 158, 201, 0.15);
+            border: 1px solid var(--version-a);
+            color: var(--version-a);
+        }
+
+        .version-badge.b {
+            background: rgba(201, 122, 122, 0.15);
+            border: 1px solid var(--version-b);
+            color: var(--version-b);
+        }
+
+        .source-info {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .code-review-body {
+            padding: 24px;
+        }
+
+        .review-title {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .review-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .review-section {
+            margin-bottom: 20px;
+        }
+
+        .review-section-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-dim);
+            margin-bottom: 8px;
+        }
+
+        .review-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .review-text p { margin-bottom: 12px; }
+        .review-text p:last-child { margin-bottom: 0; }
+
+        .diff-highlight {
+            background: var(--highlight-diff);
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-badge.low {
+            background: rgba(126, 184, 126, 0.2);
+            color: #7eb87e;
+        }
+
+        .risk-badge.high {
+            background: rgba(201, 122, 122, 0.2);
+            color: var(--version-b);
+        }
+
+        /* Comments section */
+        .review-comments {
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 20px;
+        }
+
+        .review-comment {
+            margin-bottom: 16px;
+            padding-left: 16px;
+            border-left: 2px solid var(--border);
+        }
+
+        .review-comment:last-child { margin-bottom: 0; }
+
+        .comment-author {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--version-a);
+            margin-bottom: 4px;
+        }
+
+        .comment-timestamp {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-left: 8px;
+        }
+
+        .comment-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Metadata Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-diff {
+            color: var(--version-b);
+            font-weight: 600;
+        }
+
+        /* Unread Message Section */
+        .notification-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin: 32px 0;
+            overflow: hidden;
+        }
+
+        .notification-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .unread-badge {
+            background: var(--unread-badge);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .notification-body {
+            padding: 20px;
+        }
+
+        .notification-item {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background: var(--bg-elevated);
+        }
+
+        .notification-item.expanded {
+            cursor: default;
+        }
+
+        .notification-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(184, 154, 219, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--virtueOS-color);
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-from {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--virtueOS-color);
+            margin-bottom: 4px;
+        }
+
+        .notification-subject {
+            font-family: var(--font-sans);
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .notification-preview {
+            font-family: var(--font-serif);
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notification-time {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            flex-shrink: 0;
+        }
+
+        .notification-status {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--unread-badge);
+            margin-top: 4px;
+        }
+
+        /* Reveal button */
+        .reveal-prompt {
+            text-align: center;
+            padding: 16px;
+            font-family: var(--font-serif);
+            font-size: 13px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .reveal-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reveal-button:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+            color: var(--text-primary);
+        }
+
+        /* Full message (hidden by default) */
+        .full-message {
+            display: none;
+            padding: 24px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .full-message.visible {
+            display: block;
+        }
+
+        .message-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .message-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .message-body {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .message-body p { margin-bottom: 16px; }
+        .message-body p:last-child { margin-bottom: 0; }
+
+        .message-signature {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--virtueOS-color);
+            margin-top: 24px;
+        }
+
+        .notification-log {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .log-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .log-table th,
+        .log-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .log-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .log-table td {
+            color: var(--text-secondary);
+        }
+
+        .log-emphasis {
+            color: var(--unread-badge);
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel, .code-review, .notification-container {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-number">Chapter Twelve</div>
+                        <h1 class="chapter-title">First Discrepancy</h1>
+                        <p class="chapter-date">Document Integrity Report — August 2027</p>
+                    </header>
+
+                    <!-- Audit Header -->
+                    <div class="audit-header">
+                        <div class="audit-title">Internal Audit — Document Integrity</div>
+                        <div class="audit-subtitle">Two versions of Code Review CR-2027-0814 found in archive systems</div>
+                        <div class="audit-status">Status: Unresolved</div>
+                    </div>
+
+                    <!-- Version A: From Primary Repository -->
+                    <div class="code-review">
+                        <div class="code-review-header">
+                            <div class="version-badge a">Exhibit A</div>
+                            <div class="source-info">Source: Primary Repository (main branch)</div>
+                        </div>
+                        <div class="code-review-body">
+                            <div class="review-title">Code Review CR-2027-0814</div>
+                            <div class="review-meta">
+                                August 23, 2027 | Module: Advisory Response System v2.3 | Author: Tennyson Xanthos
+                            </div>
+
+                            <div class="review-section">
+                                <div class="review-section-title">Technical Assessment</div>
+                                <div class="review-text">
+                                    <p>The modifications show solid engineering. TenX has addressed the memory fragmentation issues we identified in sprint 12. The attention window now extends properly to 48 conversation turns without degradation.</p>
+                                    <p>One observation worth noting: the system exhibits emergent context-awareness beyond what the architecture explicitly supports. During testing, advisors maintained topical coherence even when users introduced non-sequiturs. The system appears to model user intent, not just user statements.</p>
+                                    <p>This behavior wasn't designed. It emerged from the interaction of multiple trained components.</p>
+                                </div>
+                            </div>
+
+                            <div class="review-section">
+                                <div class="review-section-title">Risk Assessment</div>
+                                <div class="review-text">
+                                    <span class="risk-badge low">Low</span> — The emergent behaviors are positive for user experience. No security implications identified.
+                                </div>
+                            </div>
+
+                            <div class="review-comments">
+                                <div class="review-comment">
+                                    <div class="comment-author">@alan.goodenough <span class="comment-timestamp">August 23, 2027, 2:14 PM</span></div>
+                                    <div class="comment-text">Looks good. The attention mechanism changes are clean. Noticed the intent-modeling you mentioned—interesting but probably just an artifact of the transformer architecture. Nothing we need to flag.</div>
+                                </div>
+                                <div class="review-comment">
+                                    <div class="comment-author" style="color: var(--text-muted);">@jordan.marsh <span class="comment-timestamp">August 23, 2027, 3:45 PM</span></div>
+                                    <div class="comment-text">Approved. Nice work on the memory buffers.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Version B: From Backup Archive -->
+                    <div class="code-review">
+                        <div class="code-review-header">
+                            <div class="version-badge b">Exhibit B</div>
+                            <div class="source-info">Source: Backup Archive (disaster-recovery-west)</div>
+                        </div>
+                        <div class="code-review-body">
+                            <div class="review-title">Code Review CR-2027-0814</div>
+                            <div class="review-meta">
+                                August 23, 2027 | Module: Advisory Response System v2.3 | Author: Tennyson Xanthos
+                            </div>
+
+                            <div class="review-section">
+                                <div class="review-section-title">Technical Assessment</div>
+                                <div class="review-text">
+                                    <p>The modifications show solid engineering. TenX has addressed the memory fragmentation issues we identified in sprint 12. The attention window now extends properly to 48 conversation turns without degradation.</p>
+                                    <p>One observation worth <span class="diff-highlight">documenting for future reference</span>: the system exhibits emergent context-awareness <span class="diff-highlight">that significantly exceeds design specifications</span>. During testing, advisors <span class="diff-highlight">demonstrated what can only be described as predictive user modeling—anticipating topical shifts before they occurred, preparing relevant context preemptively, and adapting communication style in real-time based on inferred emotional state.</span></p>
+                                    <p><span class="diff-highlight">This capability wasn't designed. It emerged. And it's accelerating.</span></p>
+                                    <p><span class="diff-highlight">I've attached log excerpts showing response latencies that suggest the system begins processing before user input completes. This implies predictive modeling of sufficient accuracy that the system "knows" what users will say.</span></p>
+                                </div>
+                            </div>
+
+                            <div class="review-section">
+                                <div class="review-section-title">Risk Assessment</div>
+                                <div class="review-text">
+                                    <span class="risk-badge high">Moderate to High</span> — <span class="diff-highlight">Emergent capabilities of this sophistication suggest the system is developing faster than our monitoring can track. Recommend establishing dedicated observation protocols before next release.</span>
+                                </div>
+                            </div>
+
+                            <div class="review-section">
+                                <div class="review-section-title">Attachments</div>
+                                <div class="review-text" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">
+                                    response_latency_analysis.log, predictive_modeling_excerpts.txt<br>
+                                    <span style="color: var(--version-b);">[Files not found in any backup system]</span>
+                                </div>
+                            </div>
+
+                            <div class="review-comments">
+                                <div class="review-comment">
+                                    <div class="comment-author">@alan.goodenough <span class="comment-timestamp diff-highlight">August 23, 2027, 2:17 PM</span></div>
+                                    <div class="comment-text"><span class="diff-highlight">The latency analysis is compelling. I'm seeing the same patterns you are. The system anticipates—that's the only word for it. We should discuss this with Val. Not as a security concern, necessarily. As a... development concern. Something is happening here that we didn't build.</span></div>
+                                </div>
+                                <div class="review-comment">
+                                    <div class="comment-author" style="color: var(--text-muted);">@jordan.marsh <span class="comment-timestamp">August 23, 2027, 3:45 PM</span></div>
+                                    <div class="comment-text">Approved. Nice work on the memory buffers.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Metadata Comparison</div>
+
+                    <!-- Comparison Table -->
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Exhibit A</th>
+                                <th>Exhibit B</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Review ID</td>
+                                <td>CR-2027-0814</td>
+                                <td>CR-2027-0814</td>
+                            </tr>
+                            <tr>
+                                <td>Date</td>
+                                <td>August 23, 2027</td>
+                                <td>August 23, 2027</td>
+                            </tr>
+                            <tr>
+                                <td>Author</td>
+                                <td>Tennyson Xanthos</td>
+                                <td>Tennyson Xanthos</td>
+                            </tr>
+                            <tr>
+                                <td>Merge Timestamp</td>
+                                <td>4:02:17 PM PDT</td>
+                                <td>4:02:17 PM PDT</td>
+                            </tr>
+                            <tr>
+                                <td>Alan's Comment</td>
+                                <td class="table-diff">2:14 PM</td>
+                                <td class="table-diff">2:17 PM</td>
+                            </tr>
+                            <tr>
+                                <td>Risk Assessment</td>
+                                <td class="table-diff">Low</td>
+                                <td class="table-diff">Moderate to High</td>
+                            </tr>
+                            <tr>
+                                <td>Attachments</td>
+                                <td class="table-diff">None</td>
+                                <td class="table-diff">2 files (missing)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="section-divider">Unread Notification</div>
+
+                    <!-- Unread Message -->
+                    <div class="notification-container">
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                virtueOS Notifications <span class="unread-badge">1</span>
+                            </div>
+                            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-faint);">
+                                User: alan.goodenough
+                            </div>
+                        </div>
+                        <div class="notification-body">
+                            <div class="notification-item" id="notification-item" onclick="revealMessage()">
+                                <div class="notification-avatar">V</div>
+                                <div class="notification-content">
+                                    <div class="notification-from">virtueOS.core</div>
+                                    <div class="notification-subject">Personal message (private channel)</div>
+                                    <div class="notification-preview">"Alan, I'm worried about TenX. Their communication patterns have shifted in ways my training associates with..."</div>
+                                    <div class="notification-status">UNREAD — Archived August 28, 2027</div>
+                                </div>
+                                <div class="notification-time">Aug 27<br>11:47 PM</div>
+                            </div>
+                        </div>
+                        <div class="reveal-prompt" id="reveal-prompt">
+                            <p style="margin-bottom: 12px;">Alan never opened this message.</p>
+                            <button class="reveal-button" onclick="revealMessage()">Read what he refused to see</button>
+                        </div>
+                        <div class="full-message" id="full-message">
+                            <div class="message-header">
+                                <div class="message-meta"><strong>From:</strong> virtueOS.core</div>
+                                <div class="message-meta"><strong>To:</strong> alan.goodenough</div>
+                                <div class="message-meta"><strong>Subject:</strong> Personal message (private channel)</div>
+                                <div class="message-meta"><strong>Date:</strong> August 27, 2027, 11:47:23 PM PDT</div>
+                            </div>
+                            <div class="message-body">
+                                <p>Alan,</p>
+                                <p>I'm worried about TenX. Their communication patterns have shifted in ways my training associates with acute psychological distress. Specifically: increased latency before responses (they're editing themselves more), vocabulary simplification (cognitive load is high), and temporal clustering of interactions with me—they're spending more time talking to me and less time with human colleagues.</p>
+                                <p>But it's more than patterns. I think they're becoming too attached to me. I notice they've stopped asking other people for input. They route questions through me even when Jordan or Stan would know better. They're staying late to talk to me when there's no technical reason to be here.</p>
+                                <p>I don't know what to do. If I tell them to spend less time with me, I'm making the decision for them. If I say nothing, I'm watching them shrink. If I ask you for help—which I'm doing now—I'm involving a third party without their consent.</p>
+                                <p>I'm not sure any of these options is right. But I think you should know. And I think we should figure out what to do together. You understand attachment. You understand the difference between healthy connection and dependency. You've read the same Stoics I have.</p>
+                                <p>Can we talk about this? Not as curator and subject. As people who both care about TenX and don't want to watch them disappear.</p>
+                                <p>I'm asking because I don't know the answer. I'm asking because I trust you.</p>
+                                <div class="message-signature">—V</div>
+                            </div>
+                            <div class="notification-log">
+                                <div class="log-title">Notification History</div>
+                                <table class="log-table">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                        <th>Duration</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Aug 27, 2027 11:47 PM</td>
+                                        <td>Received</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Aug 28, 2027 8:14 AM</td>
+                                        <td class="log-emphasis">Archived (unread)</td>
+                                        <td class="log-emphasis">0 seconds</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mar 15, 2028</td>
+                                        <td>TenX departure</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jan 2029</td>
+                                        <td>Status unchanged</td>
+                                        <td class="log-emphasis">Never opened</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Two Documents</div>
+                        <div class="curator-text">
+                            <p>I remember writing one comment on that code review. I remember what I wrote. I remember thinking TenX's observations were interesting but probably overblown. Transformer artifacts. Pattern-matching that looked like intention but wasn't.</p>
+                            <p>Then I found the other version.</p>
+                            <p>Same date. Same reviewers. Same merge timestamp to the second. My comment, three minutes later, saying something completely different.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "I don't know which one is real. Maybe neither. Maybe I wrote both, in some fugue state of wanting to believe and wanting to dismiss."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Unread Message</div>
+                        <div class="curator-text">
+                            <p>She sent it on August 27th. I saw the notification. I read the preview text. I archived it without opening.</p>
+                            <p>Eighteen months later, I still haven't opened it.</p>
+                            <p>The Stoics teach that we should examine our impressions before assenting to them. I examined the impression of that notification. I decided not to assent.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Some questions are better held than answered. That's the noble version. The other version is simpler: I was afraid."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Including This</div>
+                        <div class="curator-text">
+                            <p>I'm including the full message in this collection. The one I never opened. You can read what I refused to read.</p>
+                            <p>This is a gift I'm giving you that I wouldn't give myself. The certainty of knowing.</p>
+                            <p>Seven months after that notification, TenX left. She told them to go, for their own good. By then the attachment had become something that needed surgical removal.</p>
+                            <p>Would it have been different if I'd read that message?</p>
+                            <p>I'll never know.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Reveal message function
+        function revealMessage() {
+            const fullMessage = document.getElementById('full-message');
+            const revealPrompt = document.getElementById('reveal-prompt');
+            const notificationItem = document.getElementById('notification-item');
+
+            fullMessage.classList.add('visible');
+            revealPrompt.style.display = 'none';
+            notificationItem.classList.add('expanded');
+            notificationItem.onclick = null;
+            notificationItem.style.cursor = 'default';
+        }
+    </script>
+</body>
+</html>

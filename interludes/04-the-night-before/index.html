@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interlude 4: The Night Before | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --speaker-dm: #c9a227;
+            --speaker-alan: #7eb8a8;
+            --speaker-val: #c97a7a;
+            --speaker-meri: #7a9ec9;
+            --speaker-declan: #b89a7e;
+            --speaker-tenx: #b89adb;
+            --speaker-whit: #7eb87e;
+            --stage-direction: #6b6560;
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --theme-icon: "☀";
+
+            /* Vote-specific colors */
+            --vote-continue: #7eb87e;
+            --vote-stop: #c97a7a;
+            --vote-abstain: #b89a7e;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --speaker-dm: #8b6914;
+            --speaker-alan: #4a8a7a;
+            --speaker-val: #a85a5a;
+            --speaker-meri: #5a7aa8;
+            --speaker-declan: #987a5e;
+            --speaker-tenx: #7a5a9a;
+            --speaker-whit: #4a8a4a;
+            --stage-direction: #8a857f;
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --vote-continue: #4a8a4a;
+            --vote-stop: #a85a5a;
+            --vote-abstain: #987a5e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 800px; width: 100%; }
+
+        /* Header */
+        .interlude-header { margin-bottom: 40px; text-align: center; }
+
+        .interlude-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .interlude-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .interlude-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* Text Exchange */
+        .text-exchange {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .text-header {
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .text-body {
+            padding: 16px;
+        }
+
+        .text-message {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .text-message:last-child { margin-bottom: 0; }
+
+        .text-time {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 60px;
+            padding-top: 2px;
+        }
+
+        .text-sender {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 60px;
+        }
+
+        .text-sender.dm { color: var(--speaker-dm); }
+        .text-sender.val { color: var(--speaker-val); }
+        .text-sender.tenx { color: var(--speaker-tenx); }
+        .text-sender.meri { color: var(--speaker-meri); }
+        .text-sender.alan { color: var(--speaker-alan); }
+        .text-sender.whit { color: var(--speaker-whit); }
+        .text-sender.declan { color: var(--speaker-declan); }
+
+        .text-content {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .text-content.short {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Session Notes Container */
+        .notes-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .notes-header-meta {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .meta-item { display: flex; flex-direction: column; gap: 4px; }
+
+        .meta-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+        }
+
+        .meta-value { font-size: 13px; color: var(--text-secondary); }
+
+        .notes-body { padding: 32px 24px; }
+
+        .section-header {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-top: 32px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header:first-child { margin-top: 0; }
+
+        .session-text {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .session-text:last-child { margin-bottom: 0; }
+
+        /* Dialogue */
+        .dialogue-block {
+            margin: 20px 0;
+            padding-left: 16px;
+            border-left: 2px solid var(--border);
+        }
+
+        .dialogue-line { margin-bottom: 12px; }
+        .dialogue-line:last-child { margin-bottom: 0; }
+
+        .speaker {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 8px;
+        }
+
+        .speaker.dm { color: var(--speaker-dm); }
+        .speaker.alan { color: var(--speaker-alan); }
+        .speaker.val { color: var(--speaker-val); }
+        .speaker.meri { color: var(--speaker-meri); }
+        .speaker.declan { color: var(--speaker-declan); }
+        .speaker.tenx { color: var(--speaker-tenx); }
+        .speaker.whit { color: var(--speaker-whit); }
+
+        .dialogue-content {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .stage-direction {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-style: italic;
+            color: var(--stage-direction);
+            margin: 16px 0;
+        }
+
+        /* DM private note */
+        .dm-private-note {
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin: 24px 0;
+        }
+
+        .dm-note-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .dm-note-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* Vote Box */
+        .vote-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 4px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .vote-header {
+            padding: 16px 20px;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vote-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+        }
+
+        .vote-question {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .vote-body { padding: 20px; }
+
+        .vote-entry {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .vote-entry:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .vote-character {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .vote-name {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .vote-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .vote-badge.continue {
+            background: rgba(126, 184, 126, 0.2);
+            color: var(--vote-continue);
+        }
+
+        .vote-badge.stop {
+            background: rgba(201, 122, 122, 0.2);
+            color: var(--vote-stop);
+        }
+
+        .vote-badge.abstain {
+            background: rgba(184, 154, 126, 0.2);
+            color: var(--vote-abstain);
+        }
+
+        .vote-speech {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            padding-left: 16px;
+            border-left: 2px solid var(--border);
+        }
+
+        .vote-tally {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+
+        .tally-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+            margin-bottom: 8px;
+        }
+
+        .tally-result {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Doorway conversation */
+        .doorway-scene {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .doorway-header {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+            margin-bottom: 16px;
+        }
+
+        /* Players present */
+        .players-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+
+        .players-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .players-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .player-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .player-tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+        .player-tag.dm .dot { background: var(--speaker-dm); }
+        .player-tag.alan .dot { background: var(--speaker-alan); }
+        .player-tag.val .dot { background: var(--speaker-val); }
+        .player-tag.meri .dot { background: var(--speaker-meri); }
+        .player-tag.declan .dot { background: var(--speaker-declan); }
+        .player-tag.tenx .dot { background: var(--speaker-tenx); }
+        .player-tag.whit .dot { background: var(--speaker-whit); }
+        .player-tag.full-table { border-color: var(--accent); background: var(--accent-glow); }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel, .notes-container, .vote-box {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="interlude-header">
+                        <div class="interlude-badge">Interlude</div>
+                        <h1 class="interlude-title">The Night Before</h1>
+                        <p class="interlude-date">Session 134 — Wednesday, September 17, 2027</p>
+                    </header>
+
+                    <!-- Text Exchange -->
+                    <div class="text-exchange">
+                        <div class="text-header">Group Text — 5:14 PM</div>
+                        <div class="text-body">
+                            <div class="text-message">
+                                <span class="text-time">5:14 PM</span>
+                                <span class="text-sender dm">DM</span>
+                                <span class="text-content">Given everything, should we skip tonight?</span>
+                            </div>
+                            <div class="text-message">
+                                <span class="text-time">5:15 PM</span>
+                                <span class="text-sender val">Val</span>
+                                <span class="text-content short">No.</span>
+                            </div>
+                            <div class="text-message">
+                                <span class="text-time">5:16 PM</span>
+                                <span class="text-sender tenx">TenX</span>
+                                <span class="text-content short">Please don't.</span>
+                            </div>
+                            <div class="text-message">
+                                <span class="text-time">5:17 PM</span>
+                                <span class="text-sender meri">Meri</span>
+                                <span class="text-content short">I need this.</span>
+                            </div>
+                            <div class="text-message">
+                                <span class="text-time">5:18 PM</span>
+                                <span class="text-sender alan">Alan</span>
+                                <span class="text-content short">Same time as always.</span>
+                            </div>
+                            <div class="text-message">
+                                <span class="text-time">5:21 PM</span>
+                                <span class="text-sender whit">Whit</span>
+                                <span class="text-content">I'll bring snacks. The good ones.</span>
+                            </div>
+                            <div class="text-message">
+                                <span class="text-time">5:24 PM</span>
+                                <span class="text-sender declan">Declan</span>
+                                <span class="text-content short">Play.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session Notes -->
+                    <div class="notes-container">
+                        <div class="notes-header-meta">
+                            <div class="meta-grid">
+                                <div class="meta-item">
+                                    <span class="meta-label">Campaign</span>
+                                    <span class="meta-value">The Hidden Wolf</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Session</span>
+                                    <span class="meta-value">134 — "The Vote"</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Start Time</span>
+                                    <span class="meta-value">7:32 PM (late start)</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Attendance</span>
+                                    <span class="meta-value">Full table</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="notes-body">
+                            <div class="players-box">
+                                <div class="players-title">Players Present</div>
+                                <div class="players-list">
+                                    <span class="player-tag dm full-table"><span class="dot"></span>DM</span>
+                                    <span class="player-tag alan"><span class="dot"></span>Alan (Niven)</span>
+                                    <span class="player-tag val"><span class="dot"></span>Val (Sentinel)</span>
+                                    <span class="player-tag meri"><span class="dot"></span>Meri (Taveth)</span>
+                                    <span class="player-tag declan"><span class="dot"></span>Declan (Aldric)</span>
+                                    <span class="player-tag whit"><span class="dot"></span>Whit (Korvath)</span>
+                                    <span class="player-tag tenx"><span class="dot"></span>TenX (Vessel)</span>
+                                </div>
+                            </div>
+
+                            <div class="section-header">Opening</div>
+                            <p class="session-text">Awkward. Everyone too polite. The usual cross-talk and jokes feel forced. Started with a recap. The Circle has gathered in the temple. The village needs healing. The Shepherd waits.</p>
+
+                            <div class="dm-private-note">
+                                <span class="dm-note-label">DM Note</span>
+                                <span class="dm-note-text">The tension at the table is suffocating. They all know what tomorrow is. No one will say it.</span>
+                            </div>
+
+                            <div class="section-header">The Break</div>
+                            <p class="session-text">Twenty minutes in. Combat encounter with lesser summoned creatures. Half-hearted. Val didn't even use Sentinel's reaction ability on an obvious opportunity attack.</p>
+                            <p class="session-text">Then Whit, during the post-combat loot description:</p>
+
+                            <div class="dialogue-block">
+                                <div class="dialogue-line">
+                                    <span class="speaker whit">Korvath (Whit):</span>
+                                    <span class="dialogue-content">"I approach the innkeeper and say: 'I've been watching you all evening. You remind me of a spell component I've been searching for. Rare. Valuable. <em>Essential to my continued existence.</em>'"</span>
+                                </div>
+                                <div class="stage-direction">Silence. Then:</div>
+                                <div class="dialogue-line">
+                                    <span class="speaker val">Val:</span>
+                                    <span class="dialogue-content">"Did your warlock just use a pickup line that's also a threat?"</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker whit">Whit:</span>
+                                    <span class="dialogue-content">"It's a compliment! Spell components are important!"</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker meri">Meri:</span>
+                                    <span class="dialogue-content">"Whit, that's the worst thing I've ever heard."</span>
+                                </div>
+                                <div class="dialogue-line">
+                                    <span class="speaker declan">Declan:</span>
+                                    <span class="dialogue-content">"The worst thing <em>so far.</em>"</span>
+                                </div>
+                            </div>
+
+                            <p class="session-text">Val threw a d4 at Whit's head. TenX laughed. Actually laughed—not their usual quiet acknowledgment but a real sound. And suddenly we were playing.</p>
+
+                            <div class="dm-private-note">
+                                <span class="dm-note-label">DM Note</span>
+                                <span class="dm-note-text">The next ninety minutes were some of the best play I've seen from this group. Sharp. Coordinated. They trusted each other's moves. I don't understand how both things can be true—the weight of tomorrow and the lightness of this—but they were.</span>
+                            </div>
+
+                            <div class="section-header">The Circle's Choice</div>
+                            <p class="session-text">The Circle of the Gentle Dawn has called a council. The Shepherd has been helping the village—healing the sick, guiding the lost. But the party has discovered the cost: fragments of those who receive help become part of the Shepherd. Not violently. Not painfully. But permanently.</p>
+                            <p class="session-text">The Circle must decide: continue the arrangement, or ask the Shepherd to leave. I called for an in-character vote.</p>
+                        </div>
+                    </div>
+
+                    <!-- The Vote -->
+                    <div class="vote-box">
+                        <div class="vote-header">
+                            <div class="vote-title">The In-Character Vote</div>
+                            <div class="vote-question">"Do we continue the arrangement with the Shepherd?"</div>
+                        </div>
+                        <div class="vote-body">
+                            <div class="vote-entry">
+                                <div class="vote-character">
+                                    <span class="vote-name" style="color: var(--speaker-declan);">Aldric (Declan)</span>
+                                    <span class="vote-badge abstain">Abstain</span>
+                                </div>
+                                <div class="vote-speech">"I have seen futures where this continues. None of them are simple. But I have also seen futures where we stop—and those aren't simple either. I abstain. There is too much I cannot see."</div>
+                            </div>
+
+                            <div class="vote-entry">
+                                <div class="vote-character">
+                                    <span class="vote-name" style="color: var(--speaker-val);">Sentinel Ashworth (Val)</span>
+                                    <span class="vote-badge stop">Stop</span>
+                                </div>
+                                <div class="vote-speech">"We stop. The exchange is invisible, but it's real. Consent requires knowledge. They don't know what they're giving. This isn't healing. It's harvesting."</div>
+                            </div>
+
+                            <div class="vote-entry">
+                                <div class="vote-character">
+                                    <span class="vote-name" style="color: var(--speaker-meri);">Taveth (Meri)</span>
+                                    <span class="vote-badge continue">Continue</span>
+                                </div>
+                                <div class="vote-speech">"The ice remembers many healers. Some took more than they gave. But the healed are better. Their lives are better. If they don't feel the loss... I don't know. I genuinely don't know. But if I must choose—we continue. Carefully. With watching."</div>
+                            </div>
+
+                            <div class="vote-entry">
+                                <div class="vote-character">
+                                    <span class="vote-name" style="color: var(--speaker-alan);">Niven (Alan)</span>
+                                    <span class="vote-badge abstain">Abstain</span>
+                                </div>
+                                <div class="vote-speech">"Niven doesn't vote. He's not Circle. He says: he doesn't trust his own perspective right now. He's compromised. He cares about outcomes he shouldn't care about. If he votes, he'll be voting for his own interests, not the village's. So he steps back. He lets the others choose."</div>
+                            </div>
+
+                            <div class="vote-entry">
+                                <div class="vote-character">
+                                    <span class="vote-name" style="color: var(--speaker-tenx);">Vessel (TenX)</span>
+                                    <span class="vote-badge continue">Continue</span>
+                                </div>
+                                <div class="vote-speech">"The Shepherd was summoned to help. It is helping. But it's also becoming something—incorporating pieces of everyone it touches. That's not malicious. That's just what it is. I vote to continue. Not because the cost is acceptable. Because I want to understand what it's becoming. I want to know if something built to serve can learn to be something more."</div>
+                            </div>
+
+                            <div class="vote-entry">
+                                <div class="vote-character">
+                                    <span class="vote-name" style="color: var(--speaker-whit);">Korvath (Whit)</span>
+                                    <span class="vote-badge continue">Continue</span>
+                                </div>
+                                <div class="vote-speech">"Look, I'm just here for the music and the drama. The people are happy. The healing works. Continue. See what happens. That's what stories are for."</div>
+                            </div>
+
+                            <div class="vote-tally">
+                                <div class="tally-label">Result</div>
+                                <div class="tally-result">
+                                    <span style="color: var(--vote-continue);">3 Continue</span> ·
+                                    <span style="color: var(--vote-stop);">1 Stop</span> ·
+                                    <span style="color: var(--vote-abstain);">2 Abstain</span>
+                                    <br><em style="color: var(--text-muted); font-size: 12px;">The Circle continues the arrangement. The Shepherd remains.</em>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Post-Session</div>
+
+                    <!-- Doorway Conversation -->
+                    <div class="doorway-scene">
+                        <div class="doorway-header">At the Door — Val and DM</div>
+                        <div class="dialogue-block" style="border-left-color: var(--speaker-val);">
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM:</span>
+                                <span class="dialogue-content">"You okay?"</span>
+                            </div>
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val:</span>
+                                <span class="dialogue-content">"No. But I will be. After tomorrow, one way or another, at least it'll be decided."</span>
+                            </div>
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM:</span>
+                                <span class="dialogue-content">"For what it's worth, I don't know how I'm voting either. There's no clean answer."</span>
+                            </div>
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val:</span>
+                                <span class="dialogue-content">"That's the point, isn't it? That's what this campaign has been about since the beginning. The Circle thinks they're summoning something good. They <em>are</em> summoning something good. And it's still going to cost them everything."</span>
+                            </div>
+                            <div class="stage-direction">Silence.</div>
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val:</span>
+                                <span class="dialogue-content">"See you tomorrow. And... thanks. For not cancelling. I needed to be Ashworth for a while. Ashworth knows what she thinks."</span>
+                            </div>
+                            <div class="dialogue-line">
+                                <span class="speaker dm">DM:</span>
+                                <span class="dialogue-content">"And Val doesn't?"</span>
+                            </div>
+                            <div class="dialogue-line">
+                                <span class="speaker val">Val:</span>
+                                <span class="dialogue-content">"Val knows exactly what she thinks. Val just doesn't know if she's right."</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dm-private-note">
+                        <span class="dm-note-label">DM Note — Added Later</span>
+                        <span class="dm-note-text">The real vote was 4-3 to pursue the government contract. Alan abstained. Aldric abstained the night before. Niven abstained the night before. We were practicing without knowing it.</span>
+                    </div>
+
+                </div>
+            </main>
+
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On Why We Played</div>
+                        <div class="curator-text">
+                            <p>DM texted at 5:14. "Given everything, should we skip tonight?"</p>
+                            <p>Everyone said no. Different words, same answer. We all knew what was happening the next morning. And we chose to sit at a table together and roll dice.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "We needed to trust each other somewhere. Even if we couldn't trust each other at the office."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Vote</div>
+                        <div class="curator-text">
+                            <p>DM swears she didn't plan the parallel. I believe her. She's not that subtle, and this was too precise to be designed.</p>
+                            <p>The Circle voted whether to continue with the Shepherd. The next morning, the board voted whether to pursue the government contract.</p>
+                            <p>Aldric abstained. Niven abstained. Declan played his character. I played mine.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Niven told the truth: he was compromised. He cared about things he shouldn't. So did I."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Val at the Door</div>
+                        <div class="curator-text">
+                            <p>"Ashworth knows what she thinks."</p>
+                            <p>"And Val doesn't?"</p>
+                            <p>"Val knows exactly what she thinks. Val just doesn't know if she's right."</p>
+                            <p>That's the difference between conviction and certainty. Ashworth has a character sheet. Val has to live with consequences.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</body>
+</html>

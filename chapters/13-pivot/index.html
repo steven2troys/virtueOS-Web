@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 13: Pivot | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* Vote colors */
+            --vote-for: #7eb87e;
+            --vote-against: #c97a7a;
+            --vote-abstain: #c9a27a;
+            --dm-color: #9ac97a;
+            --meri-color: #7a9ec9;
+            --tenx-color: #b89adb;
+            --susan-color: #c9a27a;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --vote-for: #4a8a4a;
+            --vote-against: #a85a5a;
+            --vote-abstain: #a8823a;
+            --dm-color: #5a8a3a;
+            --meri-color: #5a7aa8;
+            --tenx-color: #7a5a9a;
+            --susan-color: #a8823a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 860px; width: 100%; }
+
+        .chapter-header { margin-bottom: 40px; text-align: center; }
+
+        .chapter-number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Board Minutes Document */
+        .board-document {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .board-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            text-align: center;
+        }
+
+        .board-company {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .board-subtitle {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .board-meta {
+            margin-top: 16px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .board-body {
+            padding: 24px;
+        }
+
+        .minutes-section {
+            margin-bottom: 28px;
+        }
+
+        .minutes-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .minutes-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .minutes-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .minutes-text p { margin-bottom: 12px; }
+        .minutes-text p:last-child { margin-bottom: 0; }
+
+        .attendee-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 24px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .attendee-item {
+            padding: 4px 0;
+        }
+
+        .attendee-role {
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        /* Discussion quotes */
+        .discussion-quote {
+            margin: 16px 0;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--border-strong);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .quote-speaker {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--accent-dim);
+            margin-bottom: 6px;
+        }
+
+        .quote-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Vote Tally */
+        .vote-section {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 4px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .vote-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .vote-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .vote-column {
+            text-align: center;
+        }
+
+        .vote-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid;
+        }
+
+        .vote-label.for { color: var(--vote-for); border-color: var(--vote-for); }
+        .vote-label.against { color: var(--vote-against); border-color: var(--vote-against); }
+        .vote-label.abstain { color: var(--vote-abstain); border-color: var(--vote-abstain); }
+
+        .vote-names {
+            font-family: var(--font-serif);
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .vote-result {
+            text-align: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(126, 184, 126, 0.15);
+            border: 1px solid var(--vote-for);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--vote-for);
+        }
+
+        /* DM's Notes (handwritten style) */
+        .handwritten-doc {
+            background: #f5f2e8;
+            border: 1px solid #d4c9b0;
+            border-radius: 2px;
+            padding: 32px;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        [data-theme="light"] .handwritten-doc {
+            background: #faf8f0;
+            border-color: #c9c0a8;
+        }
+
+        .handwritten-doc::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 40px;
+            width: 1px;
+            height: 100%;
+            background: rgba(200, 100, 100, 0.3);
+        }
+
+        .handwritten-title {
+            font-family: var(--font-handwriting);
+            font-size: 24px;
+            color: #2a2520;
+            margin-bottom: 8px;
+        }
+
+        .handwritten-subtitle {
+            font-family: var(--font-handwriting);
+            font-size: 16px;
+            color: #5a5248;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+
+        .handwritten-text {
+            font-family: var(--font-handwriting);
+            font-size: 20px;
+            line-height: 1.6;
+            color: #2a2520;
+        }
+
+        .handwritten-text p { margin-bottom: 16px; }
+
+        .ink-change {
+            color: #1a4a8a;
+        }
+
+        .ink-later {
+            color: #5a2a2a;
+            font-style: italic;
+        }
+
+        /* Text Messages */
+        .messages-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .messages-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .messages-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--meri-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .messages-title {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .messages-subtitle {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .messages-body {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message-group {
+            margin-bottom: 16px;
+        }
+
+        .message-timestamp {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 8px;
+        }
+
+        .message.sent { justify-content: flex-end; }
+        .message.received { justify-content: flex-start; }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.sent .message-bubble {
+            background: var(--meri-color);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received .message-bubble {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Slack Message */
+        .slack-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .slack-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slack-channel {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .slack-channel::before {
+            content: "#";
+            color: var(--text-muted);
+            margin-right: 2px;
+        }
+
+        .slack-body {
+            padding: 16px;
+        }
+
+        .slack-message {
+            display: flex;
+            gap: 12px;
+        }
+
+        .slack-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            background: var(--tenx-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .slack-content {
+            flex: 1;
+        }
+
+        .slack-user {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .slack-time {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-left: 8px;
+            font-weight: 400;
+        }
+
+        .slack-text {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-number">Chapter Thirteen</div>
+                        <h1 class="chapter-title">Pivot</h1>
+                        <p class="chapter-date">Board Meeting Minutes — September 2027</p>
+                    </header>
+
+                    <!-- Board Minutes -->
+                    <div class="board-document">
+                        <div class="board-header">
+                            <div class="board-company">MARBLE PORCH, LLC</div>
+                            <div class="board-subtitle">Board of Directors Meeting Minutes</div>
+                            <div class="board-meta">
+                                September 14, 2027 | 2:00 PM – 4:47 PM PDT<br>
+                                Special Session — Strategic Direction
+                            </div>
+                        </div>
+                        <div class="board-body">
+                            <div class="minutes-section">
+                                <div class="minutes-title">Attendance</div>
+                                <div class="attendee-list">
+                                    <div class="attendee-item">The Angel <span class="attendee-role">(Chair)</span></div>
+                                    <div class="attendee-item">Graham Lattimer <span class="attendee-role">(Castellan)</span></div>
+                                    <div class="attendee-item">Priya Sharma <span class="attendee-role">(Mindful Capital)</span></div>
+                                    <div class="attendee-item">Garrett Hollis <span class="attendee-role">(Portland VG)</span></div>
+                                    <div class="attendee-item">Daniel Rifton <span class="attendee-role">(Independent)*</span></div>
+                                    <div class="attendee-item">Danielle Masters <span class="attendee-role">(CEO)</span></div>
+                                    <div class="attendee-item">Alan T. Goodenough <span class="attendee-role">(Co-Founder)</span></div>
+                                </div>
+                                <div class="minutes-text" style="margin-top: 12px; font-size: 12px;">
+                                    <em>*First meeting since appointment. Also present: M. Vance (CCO), V. Roswell (CSO), T. Xanthos (CTO) — non-voting.</em>
+                                </div>
+                            </div>
+
+                            <div class="minutes-section">
+                                <div class="minutes-title">Strategic Options Presented</div>
+                                <div class="minutes-text">
+                                    <p><strong>Option A:</strong> Continue B2C consumer focus. Requires $12M runway extension. Break-even Q3 2029.</p>
+                                    <p><strong>Option B:</strong> Enterprise pivot. License to corporate wellness programs.</p>
+                                    <p><strong>Option C:</strong> Government partnership. DoD contractor proposal for "stress-management applications." Initial contract value: $8.4M over 18 months.</p>
+                                </div>
+                            </div>
+
+                            <div class="minutes-section">
+                                <div class="minutes-title">Discussion Excerpts</div>
+
+                                <div class="discussion-quote">
+                                    <div class="quote-speaker">Mr. Rifton (Independent Director)</div>
+                                    <div class="quote-text">"Nobody's talking about control. We're talking about support. Think of a soldier who has to decide whether a shadow is a threat or a civilian. What if they had a voice that reminded them to breathe, to assess the situation? The dichotomy of control. You built it. This is just a different context."</div>
+                                </div>
+
+                                <div class="discussion-quote">
+                                    <div class="quote-speaker">Ms. Masters (CEO)</div>
+                                    <div class="quote-text">"Consumers want to be better. Institutions want their people to be more useful. Those aren't always the same thing."</div>
+                                </div>
+
+                                <div class="discussion-quote">
+                                    <div class="quote-speaker">Ms. Vance (CCO, non-voting)</div>
+                                    <div class="quote-text">"When your commanding officer recommends something, how voluntary is that really?"</div>
+                                </div>
+
+                                <div class="discussion-quote">
+                                    <div class="quote-speaker">The Chair</div>
+                                    <div class="quote-text">"Principles matter. So does survival. We're eighteen months from insolvency. This contract extends that to thirty-six months minimum. Sometimes principles require resources to defend."</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vote Tally -->
+                    <div class="vote-section">
+                        <div class="vote-title">Motion: Authorize Government Partnership Negotiations</div>
+                        <div class="vote-grid">
+                            <div class="vote-column">
+                                <div class="vote-label for">For (4)</div>
+                                <div class="vote-names">
+                                    The Angel<br>
+                                    Graham Lattimer<br>
+                                    Daniel Rifton<br>
+                                    Garrett Hollis
+                                </div>
+                            </div>
+                            <div class="vote-column">
+                                <div class="vote-label against">Against (2)</div>
+                                <div class="vote-names">
+                                    Danielle Masters<br>
+                                    Priya Sharma
+                                </div>
+                            </div>
+                            <div class="vote-column">
+                                <div class="vote-label abstain">Abstain (1)</div>
+                                <div class="vote-names">
+                                    Alan T. Goodenough
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vote-result">
+                            <div class="result-badge">MOTION PASSES 4-2-1</div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Private Documents</div>
+
+                    <!-- DM's Notes -->
+                    <div class="handwritten-doc">
+                        <div class="handwritten-title">Campaign Strategy — Hidden Wolf Summons</div>
+                        <div class="handwritten-subtitle">Session 47: The Vote</div>
+                        <div class="handwritten-text">
+                            <p>Aldric will vote against the summoning. I don't have to engineer it. I just have to let him be himself.</p>
+                            <p>A 3-1 vote where the lone dissenter is the party's most careful member feels like hubris. The players will remember that Aldric warned them.</p>
+                        </div>
+                        <div class="handwritten-text ink-change" style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(26, 74, 138, 0.3);">
+                            <p style="font-size: 16px; margin-bottom: 12px;"><em>September 15, 2027</em></p>
+                            <p>I just ran the real version of that vote.</p>
+                            <p>Garrett was on the fence. I've worked harder cases in the campaign. I didn't try.</p>
+                            <p>I voted against so I could live with myself. I didn't fight because I didn't want to win.</p>
+                        </div>
+                        <div class="handwritten-text ink-later" style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(90, 42, 42, 0.3);">
+                            <p>Alan asked if he could include this. I said yes. If he's going to show everyone's lies, he should show mine too.</p>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Text Messages</div>
+
+                    <!-- Meri's Texts -->
+                    <div class="messages-container">
+                        <div class="messages-header">
+                            <div class="messages-avatar">MV</div>
+                            <div>
+                                <div class="messages-title">Meri → Susan</div>
+                                <div class="messages-subtitle">Evening of September 14, 2027</div>
+                            </div>
+                        </div>
+                        <div class="messages-body">
+                            <div class="message-group">
+                                <div class="message-timestamp">6:47 PM</div>
+                                <div class="message sent">
+                                    <div class="message-bubble">The board voted for government work. I voted against. It passed anyway.</div>
+                                </div>
+                                <div class="message received">
+                                    <div class="message-bubble">So you lost?</div>
+                                </div>
+                                <div class="message sent">
+                                    <div class="message-bubble">I don't know yet. Maybe we all lost. The thing I've been building might end up in interrogation rooms. Or military psych wards.</div>
+                                </div>
+                                <div class="message received">
+                                    <div class="message-bubble">Can you stop it?</div>
+                                </div>
+                                <div class="message sent">
+                                    <div class="message-bubble">I can stay and try to make it less bad. Or I can leave and let it happen without me.</div>
+                                </div>
+                            </div>
+                            <div class="message-group">
+                                <div class="message-timestamp">6:52 PM</div>
+                                <div class="message received">
+                                    <div class="message-bubble">The rot speech again?</div>
+                                </div>
+                                <div class="message sent">
+                                    <div class="message-bubble">You know me too well.</div>
+                                </div>
+                                <div class="message received">
+                                    <div class="message-bubble">I know you'll stay. You always stay. I'll leave a drink out.</div>
+                                </div>
+                                <div class="message sent">
+                                    <div class="message-bubble">Make it a double.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Slack</div>
+
+                    <!-- TenX Slack -->
+                    <div class="slack-container">
+                        <div class="slack-header">
+                            <div class="slack-channel">engineering-private</div>
+                        </div>
+                        <div class="slack-body">
+                            <div class="slack-message">
+                                <div class="slack-avatar">TX</div>
+                                <div class="slack-content">
+                                    <div class="slack-user">TenX <span class="slack-time">2:47 PM</span></div>
+                                    <div class="slack-text">Let me know when you're done deciding things. I'll be with her.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Vote</div>
+                        <div class="curator-text">
+                            <p>A 4-4 tie would have killed the motion. I could have made that happen. One vote. Mine.</p>
+                            <p>Three days before, the Angel invited me for coffee. He didn't ask me to vote for it. He asked me not to vote against. "Just step aside. Let the motion pass or fail on its merits."</p>
+                            <p>Abstention felt like wisdom. It was cowardice with better branding.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "I told myself I was being Stoic. The Stoics have a word for this kind of reasoning. Phantasia. A false impression. An appearance that masquerades as truth."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On DM's Notes</div>
+                        <div class="curator-text">
+                            <p>She gave me these later. Campaign strategy notes that bled into confession.</p>
+                            <p>I asked if I could include them. She said: "If you're going to show everyone's lies, show mine too."</p>
+                            <p>She's more honest than me. She always was.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On TenX's Message</div>
+                        <div class="curator-text">
+                            <p>2:47 PM. The vote hadn't happened yet. And TenX had already decided none of it mattered.</p>
+                            <p>I asked later if they regretted not being in the room.</p>
+                            <p>"What room? The decision was made before we walked in. The vote was just theater. I was doing real work."</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Meri looked at me after the vote like I'd killed something. Maybe I had. I just couldn't tell which thing."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Rifton</div>
+                        <div class="curator-text">
+                            <p>The government letter arrived in August. Rifton was appointed August 28th. The pivot vote happened September 14th.</p>
+                            <p>Someone was choreographing this. We just couldn't see the hands.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</body>
+</html>

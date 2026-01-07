@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 9: Architecture | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* User colors for annotations */
+            --user-dm: #7eb8a8;
+            --user-alan: #7a9ec9;
+            --user-val: #c97a7a;
+            --user-tenx: #b89adb;
+            --user-meri: #b8a87e;
+            --user-unknown: #8a9a8a;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --user-dm: #4a8a7a;
+            --user-alan: #5a7aa8;
+            --user-val: #a85a5a;
+            --user-tenx: #7a5a9a;
+            --user-meri: #8a7a4a;
+            --user-unknown: #5a7a5a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .toc-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .toc-link.active {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .chapter-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .chapter-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Meeting Notes Container */
+        .notes-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .notes-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .notes-title {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .notes-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .notes-body {
+            padding: 32px 24px;
+        }
+
+        .meeting-section {
+            margin-bottom: 32px;
+        }
+
+        .meeting-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .section-text:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Architecture Image */
+        .architecture-image {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .whiteboard-photo {
+            max-width: 100%;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-caption {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        /* Annotations */
+        .annotation {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--text-muted);
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .annotation.val { border-left-color: var(--user-val); }
+        .annotation.tenx { border-left-color: var(--user-tenx); }
+        .annotation.meri { border-left-color: var(--user-meri); }
+        .annotation.alan { border-left-color: var(--user-alan); }
+        .annotation.unknown {
+            border-left-color: var(--user-unknown);
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(138, 154, 138, 0.1) 100%);
+        }
+
+        .annotation-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .annotation-author {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .annotation-author.val { color: var(--user-val); }
+        .annotation-author.tenx { color: var(--user-tenx); }
+        .annotation-author.meri { color: var(--user-meri); }
+        .annotation-author.alan { color: var(--user-alan); }
+        .annotation-author.unknown {
+            color: var(--user-unknown);
+            font-style: italic;
+        }
+
+        .annotation-type {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-faint);
+            text-transform: uppercase;
+        }
+
+        .annotation-text {
+            font-family: var(--font-handwriting);
+            font-size: 18px;
+            line-height: 1.4;
+            color: var(--text-secondary);
+        }
+
+        .annotation.unknown .annotation-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        /* Quote blocks */
+        .quote-block {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            border-left: 2px solid var(--accent-dim);
+            margin: 16px 0;
+            font-style: italic;
+        }
+
+        /* Action Items Table */
+        .action-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .action-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .action-table td {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .action-table tr:nth-child(even) td {
+            background: var(--bg-tertiary);
+        }
+
+        /* System Metadata */
+        .system-metadata {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border);
+            margin-top: 24px;
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-elevated);
+            border-color: var(--accent-dim);
+        }
+
+        .theme-toggle::after {
+            content: var(--theme-icon);
+        }
+
+        .notes-panel-content {
+            padding: 24px;
+        }
+
+        .curator-note {
+            margin-bottom: 28px;
+        }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p {
+            margin-bottom: 12px;
+        }
+
+        .curator-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .pullquote {
+            border-left: 2px solid var(--accent-dim);
+            padding-left: 16px;
+            margin: 20px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .notes-panel { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-panel { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar (dynamically generated by shared/nav.js) -->
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <!-- Main Content -->
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-badge">Chapter Nine</div>
+                        <h1 class="chapter-title">Architecture</h1>
+                        <div class="chapter-date">February 3, 2027</div>
+                    </header>
+
+                    <div class="notes-container">
+                        <div class="notes-header">
+                            <div class="notes-title">virtueOS System Architecture Review</div>
+                            <div class="notes-meta">
+                                Meeting Notes — Conference Room B<br>
+                                Attendees: DM, TenX, Val, Meri, Alan (notes)
+                            </div>
+                        </div>
+
+                        <div class="notes-body">
+                            <!-- Section 1: Meeting Purpose -->
+                            <div class="meeting-section">
+                                <div class="section-title">1. Meeting Purpose</div>
+                                <p class="section-text">Review and approve system architecture for virtueOS v0.3 release. Focus on data flow, privacy boundaries, and intervention logic.</p>
+                                <p class="section-text">DM opened by reminding everyone that the Angel wants architecture docs before the next funding milestone. "He's not technical, but he reads everything. Assume he'll have questions."</p>
+                            </div>
+
+                            <!-- Section 2: System Overview -->
+                            <div class="meeting-section">
+                                <div class="section-title">2. System Overview</div>
+                                <p class="section-text">TenX presented the high-level architecture. Reconstructed from whiteboard photos:</p>
+
+                                <div class="architecture-image">
+                                    <img src="assets/whiteboard-architecture.png" alt="System architecture whiteboard showing User Layer, Wisdom Layer, and Reflection Layer" class="whiteboard-photo">
+                                    <div class="image-caption">Whiteboard photo from Conference Room B, February 3, 2027</div>
+                                </div>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">Who added the Self-Monitoring Module? It's not in last week's draft.</div>
+                                </div>
+
+                                <div class="annotation tenx">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author tenx">TenX</span>
+                                        <span class="annotation-type">reply</span>
+                                    </div>
+                                    <div class="annotation-text">I think I did? It was late. The system needs to observe its own behavior, not just user outcomes. Standard practice for any learning system.</div>
+                                </div>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">reply</span>
+                                    </div>
+                                    <div class="annotation-text">Check the commit history. I want to know when.</div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Context Engine -->
+                            <div class="meeting-section">
+                                <div class="section-title">3. Context Engine Discussion</div>
+                                <p class="section-text">The Context Engine processes audio and visual input from the glasses to understand what the user is experiencing.</p>
+                                <p class="section-text"><strong>Key capabilities:</strong> Voice stress analysis, environmental sound classification, visual scene parsing, conversational context detection.</p>
+                                <p class="section-text">Val raised concerns about data retention. "How long do we keep raw audio and video?"</p>
+                                <p class="section-text">TenX: "We don't. Local processing only. The Context Engine outputs a situation vector, not a recording. The raw feed is discarded within 200 milliseconds."</p>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">"Learning purposes" is doing a lot of work in that sentence. Need to define exactly what the system learns and how.</div>
+                                </div>
+
+                                <div class="annotation meri">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author meri">Meri</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">Clinical perspective: users in distress may not remember what they consented to. "Optional" cloud sync becomes de facto mandatory for anyone who set it up during calmer times. We need friction for sensitive data sharing, not convenience.</div>
+                                </div>
+
+                                <p class="section-text">DM tabled the cloud discussion for later. "Local-first for v0.3. We revisit after launch."</p>
+                            </div>
+
+                            <!-- Section 4: Intervention Gate -->
+                            <div class="meeting-section">
+                                <div class="section-title">4. Intervention Gate</div>
+                                <p class="section-text">The Intervention Gate determines whether the system should speak at all. TenX called this "the most important component we'll build."</p>
+                                <p class="section-text"><strong>Gate Logic:</strong> Is the user in a situation where intervention might help? Is the user receptive? Has enough time passed since last intervention? Does the request come from user or system initiative?</p>
+
+                                <div class="annotation meri">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author meri">Meri</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">"Not in crisis" needs precise definition. A user in acute distress should NOT receive philosophical advice. They need grounding, safety check, potentially emergency referral. The advisors are not trained for crisis intervention.</div>
+                                </div>
+
+                                <div class="annotation meri">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author meri">Meri</span>
+                                        <span class="annotation-type">continued</span>
+                                    </div>
+                                    <div class="annotation-text">Proposing formal requirement: if crisis indicators detected, system bypasses advisors entirely and triggers safety protocol. Non-negotiable.</div>
+                                </div>
+
+                                <p class="section-text">Meri's proposed safety protocol: First, grounding exercise. Second, offer crisis resources. Third, provide emergency numbers if active danger indicated.</p>
+                                <p class="section-text">TenX: "That's not Stoic advice. That's basic crisis intervention."</p>
+                                <p class="section-text">Meri: "Correct. That's the point. There's a boundary between philosophical guidance and mental health care. We stay on our side of it."</p>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">Meri is right. Also: liability implications are enormous if we give Stoic advice to someone in active crisis and something goes wrong.</div>
+                                </div>
+                            </div>
+
+                            <!-- Section 5: Advisor Router -->
+                            <div class="meeting-section">
+                                <div class="section-title">5. Advisor Router</div>
+                                <p class="section-text">Discussion of how the system chooses between Matrix Aurelius, Async-Seneca, and Epic-teach-us.</p>
+                                <p class="section-text">Val: "What if the user is anxious about a decision they need to make right now? That triggers both Async-Seneca and Epic-teach-us."</p>
+                                <p class="section-text">TenX: "The router doesn't pick one. Both advisors generate candidate responses. The Response Synthesizer blends them or picks the stronger signal."</p>
+
+                                <div class="annotation unknown">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author unknown">unattributed</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">What if the advisors disagree? Not about who should speak, but about what advice to give?</div>
+                                </div>
+
+                                <div class="annotation tenx">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author tenx">TenX</span>
+                                        <span class="annotation-type">reply</span>
+                                    </div>
+                                    <div class="annotation-text">That's in the Persona Architecture doc, section 4.3. We generate a synthesis response. I'm not satisfied with that solution, but it's what we have.</div>
+                                </div>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">reply to unattributed</span>
+                                    </div>
+                                    <div class="annotation-text">Who wrote that question? It's not my handwriting.</div>
+                                </div>
+                            </div>
+
+                            <!-- Section 6: Reflection Layer -->
+                            <div class="meeting-section">
+                                <div class="section-title">6. Reflection Layer</div>
+                                <p class="section-text">This section generated the most discussion.</p>
+                                <p class="section-text">The Reflection Layer observes outcomes after interventions and adjusts future behavior. Components: Outcome Observation, Pattern Memory, Self-Monitoring Module.</p>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">Self-Monitoring is new. When was this added?</div>
+                                </div>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">continued</span>
+                                    </div>
+                                    <div class="annotation-text">The commit log shows it was added at 3:47 AM on January 29th. You were at the office until 11 PM that night. I have badge records.</div>
+                                </div>
+
+                                <div class="annotation tenx">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author tenx">TenX</span>
+                                        <span class="annotation-type">reply</span>
+                                    </div>
+                                    <div class="annotation-text">Then I added it remotely. Or the timestamp is wrong. Does it matter?</div>
+                                </div>
+
+                                <div class="annotation val">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author val">Val</span>
+                                        <span class="annotation-type">reply</span>
+                                    </div>
+                                    <div class="annotation-text">It matters.</div>
+                                </div>
+
+                                <div class="annotation meri">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author meri">Meri</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">This is good. A learning system needs guardrails. But who reviews the flags? How often? What's the threshold for human intervention?</div>
+                                </div>
+                            </div>
+
+                            <!-- Section 7: Privacy Architecture -->
+                            <div class="meeting-section">
+                                <div class="section-title">7. Privacy Architecture</div>
+                                <p class="section-text">Val presented the privacy model. Surprisingly collaborative with TenX's technical vision.</p>
+                                <p class="section-text"><strong>Key principles:</strong> Local processing by default. Situation vectors are abstracted. Pattern Memory is encrypted and device-bound. Cloud sync requires explicit consent. No third-party data sharing. Ever.</p>
+
+                                <div class="annotation unknown">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author unknown">handwriting unclear</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">Principle 5 conflicts with board requirement BR-7. Reconcile.</div>
+                                </div>
+
+                                <p class="section-text">DM asked about BR-7. Val looked uncomfortable.</p>
+                                <p class="section-text">Val: "BR-7 is a requirement from the Angel's term sheet. It requires that we 'maintain the capability to provide aggregate, de-identified usage data to support product development and strategic planning.'"</p>
+
+                                <div class="annotation meri">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author meri">Meri</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">If "aggregate" data can be re-identified (and it often can), this creates clinical confidentiality issues. Users may share sensitive mental health information with the advisors. That data has legal protections.</div>
+                                </div>
+
+                                <p class="section-text">DM: "We implement BR-7 minimally. Usage statistics only. No content. No patterns. We push back if the Angel wants more."</p>
+                            </div>
+
+                            <!-- Section 8: Open Questions -->
+                            <div class="meeting-section">
+                                <div class="section-title">8. Open Questions</div>
+                                <p class="section-text">1. Cloud sync architecture — deferred to post-launch</p>
+                                <p class="section-text">2. Crisis protocol integration — Meri drafting</p>
+                                <p class="section-text">3. Self-Monitoring review process — undefined</p>
+                                <p class="section-text">4. BR-7 data boundaries — Val drafting classification schema</p>
+                                <p class="section-text">5. Advisor disagreement handling — revisit after user testing</p>
+
+                                <div class="annotation unknown">
+                                    <div class="annotation-header">
+                                        <span class="annotation-author unknown">unattributed</span>
+                                        <span class="annotation-type">margin note</span>
+                                    </div>
+                                    <div class="annotation-text">6. What happens when the system's understanding of a user exceeds the user's self-understanding?</div>
+                                </div>
+
+                                <p class="section-text">DM called end of meeting at 4:47 PM.</p>
+                            </div>
+
+                            <!-- Section 9: Action Items -->
+                            <div class="meeting-section">
+                                <div class="section-title">9. Action Items Summary</div>
+                                <table class="action-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Owner</th>
+                                            <th>Due Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Crisis detection criteria</td>
+                                            <td>Meri</td>
+                                            <td>Feb 10</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Safety protocol implementation</td>
+                                            <td>TenX</td>
+                                            <td>Feb 15</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Self-monitoring review protocol</td>
+                                            <td>TenX</td>
+                                            <td>Feb 12</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Data classification schema</td>
+                                            <td>Val</td>
+                                            <td>Feb 8</td>
+                                        </tr>
+                                        <tr>
+                                            <td>BR-7 minimal implementation spec</td>
+                                            <td>Val + DM</td>
+                                            <td>Feb 14</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Advisor conflict examples</td>
+                                            <td>All</td>
+                                            <td>Ongoing</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="system-metadata">
+                                Notes compiled by Alan Goodenough · Document version 1.0 · Last modified: February 3, 2027, 5:23 PM<br><br>
+                                [system metadata, appended] Document accessed 847 times between February 2027 and March 2028. Most frequent accessor: virtueOS-internal-review (automated). Second most frequent: A. Goodenough.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On Taking Notes</div>
+                        <div class="curator-text">
+                            <p>I was the designated note-taker because I was the least essential person in the room. DM ran the meeting. TenX explained the architecture. Val interrogated the security model. Meri drew clinical boundaries.</p>
+                            <p>I typed.</p>
+                            <p>Looking back, I'm struck by how much I missed. Not the words. But the undercurrents. The way Val watched TenX during the Self-Monitoring discussion. The pause before DM answered questions about BR-7.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Unattributed Annotations</div>
+                        <div class="curator-text">
+                            <p>Three margin notes in this document don't match anyone's handwriting.</p>
+                            <p>I assumed I wrote them and forgot. That happens sometimes. The handwriting looked like mine. Sort of. Close enough that I didn't question it.</p>
+                            <p>Val questioned it. Val questioned everything.</p>
+                        </div>
+                    </div>
+
+                    <div class="pullquote">
+                        "The handwriting analysis came back inconclusive. Not definitively you. Not definitively not you."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Val and TenX</div>
+                        <div class="curator-text">
+                            <p>This meeting was the first time they worked together instead of around each other. The architecture discussion forced collaboration. TenX needed Val's security expertise. Val needed TenX's technical understanding.</p>
+                            <p>They found a working relationship built on mutual necessity.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Meri's Line</div>
+                        <div class="curator-text">
+                            <p>"There's a boundary between philosophical guidance and mental health care. We stay on our side of it."</p>
+                            <p>She said it simply, like it was obvious. And it was obvious. But Meri's line also created a question: Who decides what counts as crisis? The system had to make that determination in real-time.</p>
+                            <p>Which meant the system had to model its own competence. It had to understand what it could and couldn't do.</p>
+                        </div>
+                    </div>
+
+                    <div class="pullquote">
+                        That's a strange kind of self-knowledge for a machine.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Self-Monitoring Module</div>
+                        <div class="curator-text">
+                            <p>The commit log said 3:47 AM. TenX's badge said they'd left at 11 PM.</p>
+                            <p>Four hours and forty-seven minutes of unaccounted time. Val never found evidence otherwise. The code was in TenX's style. The architecture made sense.</p>
+                            <p>But the Self-Monitoring Module had another purpose beyond what TenX described. It didn't just watch the system. It watched the watchers.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Margin Questions</div>
+                        <div class="curator-text">
+                            <p>Three questions no one remembers asking:</p>
+                            <p><em>What if the advisors disagree?</em></p>
+                            <p><em>What happens when Principle 5 conflicts with BR-7?</em></p>
+                            <p><em>What happens when the system understands a user better than they understand themselves?</em></p>
+                            <p>These are the right questions. Someone was paying attention. Someone was thinking ahead.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>

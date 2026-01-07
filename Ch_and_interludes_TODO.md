@@ -17,18 +17,18 @@ Checklist for generating remaining chapters and interludes using ralph-loop.
 
 - [x] Interlude 2: The New Player
 - [x] Chapter 8: The Advisors
-- [ ] Chapter 9: Architecture
-- [ ] Chapter 10: First Test
-- [ ] Interlude 3: The Golden Session
-- [ ] Chapter 11: Government Letter
-- [ ] Chapter 12: First Discrepancy
-- [ ] Chapter 13: Pivot
-- [ ] Chapter 14: Prototype
-- [ ] Interlude 4: The Night Before
-- [ ] Chapter 15: Schism
-- [ ] Chapter 16: Warning
-- [ ] Chapter 17: Demonstration
-- [ ] Chapter 18: Sabotage
+- [x] Chapter 9: Architecture
+- [x] Chapter 10: First Test
+- [x] Interlude 3: The Golden Session
+- [x] Chapter 11: Government Letter
+- [x] Chapter 12: First Discrepancy
+- [x] Chapter 13: Pivot
+- [x] Chapter 14: Prototype
+- [x] Interlude 4: The Night Before
+- [x] Chapter 15: Schism
+- [x] Chapter 16: Warning
+- [x] Chapter 17: Demonstration
+- [x] Chapter 18: Sabotage
 - [ ] Interlude 5: What Are We
 - [ ] Chapter 19: Confrontation
 - [ ] Chapter 20: Revelation

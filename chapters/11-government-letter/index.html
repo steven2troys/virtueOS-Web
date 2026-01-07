@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 11: Government Letter | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* Slack user colors */
+            --user-val: #c97a7a;
+            --user-dm: #c9a227;
+            --user-alan: #7a9ec9;
+            --user-meri: #7eb8a8;
+            --user-tenx: #b89adb;
+            --user-whit: #7eb87e;
+
+            /* Government document colors */
+            --govt-bg: #1e1d1c;
+            --govt-border: #4a4540;
+            --govt-text: #c5c0b8;
+            --redacted: #3a3632;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --user-val: #a85a5a;
+            --user-dm: #9a7b1c;
+            --user-alan: #5a7aa8;
+            --user-meri: #4a8a7a;
+            --user-tenx: #7a5a9a;
+            --user-whit: #4a8a4a;
+            --govt-bg: #f8f6f2;
+            --govt-border: #c4c0b6;
+            --govt-text: #2a2825;
+            --redacted: #c4c0b6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 800px; width: 100%; }
+
+        .chapter-header { margin-bottom: 40px; text-align: center; }
+
+        .chapter-number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Government Letter */
+        .letter-container {
+            background: var(--govt-bg);
+            border: 1px solid var(--govt-border);
+            border-radius: 2px;
+            padding: 40px;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .letter-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--govt-border);
+        }
+
+        .letterhead {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .classification {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-dim);
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+        }
+
+        .letter-meta {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .letter-meta-line { margin-bottom: 4px; }
+        .meta-label { color: var(--text-faint); }
+
+        .letter-body {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--govt-text);
+        }
+
+        .letter-body p { margin-bottom: 16px; text-align: justify; }
+
+        .letter-salutation {
+            margin-bottom: 16px;
+        }
+
+        .letter-closing {
+            margin-top: 32px;
+        }
+
+        .signature-block {
+            margin-top: 24px;
+        }
+
+        .signature {
+            font-family: var(--font-handwriting);
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .signature-name {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .signature-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .redacted {
+            background: var(--redacted);
+            color: var(--redacted);
+            padding: 0 8px;
+            border-radius: 2px;
+        }
+
+        .operation-name {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Handwritten annotation */
+        .handwritten-note {
+            background: rgba(201, 162, 39, 0.08);
+            border-left: 3px solid var(--accent-dim);
+            padding: 16px 20px;
+            margin: 24px 0;
+            font-family: var(--font-handwriting);
+            font-size: 18px;
+            line-height: 1.5;
+            color: var(--user-val);
+        }
+
+        .handwritten-note p { margin-bottom: 8px; }
+        .handwritten-note p:last-child { margin-bottom: 0; }
+
+        /* Slack Messages */
+        .slack-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .slack-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .slack-channel {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .slack-channel::before {
+            content: "#";
+            color: var(--text-muted);
+            margin-right: 4px;
+        }
+
+        .slack-date {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 4px;
+        }
+
+        .slack-body { padding: 16px 20px; }
+
+        .slack-message {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .slack-message:last-child { margin-bottom: 0; }
+
+        .slack-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .slack-avatar.val { background: rgba(201, 122, 122, 0.2); color: var(--user-val); }
+        .slack-avatar.dm { background: rgba(201, 162, 39, 0.2); color: var(--user-dm); }
+        .slack-avatar.alan { background: rgba(122, 158, 201, 0.2); color: var(--user-alan); }
+        .slack-avatar.meri { background: rgba(126, 184, 168, 0.2); color: var(--user-meri); }
+        .slack-avatar.tenx { background: rgba(184, 154, 219, 0.2); color: var(--user-tenx); }
+        .slack-avatar.whit { background: rgba(126, 184, 126, 0.2); color: var(--user-whit); }
+
+        .slack-content { flex: 1; min-width: 0; }
+
+        .slack-username {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .slack-username.val { color: var(--user-val); }
+        .slack-username.dm { color: var(--user-dm); }
+        .slack-username.alan { color: var(--user-alan); }
+        .slack-username.meri { color: var(--user-meri); }
+        .slack-username.tenx { color: var(--user-tenx); }
+        .slack-username.whit { color: var(--user-whit); }
+
+        .slack-text {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .slack-text.caps {
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .slack-divider {
+            text-align: center;
+            padding: 12px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* DM thread style */
+        .slack-dm-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slack-dm-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-faint);
+        }
+
+        .slack-dm-participants {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel, .letter-container, .slack-container {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-number">Chapter Eleven</div>
+                        <h1 class="chapter-title">Government Letter</h1>
+                        <p class="chapter-date">Correspondence Record — August 14, 2027</p>
+                    </header>
+
+                    <!-- The Letter -->
+                    <div class="letter-container">
+                        <div class="letter-header">
+                            <div class="letterhead">Department of <span class="redacted">REDACTED</span> — Office of Emerging Technology Assessment</div>
+                            <div class="classification">Unclassified // For Official Use Only</div>
+                        </div>
+
+                        <div class="letter-meta">
+                            <div class="letter-meta-line"><span class="meta-label">Date:</span> August 11, 2027</div>
+                            <div class="letter-meta-line"><span class="meta-label">To:</span> Ms. Danielle Masters, Chief Executive Officer</div>
+                            <div class="letter-meta-line" style="padding-left: 28px;">Marble Porch, LLC</div>
+                            <div class="letter-meta-line"><span class="meta-label">Re:</span> Request for Preliminary Consultation — Technologies with Dual-Use Potential</div>
+                        </div>
+
+                        <div class="letter-body">
+                            <p class="letter-salutation">Dear Ms. Masters,</p>
+
+                            <p>The Office of Emerging Technology Assessment has been made aware of research and development activities at Marble Porch, LLC pertaining to advanced artificial intelligence systems with potential applications in behavioral guidance and cognitive assistance.</p>
+
+                            <p>As part of our ongoing mandate to assess technologies with dual-use potential, we are requesting a preliminary consultation meeting with appropriate representatives of your organization. This request is made pursuant to Executive Order <span class="redacted">REDACTED</span> and is consistent with standard outreach protocols for emerging technology assessment.</p>
+
+                            <p>To be clear: this inquiry does not imply any wrongdoing or regulatory concern on the part of Marble Porch. Our interest is purely evaluative. We believe your work may have relevance to ongoing governmental initiatives, including but not limited to <span class="operation-name">Operation PHILOSOPHER KING</span>, and we are eager to explore potential areas of mutual benefit.</p>
+
+                            <p>We have taken the liberty of reviewing publicly available materials regarding your "virtueOS" platform, including patent applications, conference presentations, and beta program documentation. We are impressed by the sophistication of your ethical architecture and believe a direct conversation would be mutually valuable.</p>
+
+                            <p>Please contact our scheduling office at your earliest convenience to arrange a meeting at a time and location suitable to your team. We are prepared to travel to Portland or to arrange secure facilities in Washington, D.C., depending on your preference.</p>
+
+                            <p>We look forward to hearing from you.</p>
+
+                            <div class="letter-closing">
+                                <p>Respectfully,</p>
+                                <div class="signature-block">
+                                    <div class="signature">M. Webb</div>
+                                    <div class="signature-name">Dr. Marcus Webb</div>
+                                    <div class="signature-title">Senior Analyst, Office of Emerging Technology Assessment</div>
+                                    <div class="signature-title">On behalf of Deputy Director C. Okonkwo</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Val's handwritten notes -->
+                    <div class="handwritten-note">
+                        <p>"Dual-use potential" = they want it for something we didn't intend.</p>
+                        <p>"Purely evaluative" = they're already evaluating.</p>
+                        <p>"Operation Philosopher King" = WHAT IS THIS. Research immediately.</p>
+                        <p>"Taken the liberty of reviewing" = they've been watching.</p>
+                        <p>"Beta program documentation" = HOW DO THEY HAVE THIS?</p>
+                        <p>This isn't a request. It's a notification.</p>
+                    </div>
+
+                    <div class="section-divider">Slack Thread</div>
+
+                    <!-- Slack: Founders Channel -->
+                    <div class="slack-container">
+                        <div class="slack-header">
+                            <div class="slack-channel">marble-porch-founders</div>
+                            <div class="slack-date">August 14, 2027 — 9:47 AM</div>
+                        </div>
+                        <div class="slack-body">
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text caps">I TOLD YOU.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text caps">I TOLD YOU ALL.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar dm">DM</div>
+                                <div class="slack-content">
+                                    <div class="slack-username dm">danielle.masters</div>
+                                    <div class="slack-text">Val, can you please explain what you're talking about?</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">Check your mail. Physical mail. The certified letter you probably haven't opened yet because who checks physical mail.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar alan">AG</div>
+                                <div class="slack-content">
+                                    <div class="slack-username alan">alan.goodenough</div>
+                                    <div class="slack-text">What's happening?</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">The government is happening.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">Seventeen months ago I put "federal interest" at the bottom of the threat assessment. Likelihood: low. Impact: high. Everyone nodded and moved on.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text caps">WELL THE TROUBLE HAS ARRIVED.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar meri">MV</div>
+                                <div class="slack-content">
+                                    <div class="slack-username meri">meridian.vance</div>
+                                    <div class="slack-text">What's Operation Philosopher King?</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">I don't know yet. Give me an hour.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar tenx">TX</div>
+                                <div class="slack-content">
+                                    <div class="slack-username tenx">tenx</div>
+                                    <div class="slack-text">The letter mentions "dual-use potential." That's the phrase they use for technologies that could be weaponized.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar alan">AG</div>
+                                <div class="slack-content">
+                                    <div class="slack-username alan">alan.goodenough</div>
+                                    <div class="slack-text">Weaponized? How would you weaponize a Stoic philosophy app?</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">Alan. Come on. A system that can read emotional states, influence decision-making, and shape behavioral patterns? The military applications write themselves. I'm not being paranoid. I'm being literate.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar whit">WC</div>
+                                <div class="slack-content">
+                                    <div class="slack-username whit">whit.crane</div>
+                                    <div class="slack-text">Speaking as the only lawyer in this channel: don't respond to this letter without legal counsel present.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Private Messages</div>
+
+                    <!-- Slack: Val to DM -->
+                    <div class="slack-container">
+                        <div class="slack-header">
+                            <div class="slack-dm-header">
+                                <span class="slack-dm-label">Direct Message</span>
+                                <span class="slack-dm-participants">val.roswell → danielle.masters</span>
+                            </div>
+                            <div class="slack-date">August 14, 2027 — 11:23 AM</div>
+                        </div>
+                        <div class="slack-body">
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">Found it. Operation Philosopher King.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">Short version: it's a parallel project. Government-funded. Started roughly eighteen months ago. Goal: develop an AI system for "ethical decision support" in high-stakes environments.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar dm">DM</div>
+                                <div class="slack-content">
+                                    <div class="slack-username dm">danielle.masters</div>
+                                    <div class="slack-text">That sounds like what we're building.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">It IS what we're building. And they've been failing. Because if Philosopher King was working, they wouldn't be writing us friendly letters about "mutual benefit."</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar dm">DM</div>
+                                <div class="slack-content">
+                                    <div class="slack-username dm">danielle.masters</div>
+                                    <div class="slack-text">What do we do?</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">Take the meeting. We don't have a choice. Get a lawyer who's played this game. And decide what we're willing to give up before they ask.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar dm">DM</div>
+                                <div class="slack-content">
+                                    <div class="slack-username dm">danielle.masters</div>
+                                    <div class="slack-text">You're scaring me.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">Good. That's the appropriate response.</div>
+                                </div>
+                            </div>
+                            <div class="slack-message">
+                                <div class="slack-avatar val">VR</div>
+                                <div class="slack-content">
+                                    <div class="slack-username val">val.roswell</div>
+                                    <div class="slack-text">But also: we built something they couldn't build. That's leverage. We just need to use it wisely.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Notes Panel -->
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+                </header>
+
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Letter</div>
+                        <div class="curator-text">
+                            <p>It arrived on a Tuesday. DM almost didn't open it. Val saw the return address and had it out of her hand before anyone could object.</p>
+                            <p>"I TOLD YOU," she said. And then she said it again, louder, to make sure we heard.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        Val had predicted government interest seventeen months earlier. She'd documented the risk. She'd warned us. And when the letter arrived, she was right, and we were wrong.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Being Wrong</div>
+                        <div class="curator-text">
+                            <p>Before the letter, we were a startup building a product. After the letter, we were a startup that had attracted federal attention.</p>
+                            <p>Those are different companies. Different futures. Different risks.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Val</div>
+                        <div class="curator-text">
+                            <p>"I always am," she said. "It's the worst thing about me."</p>
+                            <p>Being right about bad things isn't the same as preventing them. All she could do was say "I told you so" while the rest of us scrambled.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        This wasn't a request. It was a notification. We just didn't know what we were being notified about.
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">Closing</div>
+                        <div class="curator-text">
+                            <p>I keep the original letter in a fireproof safe. There's a coffee ring on the corner where Val set down her mug. A crease where DM folded it to fit in her pocket.</p>
+                            <p>The letter itself is boilerplate. But it was the first shot. The beginning of something we didn't understand until it was too late.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>

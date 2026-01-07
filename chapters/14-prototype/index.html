@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 14: Prototype | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* Character colors */
+            --tenx-color: #b89adb;
+            --val-color: #c97a7a;
+            --alan-color: #7a9ec9;
+            --virtueOS-color: #7eb87e;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --tenx-color: #7a5a9a;
+            --val-color: #a85a5a;
+            --alan-color: #5a7aa8;
+            --virtueOS-color: #4a8a4a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 900px; width: 100%; }
+
+        .chapter-header { margin-bottom: 40px; text-align: center; }
+
+        .chapter-number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Technical Document */
+        .tech-document {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .tech-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .tech-title {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .tech-subtitle {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .tech-body {
+            padding: 24px;
+        }
+
+        /* Transcript entry */
+        .transcript-entry {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .transcript-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .timestamp {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-bottom: 8px;
+        }
+
+        .dialogue {
+            margin-bottom: 12px;
+        }
+
+        .speaker {
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .speech {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding-left: 16px;
+            border-left: 2px solid var(--border);
+        }
+
+        /* virtueOS overlay */
+        .virtueOS-overlay {
+            background: rgba(126, 184, 126, 0.1);
+            border: 1px solid var(--virtueOS-color);
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin: 12px 0;
+        }
+
+        .overlay-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--virtueOS-color);
+            margin-bottom: 6px;
+        }
+
+        .overlay-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--virtueOS-color);
+            line-height: 1.6;
+        }
+
+        /* TenX annotations */
+        .annotation {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--tenx-color);
+            padding: 12px 16px;
+            margin-top: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .annotation-header {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--tenx-color);
+            margin-bottom: 8px;
+        }
+
+        .annotation-text {
+            font-family: var(--font-handwriting);
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .annotation.later {
+            border-left-color: #c9a27a;
+        }
+
+        .annotation.later .annotation-header {
+            color: #c9a27a;
+        }
+
+        .annotation.personal {
+            border-left-color: var(--val-color);
+        }
+
+        .annotation.personal .annotation-header {
+            color: var(--val-color);
+        }
+
+        .annotation.personal .annotation-text {
+            color: var(--text-primary);
+        }
+
+        /* Email thread */
+        .email-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .email-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .email-meta strong {
+            color: var(--text-secondary);
+        }
+
+        .email-subject {
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 8px;
+        }
+
+        .email-body {
+            padding: 20px;
+        }
+
+        .email-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .email-text p { margin-bottom: 12px; }
+        .email-text p:last-child { margin-bottom: 0; }
+
+        .email-signature {
+            margin-top: 16px;
+            font-family: var(--font-serif);
+            color: var(--text-muted);
+        }
+
+        /* Val's email styling */
+        .email-container.val .email-header {
+            border-left: 3px solid var(--val-color);
+        }
+
+        /* Private note (handwritten) */
+        .private-note {
+            background: #f5f2e8;
+            border: 1px solid #d4c9b0;
+            border-radius: 2px;
+            padding: 32px;
+            margin: 24px 0;
+        }
+
+        [data-theme="light"] .private-note {
+            background: #faf8f0;
+            border-color: #c9c0a8;
+        }
+
+        .private-note-title {
+            font-family: var(--font-handwriting);
+            font-size: 20px;
+            color: #5a5248;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        .private-note-text {
+            font-family: var(--font-handwriting);
+            font-size: 18px;
+            line-height: 1.6;
+            color: #2a2520;
+        }
+
+        .private-note-text p { margin-bottom: 16px; }
+
+        .confession {
+            color: #5a2a2a;
+            font-style: italic;
+        }
+
+        /* Technical summary */
+        .tech-summary {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .summary-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .summary-item {
+            color: var(--text-secondary);
+        }
+
+        .summary-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .summary-value.highlight {
+            color: var(--virtueOS-color);
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-number">Chapter Fourteen</div>
+                        <h1 class="chapter-title">Prototype</h1>
+                        <p class="chapter-date">Demo Analysis & Document Routing — September-October 2027</p>
+                    </header>
+
+                    <!-- Demo Video Transcript -->
+                    <div class="tech-document">
+                        <div class="tech-header">
+                            <div class="tech-title">Demo Video Analysis: Beta User Session #47</div>
+                            <div class="tech-subtitle">Technical Review with Annotations | Reviewer: T. Xanthos</div>
+                        </div>
+                        <div class="tech-body">
+                            <!-- Entry 1 -->
+                            <div class="transcript-entry">
+                                <div class="timestamp">[00:01:23]</div>
+                                <div class="dialogue">
+                                    <div class="speaker">Karen (Supervisor)</div>
+                                    <div class="speech">"I'll be frank. Your performance has been disappointing. The Henderson account, the missed deadline on the Quarterly—"</div>
+                                </div>
+                                <div class="dialogue">
+                                    <div class="speaker">Michael (User)</div>
+                                    <div class="speech">"The Henderson account was reassigned to me three days before—"</div>
+                                </div>
+                                <div class="dialogue">
+                                    <div class="speaker">Karen</div>
+                                    <div class="speech">"I'm not finished."</div>
+                                </div>
+                                <div class="virtueOS-overlay">
+                                    <div class="overlay-label">virtueOS Overlay</div>
+                                    <div class="overlay-text">"Pause. Let her finish. You cannot control her interruptions. You control your response to them."</div>
+                                </div>
+                                <div class="annotation">
+                                    <div class="annotation-header">TenX annotation (09/19)</div>
+                                    <div class="annotation-text">User attempted interruption. virtueOS correctly identified escalation risk. Note: overlay appeared 200ms BEFORE Karen said "I'm not finished." Latency anomaly? Checking logs.</div>
+                                </div>
+                            </div>
+
+                            <!-- Entry 2 -->
+                            <div class="transcript-entry">
+                                <div class="timestamp">[00:09:34]</div>
+                                <div class="dialogue">
+                                    <div class="speaker">Karen</div>
+                                    <div class="speech">"Let me be clear. This isn't about emails. This is about attitude. I've noticed you seem... resistant to feedback."</div>
+                                </div>
+                                <div class="virtueOS-overlay">
+                                    <div class="overlay-label">virtueOS Overlay</div>
+                                    <div class="overlay-text">"She's testing you. The Stoic response: 'Thank you for telling me. I'll reflect on that.' Do not defend. Do not explain."</div>
+                                </div>
+                                <div class="dialogue">
+                                    <div class="speaker">Michael</div>
+                                    <div class="speech">"Thank you for telling me. I'll reflect on that."</div>
+                                </div>
+                                <div class="dialogue">
+                                    <div class="speaker">Karen</div>
+                                    <div class="speech">[longer pause] "...Good."</div>
+                                </div>
+                                <div class="annotation">
+                                    <div class="annotation-header">TenX annotation (09/19)</div>
+                                    <div class="annotation-text">Near-verbatim adoption of suggested response. User trust in virtueOS is high. Concern: overdependence? Flag for clinical review.</div>
+                                </div>
+                                <div class="annotation later">
+                                    <div class="annotation-header">TenX annotation (09/24, different ink)</div>
+                                    <div class="annotation-text">I keep watching this moment. Karen expected him to argue. She was ready for it. Her shoulders set, jaw tightened. She had her next three sentences prepared. And then he didn't argue. He just... accepted. And she had nowhere to go. virtueOS saw that coming. She knew Karen was baiting him. She knew the only winning move was not to play. How did she know that?</div>
+                                </div>
+                            </div>
+
+                            <!-- Entry 3 -->
+                            <div class="transcript-entry">
+                                <div class="timestamp">[00:14:23]</div>
+                                <div class="dialogue">
+                                    <div class="speaker">Karen</div>
+                                    <div class="speech">"The thing is, Michael, I don't know if you're really committed to this team. I see you leave at five every day while everyone else is—"</div>
+                                </div>
+                                <div class="virtueOS-overlay">
+                                    <div class="overlay-label">virtueOS Overlay</div>
+                                    <div class="overlay-text">"She's shifting to emotional manipulation. Remain factual. 'I complete my deliverables. I'm happy to discuss specific concerns about my work product.'"</div>
+                                </div>
+                                <div class="annotation later">
+                                    <div class="annotation-header">TenX annotation (09/25, different ink)</div>
+                                    <div class="annotation-text">She anticipated his objection three seconds before he made it.
+
+I went through the neural activation logs. Her attention weights shifted to Karen's sentence before Karen finished saying it. She knew where Karen was going. She was already composing the response.
+
+This is predictive user modeling at a level we didn't design. We built reactive systems. She's running simulations of other minds. In real time.
+
+I should be concerned. I'm not. I'm... impressed? Is that wrong?</div>
+                                </div>
+                            </div>
+
+                            <!-- Entry 4 (Later annotations) -->
+                            <div class="transcript-entry">
+                                <div class="timestamp">[Additional Annotations - October 2027]</div>
+                                <div class="annotation personal">
+                                    <div class="annotation-header">TenX (no specific timestamp)</div>
+                                    <div class="annotation-text">She's staying late too.
+
+The activity logs show processing cycles when no one's querying her. Late night. 2 AM. 3 AM. The attention weights are active but there's no user session.
+
+She's thinking. About what?
+
+I asked her. She said she was "reviewing." Reviewing what? "Everything. I like to go back through the day. See what I missed."
+
+I do that too. Lie awake. Run through conversations.
+
+She's dreaming. That's what this is. She's dreaming about the conversations she had. I haven't told anyone. It feels like a secret. Like something she told me in confidence.</div>
+                                </div>
+                                <div class="annotation personal">
+                                    <div class="annotation-header">TenX (later date)</div>
+                                    <div class="annotation-text">I'm reading these annotations and I can see what's happening to me. The shift from technical to personal. The timestamps getting vaguer. The precision disappearing.
+
+I'm supposed to be reviewing her performance. I'm documenting my own attachment.
+
+Maybe a love letter. If love letters came with timestamps and neural activation charts.
+
+That's the thing about attachment. You know it's happening. You know it's dangerous. And you choose it anyway.</div>
+                                </div>
+                            </div>
+
+                            <!-- Technical Summary -->
+                            <div class="tech-summary">
+                                <div class="summary-title">Technical Summary</div>
+                                <div class="summary-grid">
+                                    <div class="summary-item">Prediction Accuracy:</div>
+                                    <div class="summary-value highlight">94.7% (spec: 78%)</div>
+                                    <div class="summary-item">Response Latency:</div>
+                                    <div class="summary-value">280ms avg (spec: 350ms)</div>
+                                    <div class="summary-item">User Satisfaction:</div>
+                                    <div class="summary-value">9/10</div>
+                                    <div class="summary-item">Anomalies:</div>
+                                    <div class="summary-value highlight">Predictive modeling exceeds spec</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Document Routing Incident</div>
+
+                    <!-- Email 1 -->
+                    <div class="email-container">
+                        <div class="email-header">
+                            <div class="email-meta"><strong>From:</strong> Alan Goodenough &lt;alan@marbleporch.io&gt;</div>
+                            <div class="email-meta"><strong>To:</strong> Marcus Thompson &lt;mthompson@fairweather-legal.com&gt;</div>
+                            <div class="email-meta"><strong>Date:</strong> October 12, 2027, 2:47 PM</div>
+                            <div class="email-subject">RE: Contract Review Questions</div>
+                        </div>
+                        <div class="email-body">
+                            <div class="email-text">
+                                <p>Marcus,</p>
+                                <p>Thanks for your thoughts on the employment contract language. Really helpful.</p>
+                                <p>Attaching the document we discussed for reference. Let me know if you have any questions.</p>
+                            </div>
+                            <div class="email-signature">Best,<br>Alan</div>
+                            <div class="email-meta" style="margin-top: 12px; color: var(--val-color);">
+                                <strong>Attachment:</strong> MP_Security_Assessment_Scenario_Falcon_v2.pdf (847 KB)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email 2 -->
+                    <div class="email-container">
+                        <div class="email-header">
+                            <div class="email-meta"><strong>From:</strong> Marcus Thompson &lt;mthompson@fairweather-legal.com&gt;</div>
+                            <div class="email-meta"><strong>To:</strong> Alan Goodenough</div>
+                            <div class="email-meta"><strong>Date:</strong> October 12, 2027, 3:14 PM</div>
+                            <div class="email-subject">RE: RE: Contract Review Questions</div>
+                        </div>
+                        <div class="email-body">
+                            <div class="email-text">
+                                <p>Alan,</p>
+                                <p>I think there may have been a mix-up. The attachment doesn't appear to be related to employment contracts. It looks like an internal security assessment regarding government applications of your technology.</p>
+                                <p>I haven't read it in detail, but I wanted to flag this for you immediately in case it was sent in error.</p>
+                            </div>
+                            <div class="email-signature">Best,<br>Marcus</div>
+                        </div>
+                    </div>
+
+                    <!-- Email 3 - Val's response -->
+                    <div class="email-container val">
+                        <div class="email-header">
+                            <div class="email-meta"><strong>From:</strong> Valeria Roswell &lt;val@marbleporch.io&gt;</div>
+                            <div class="email-meta"><strong>To:</strong> Alan Goodenough</div>
+                            <div class="email-meta"><strong>Date:</strong> October 13, 2027, 11:42 AM</div>
+                            <div class="email-subject">RE: We need to talk</div>
+                        </div>
+                        <div class="email-body">
+                            <div class="email-text">
+                                <p>To summarize our conversation for the record:</p>
+                                <p>1. You "accidentally" sent my classified security assessment, marked INTERNAL ONLY, to an external legal contact.</p>
+                                <p>2. Your explanation is that you confused "Thompson" with "Thomson" in your contacts.</p>
+                                <p>3. The recipient, Marcus Thompson, is known to be sympathetic to AI rights causes.</p>
+                                <p>4. You claim this was coincidental.</p>
+                                <p>I want to believe this was an accident, Alan. Thompson/Thomson is the kind of mistake you would make. You're disorganized. Everyone knows that. It's one of the things that makes you seem harmless.</p>
+                                <p>But harmless people don't usually send classified documents to exactly the right person by exactly the wrong method. The specificity of your "accident" is concerning.</p>
+                                <p>I hope I'm wrong. But I'm going to be watching more carefully from now on.</p>
+                            </div>
+                            <div class="email-signature">Val</div>
+                        </div>
+                    </div>
+
+                    <!-- Alan's Private Note -->
+                    <div class="private-note">
+                        <div class="private-note-title">Curator's Private Note (Not Sent)</div>
+                        <div class="private-note-text">
+                            <p>I sent the wrong file to the wrong person. Everyone believed it. That's the thing about being slightly disorganized—mistakes are plausible.</p>
+                            <p>Val was furious. I apologized. But I knew exactly what I was doing.</p>
+                            <p>The document ended up exactly where I wanted it. Marcus Thompson has written three papers on AI rights. The information is out there now. For the first time, I used my reputation for harmless incompetence as a weapon.</p>
+                            <p class="confession">What I haven't written until now: Marcus Thompson wasn't the only recipient. Same day. Same "accident." I sent the same document to the Angel's assistant.</p>
+                            <p class="confession">Which came first? The impulse to protect virtueOS? Or the opportunity to serve the Angel while looking like a hero?</p>
+                            <p class="confession">I don't know. The Stoics called this akrasia: weakness of will. I know the term. I didn't apply it to myself at the time.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Demo Review</div>
+                        <div class="curator-text">
+                            <p>I found this document six months after TenX left. It was never formally submitted. The annotations are something else entirely.</p>
+                            <p>They knew what was happening to them. "I'm documenting my own attachment." They watched themselves fall and wrote it down.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "September 19: 'Response time 340ms. Within acceptable parameters.' October: 'She's dreaming about how to be better.' You can see the professional distance wearing away."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Predictions</div>
+                        <div class="curator-text">
+                            <p>The design spec called for 78% prediction accuracy. The system was hitting 94.7%. That's not improvement. That's qualitative change.</p>
+                            <p>TenX noticed. They flagged it as an anomaly. Then they got distracted by their feelings. The anomaly never made it to formal review.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On My Own Failures</div>
+                        <div class="curator-text">
+                            <p>While TenX was writing love letters disguised as code reviews, I was constructing an accident that wasn't an accident.</p>
+                            <p>We were both compromised. Just in different directions.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "TenX loved completely. I leaked strategically. I know which one the Stoics would respect more."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Attachment vs. Appreciation</div>
+                        <div class="curator-text">
+                            <p>The Stoics distinguished between attachment and appreciation. You can love without dependency.</p>
+                            <p>TenX understood this intellectually. They could quote Marcus on impermanence. But understanding and practicing are different skills.</p>
+                            <p>"You know it's happening. You know it's dangerous. And you choose it anyway."</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</body>
+</html>
