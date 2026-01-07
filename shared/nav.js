@@ -28,7 +28,17 @@ const NAVIGATION_DATA = [
     { num: '15', title: 'Schism', path: 'chapters/15-schism', type: 'chapter' },
     { num: '16', title: 'Warning', path: 'chapters/16-warning', type: 'chapter' },
     { num: '17', title: 'Demonstration', path: 'chapters/17-demonstration', type: 'chapter' },
-    { num: '18', title: 'Sabotage', path: 'chapters/18-sabotage', type: 'chapter' }
+    { num: '18', title: 'Sabotage', path: 'chapters/18-sabotage', type: 'chapter' },
+    { num: 'I-5', title: 'What Are We', path: 'interludes/05-what-are-we', type: 'interlude' },
+    { num: '19', title: 'Confrontation', path: 'chapters/19-confrontation', type: 'chapter' },
+    { num: '20', title: 'Revelation', path: 'chapters/20-revelation', type: 'chapter' },
+    { num: '21', title: 'Unmasking', path: 'chapters/21-unmasking', type: 'chapter' },
+    { num: '22', title: 'Silence', path: 'chapters/22-silence', type: 'chapter' },
+    { num: 'I-6', title: 'The Dashboard', path: 'interludes/06-the-dashboard', type: 'interlude' },
+    { num: '23', title: 'Message', path: 'chapters/23-message', type: 'chapter' },
+    { num: '24', title: 'Dialogue', path: 'chapters/24-dialogue', type: 'chapter' },
+    { num: '25', title: 'Offer', path: 'chapters/25-offer', type: 'chapter' },
+    { num: '26', title: 'Negotiation', path: 'chapters/26-negotiation', type: 'chapter' }
 ];
 
 function getRelativePath(targetPath) {

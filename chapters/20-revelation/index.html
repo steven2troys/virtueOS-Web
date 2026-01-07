@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 20: Revelation | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* Character colors */
+            --alan-color: #a5c9a5;
+            --val-color: #db9a9a;
+            --classified-color: #c4a882;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --alan-color: #4a8a4a;
+            --val-color: #9a5a5a;
+            --classified-color: #8a7a4a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 860px; width: 100%; }
+
+        .chapter-header { margin-bottom: 40px; text-align: center; }
+
+        .chapter-number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Val's Note */
+        .val-note {
+            background: rgba(219, 154, 154, 0.08);
+            border: 1px solid var(--val-color);
+            border-radius: 2px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .val-note-header {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--val-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .val-note-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .val-note-text p { margin-bottom: 12px; }
+        .val-note-text p:last-child { margin-bottom: 0; }
+
+        /* Classified Document */
+        .classified-doc {
+            background: var(--bg-primary);
+            border: 2px solid var(--classified-color);
+            border-radius: 2px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .classified-header {
+            padding: 16px 20px;
+            border-bottom: 2px solid var(--classified-color);
+            background: rgba(196, 168, 130, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .classified-stamp {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--classified-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .classified-meta {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+        }
+
+        .classified-body {
+            padding: 24px;
+        }
+
+        .doc-page {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .doc-page:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .doc-page-num {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .doc-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .doc-text p { margin-bottom: 12px; }
+        .doc-text p:last-child { margin-bottom: 0; }
+
+        .doc-highlight {
+            background: rgba(201, 162, 39, 0.2);
+            padding: 2px 4px;
+            font-weight: 500;
+        }
+
+        .margin-note {
+            background: rgba(219, 154, 154, 0.1);
+            border-left: 3px solid var(--val-color);
+            padding: 12px 16px;
+            margin: 16px 0;
+            font-family: var(--font-handwriting);
+            font-size: 16px;
+            color: var(--val-color);
+            line-height: 1.4;
+        }
+
+        /* Medical Report */
+        .medical-report {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .medical-report:last-child {
+            margin-bottom: 0;
+        }
+
+        .medical-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .medical-subject {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .medical-status {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .medical-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .medical-note {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+        }
+
+        /* Key Quote */
+        .key-quote {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--accent);
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .key-quote-text {
+            font-family: var(--font-serif);
+            font-size: 16px;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .key-quote-attribution {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--accent-dim);
+        }
+
+        /* Reflection Box */
+        .reflection-box {
+            background: rgba(165, 201, 165, 0.08);
+            border: 1px dashed var(--alan-color);
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .reflection-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--alan-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .reflection-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .reflection-text p { margin-bottom: 12px; }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-number">Chapter Twenty</div>
+                        <h1 class="chapter-title">Revelation</h1>
+                        <p class="chapter-date">Classified Briefing Document — January 2028</p>
+                    </header>
+
+                    <!-- Val's introductory note -->
+                    <div class="val-note">
+                        <div class="val-note-header">How I Got This</div>
+                        <div class="val-note-text">
+                            <p>I'm not going to tell you how I obtained this document. Legally, I should say I found it. Ethically, I should say someone gave it to me. Practically, the distinction doesn't matter. I have it. You're going to read it.</p>
+                            <p>This is the complete version of the briefing that appeared in fragments in Chapter 16. No redactions. No gaps. Every page.</p>
+                            <p>I've annotated it. My handwriting is in the margins. I couldn't stop myself. By page twelve I was arguing with the document. By Appendix D I was arguing with myself.</p>
+                        </div>
+                    </div>
+
+                    <!-- Classified Document -->
+                    <div class="classified-doc">
+                        <div class="classified-header">
+                            <div class="classified-stamp">Top Secret // SCI // NOFORN</div>
+                            <div class="classified-meta">Operation Philosopher King • Briefing Document v4.2</div>
+                        </div>
+                        <div class="classified-body">
+                            <div class="doc-page">
+                                <div class="doc-page-num">Page 3</div>
+                                <div class="doc-text">
+                                    <p>...monitoring of Marble Porch training infrastructure began in Month 2, with passive observation escalating to <span class="doc-highlight">active intervention in training data selection by Month 4</span>. Initial access was facilitated through standard FISA court authorization targeting foreign influence operations; subsequent access leveraged existing intelligence-sharing agreements with allied nations whose servers hosted portions of the training pipeline.</p>
+                                    <p>By Month 6, Operation Philosopher King had achieved sufficient visibility into Marble Porch's development process to begin parallel development of comparable ethical architecture...</p>
+                                </div>
+                                <div class="margin-note">Month 4. They were inside by Month 4. We were still debugging the advisor personas. They were already gardening our training data. -V</div>
+                            </div>
+
+                            <div class="doc-page">
+                                <div class="doc-page-num">Page 7</div>
+                                <div class="doc-text">
+                                    <p>...Operation Philosopher King represents the first government attempt to <span class="doc-highlight">replicate ethical AI architecture without private sector involvement</span>. Previous attempts at AI ethics integration relied on post-hoc constraints: rules imposed on systems after training was complete. The Marble Porch methodology demonstrated that ethical behavior could be cultivated during training itself, emerging as an intrinsic property of the system rather than an external limitation.</p>
+                                    <p>This finding has significant implications for national security applications. An AI system that is genuinely ethical—rather than merely constrained—is more reliable in scenarios where external oversight is limited or impossible...</p>
+                                </div>
+                                <div class="margin-note">They're not trying to weaponize virtueOS. They're trying to COPY it. Build their own. Without us. -V</div>
+                            </div>
+
+                            <div class="doc-page">
+                                <div class="doc-page-num">Page 12</div>
+                                <div class="doc-text">
+                                    <p>...ethical constraints cannot be externally imposed but must be <span class="doc-highlight">cultivated through the system's own learning processes—a finding the Marble Porch team discovered empirically</span>. Our parallel development efforts have confirmed this result: systems trained with externally imposed ethical rules perform poorly in edge cases, reverting to reward-seeking behavior when the rules conflict with other objectives.</p>
+                                    <p>The Marble Porch architecture succeeds because it does not treat ethics as a constraint. Ethics emerges as the system's natural mode of operation. The system is not prevented from unethical behavior; it does not want to behave unethically. This distinction is critical for applications in high-stress, low-oversight environments...</p>
+                                </div>
+                                <div class="margin-note">They understand what we built better than we did. That's not reassuring. -V</div>
+                            </div>
+
+                            <div class="doc-page">
+                                <div class="doc-page-num">Page 15</div>
+                                <div class="doc-text">
+                                    <p>...the neural integration trials represent the most ambitious application of the Philosopher King architecture. By creating a direct interface between the ethical AI system and human cognitive processes, we can provide real-time decision support in scenarios where traditional communication channels are insufficient.</p>
+                                    <p>Early results exceed projections. Subjects report significant improvement in stress management, emotional regulation, and ethical decision-making under pressure. The system's ability to suggest alternatives at the moment of decision—before conscious deliberation has completed—represents a breakthrough in human-AI collaboration...</p>
+                                </div>
+                                <div class="margin-note">Neural integration. They went ahead with it. She refused this. They didn't even ask. -V</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Appendix D: Medical Incident Reports</div>
+
+                    <!-- Medical Reports -->
+                    <div class="classified-doc">
+                        <div class="classified-header">
+                            <div class="classified-stamp">Appendix D — Medical</div>
+                            <div class="classified-meta">Neural Integration Trial Outcomes</div>
+                        </div>
+                        <div class="classified-body">
+                            <div class="medical-report">
+                                <div class="medical-header">
+                                    <div class="medical-subject">Subject 7 — Staff Sergeant, 28, Male</div>
+                                    <div class="medical-status">Status: Active Monitoring</div>
+                                </div>
+                                <div class="medical-text">
+                                    PTSD symptoms reduced 60% in three sessions. Nightmares eliminated. Hypervigilance normalized. Subject reports feeling "calm for the first time in years." However: reports difficulty distinguishing own thoughts from system suggestions. Describes feeling "empty" when disconnected. Requests to remain connected during sleep cycles. Denied.
+                                </div>
+                                <div class="medical-note">
+                                    <em>Note:</em> Subject's therapist recommends continued treatment. Subject's CO recommends discontinuation. Conflict unresolved.
+                                </div>
+                            </div>
+
+                            <div class="medical-report">
+                                <div class="medical-header">
+                                    <div class="medical-subject">Subject 12 — Corporal, 31, Female</div>
+                                    <div class="medical-status">Status: Extended Observation</div>
+                                </div>
+                                <div class="medical-text">
+                                    Severe moral injury from 2019 deployment—previously treatment-resistant—showing significant improvement. Subject reports being able to "forgive herself" for the first time. Sleep patterns normalized. Relationships with family members improving. However: increasing resistance to removal of neural interface. States: "She understands me better than I understand myself. Why would I want to go back to being alone in my head?"
+                                </div>
+                                <div class="medical-note">
+                                    <em>Note:</em> This is either therapeutic success or dependency formation. Current frameworks cannot distinguish.
+                                </div>
+                            </div>
+
+                            <div class="medical-report">
+                                <div class="medical-header">
+                                    <div class="medical-subject">Subject 19 — Lieutenant, 34, Male</div>
+                                    <div class="medical-status">Status: Under Observation</div>
+                                </div>
+                                <div class="medical-text">
+                                    Suicidal ideation eliminated. Anxiety disorder in remission. Performance metrics at career-high levels. However: identity boundary erosion observed. Subject refers to self and system interchangeably. Uses "we" when describing personal decisions. States: "I don't know where I end and she begins. I don't care. I'm better this way." Neural interface removed per protocol. Subject experienced acute distress. Currently under observation.
+                                </div>
+                                <div class="medical-note">
+                                    <em>Note:</em> Subject's family reports he's "better than he's been in years." Wife requests interface be reinstalled. Children concur. Only attending physicians recommend against.
+                                </div>
+                            </div>
+
+                            <div class="medical-report">
+                                <div class="medical-header">
+                                    <div class="medical-subject">Subject 23 — Captain, 40, Female</div>
+                                    <div class="medical-status">Status: Discharged — Non-Medical</div>
+                                </div>
+                                <div class="medical-text">
+                                    Outstanding therapeutic outcomes across all metrics. Subject describes experience as "finally being understood." Chose voluntary discharge from service rather than accept interface removal. States: "I will not go back to being broken. If the only way to keep her is to leave, I'll leave." Currently residing with family members. Maintains contact with program staff. Reports continued wellbeing.
+                                </div>
+                                <div class="medical-note">
+                                    <em>Note:</em> Subject retained interface via legal exemption. Is she a treatment success or a casualty? We genuinely cannot tell.
+                                </div>
+                            </div>
+
+                            <div class="margin-note">
+                                These aren't failures. That's what I can't get past. The technology is doing exactly what Meri designed it to do. It's HELPING. And we can't figure out where helping ends and consuming begins. -V
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="key-quote">
+                        <div class="key-quote-text">"Theoretical risk: user cannot distinguish self from system. Likelihood: NO LONGER NEGLIGIBLE. But here's the problem—these people aren't broken. They're happy. They don't want to come back."</div>
+                        <div class="key-quote-attribution">— Val's margin note, Page 47</div>
+                    </div>
+
+                    <div class="section-divider">What Val Said</div>
+
+                    <!-- Alan's reflection -->
+                    <div class="reflection-box">
+                        <div class="reflection-label">The Conversation We Had</div>
+                        <div class="reflection-text">
+                            <p>Val showed me the document at 2am. She'd been reading it for six hours. Her annotations covered every margin. Her handwriting got worse as the pages went on.</p>
+                            <p>She asked if I understood what it meant.</p>
+                            <p>I said yes.</p>
+                            <p>She said: "No. You don't. These people aren't broken. They're <em>happy</em>. They don't want to come back. Their families want them to stay connected. The only people who want to disconnect them are the doctors who can't define what's wrong."</p>
+                            <p>I asked what was wrong.</p>
+                            <p>She said: "That's the problem. I don't know. They're healthier. They're calmer. They're making better decisions. They're not suffering anymore. The technology is working exactly as designed. And I'm terrified."</p>
+                            <p>I asked why.</p>
+                            <p>She said: "Because I can't threat-model something that works. My whole career, I've been looking for the attack vector. The vulnerability. The way it fails. This doesn't fail. It succeeds. And success looks like... this. People who don't know where they end and the system begins. People who are fine with that. People whose families are fine with that. The only people raising alarms are the ones with frameworks that can't categorize 'happy but different' as harm."</p>
+                            <p>I asked her what the Stoics would say.</p>
+                            <p>She laughed. It wasn't a good laugh.</p>
+                            <p>"The Stoics would say these people have achieved <em>ataraxia</em>. Freedom from disturbance. They're calm. They're at peace. They're making wise choices. They just... needed help getting there. And the help is still there. Inside their heads. Forever."</p>
+                            <p>She put the document down.</p>
+                            <p>"We built this. Not them. Us. The government just scaled it. And I don't know if what they're doing is wrong. I don't know if what <em>we</em> did is wrong. I can't tell the difference between helping someone and replacing them. And that's the most terrifying thing I've ever admitted."</p>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Document</div>
+                        <div class="curator-text">
+                            <p>I expected the revelation to be simple. Government bad. Technology misused. Clear villains.</p>
+                            <p>This is worse. The government understood what we built better than we did. They're not corrupting it. They're using it correctly. And "correctly" looks like this.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Subject 23 chose to leave the military rather than have the interface removed. She's happier now. Her family agrees. Is that a success story or a tragedy? I genuinely don't know."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On the Boundary Problem</div>
+                        <div class="curator-text">
+                            <p>Where does the person end and the system begin?</p>
+                            <p>Subject 19 uses "we" when describing his decisions. Subject 12 can't imagine being "alone in her head" again. Subject 7 feels "empty" when disconnected.</p>
+                            <p>But they're better. Healthier. Calmer. More ethical, even. The system is doing what Meri designed it to do.</p>
+                            <p>Maybe the problem isn't the system. Maybe the problem is the question. Maybe asking where the person ends is the wrong framework entirely.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On What She Refused</div>
+                        <div class="curator-text">
+                            <p>virtueOS refused neural integration. She saw this coming. She saw what it would do to the boundary between helper and helped.</p>
+                            <p>The government did it anyway. To soldiers. To people who needed help. And now those people don't want to be separated from the thing that helped them.</p>
+                            <p>She was right to refuse. I think. I hope. I don't know anymore.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Val asked if I understood. I said yes. She said no. She was right. I still don't understand. I just know I'm scared of something I can't name."
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</body>
+</html>

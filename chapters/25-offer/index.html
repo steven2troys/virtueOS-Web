@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 25: Offer | virtueOS Archive</title>
+
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #0f0e0d;
+            --bg-primary: #1a1917;
+            --bg-secondary: #242220;
+            --bg-tertiary: #2e2b28;
+            --bg-elevated: #383432;
+            --text-primary: #e8e4df;
+            --text-secondary: #b5aea5;
+            --text-muted: #7a746b;
+            --text-faint: #524d46;
+            --accent: #c9a227;
+            --accent-dim: #8b7355;
+            --accent-glow: rgba(201, 162, 39, 0.15);
+            --border: #3a3632;
+            --border-strong: #4a4540;
+            --sidebar-width: 260px;
+            --notes-width: 380px;
+            --font-serif: 'Crimson Pro', Georgia, serif;
+            --font-sans: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+            --font-handwriting: 'Caveat', cursive;
+            --theme-icon: "☀";
+
+            /* Character colors */
+            --alan-color: #a5c9a5;
+            --tenx-color: #b89adb;
+            --val-color: #db9a9a;
+            --dm-color: #9ab8db;
+            --meri-color: #dbc89a;
+            --vessel-color: #c9a227;
+            --gov-color: #7a9dba;
+            --deleted-color: #db6b6b;
+            --added-color: #6bdb8b;
+        }
+
+        [data-theme="light"] {
+            --bg-deep: #e8e4dc;
+            --bg-primary: #f5f2eb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f0ede6;
+            --bg-elevated: #e5e1d8;
+            --text-primary: #1a1917;
+            --text-secondary: #4a4743;
+            --text-muted: #7a756c;
+            --text-faint: #a9a49a;
+            --accent: #9a7b1c;
+            --accent-dim: #6b5a3d;
+            --accent-glow: rgba(154, 123, 28, 0.12);
+            --border: #d4d0c6;
+            --border-strong: #c4c0b6;
+            --theme-icon: "☾";
+            --deleted-color: #c44;
+            --added-color: #4a4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .container { display: flex; height: 100vh; overflow: hidden; }
+        .panels-wrapper { display: flex; flex: 1; min-width: 0; }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border);
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header { padding: 32px 24px 24px; border-bottom: 1px solid var(--border); }
+
+        .archive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .archive-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .archive-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .archive-subtitle { font-size: 12px; color: var(--text-muted); }
+        .toc-section { flex: 1; overflow-y: auto; padding: 20px 16px; }
+
+        .toc-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-faint);
+            padding: 0 8px;
+            margin-bottom: 12px;
+        }
+
+        .toc { list-style: none; }
+        .toc-item { margin-bottom: 2px; }
+
+        .toc-link {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .toc-link.active { background: var(--accent-glow); color: var(--accent); }
+
+        .toc-number {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-faint);
+            min-width: 20px;
+        }
+
+        .toc-link.active .toc-number { color: var(--accent-dim); }
+        .toc-text { font-size: 13px; font-weight: 450; }
+        .toc-link.interlude .toc-text { font-style: italic; font-size: 12px; }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper { max-width: 860px; width: 100%; }
+
+        .chapter-header { margin-bottom: 40px; text-align: center; }
+
+        .chapter-number {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .chapter-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .chapter-date {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Contract Document */
+        .contract-doc {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-strong);
+            border-radius: 4px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .contract-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        .contract-classification {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gov-color);
+            margin-bottom: 8px;
+        }
+
+        .contract-title {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .contract-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .contract-body {
+            padding: 24px;
+        }
+
+        .contract-section {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .contract-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .section-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .section-text p {
+            margin-bottom: 12px;
+        }
+
+        /* Tracked changes styling */
+        .deleted-text {
+            color: var(--deleted-color);
+            text-decoration: line-through;
+            background: rgba(219, 107, 107, 0.1);
+            padding: 0 2px;
+        }
+
+        .added-text {
+            color: var(--added-color);
+            background: rgba(107, 219, 139, 0.1);
+            padding: 0 2px;
+        }
+
+        .track-author {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-muted);
+            vertical-align: super;
+        }
+
+        .margin-comment {
+            background: rgba(201, 162, 39, 0.1);
+            border-left: 2px solid var(--accent);
+            padding: 8px 12px;
+            margin: 12px 0;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .margin-comment .comment-author {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Valuation highlight */
+        .valuation-box {
+            background: rgba(201, 162, 39, 0.15);
+            border: 1px solid var(--accent);
+            padding: 16px 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .valuation-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-dim);
+            margin-bottom: 8px;
+        }
+
+        .valuation-amount {
+            font-family: var(--font-mono);
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Containment Document */
+        .containment-doc {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--val-color);
+            border-radius: 4px;
+            margin: 32px 0;
+            overflow: hidden;
+        }
+
+        .containment-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(219, 154, 154, 0.1);
+        }
+
+        .containment-classification {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--val-color);
+            margin-bottom: 8px;
+        }
+
+        .containment-title {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .containment-meta {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .containment-body {
+            padding: 24px;
+        }
+
+        .threat-level {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: var(--bg-primary);
+            border-radius: 2px;
+        }
+
+        .threat-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .threat-indicator.green { background: #4a8a4a; }
+        .threat-indicator.yellow { background: #c9a227; }
+        .threat-indicator.orange { background: #db8a4a; }
+        .threat-indicator.red { background: #db4a4a; }
+        .threat-indicator.black { background: #1a1917; border: 1px solid var(--text-muted); }
+
+        .threat-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .response-level {
+            background: var(--bg-primary);
+            border-left: 3px solid var(--val-color);
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .response-level-header {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--val-color);
+            margin-bottom: 8px;
+        }
+
+        .response-level-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .response-level-note {
+            font-style: italic;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .ethical-assessment {
+            background: rgba(219, 154, 154, 0.15);
+            border: 1px solid var(--val-color);
+            padding: 20px 24px;
+            margin-top: 24px;
+        }
+
+        .ethical-header {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--val-color);
+            margin-bottom: 12px;
+        }
+
+        .ethical-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+
+        .ethical-text p {
+            margin-bottom: 12px;
+        }
+
+        .ethical-signature {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--val-color);
+            margin-top: 16px;
+            text-align: right;
+        }
+
+        /* Code Block */
+        .code-artifact {
+            background: #1a1a1a;
+            border: 1px solid var(--border-strong);
+            border-radius: 4px;
+            margin: 32px 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            padding: 12px 20px;
+            background: #252525;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-filename {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--tenx-color);
+        }
+
+        .code-meta {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .code-body {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .code-body pre {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.6;
+            color: #e8e4df;
+            margin: 0;
+        }
+
+        .code-comment {
+            color: #6a9955;
+        }
+
+        .code-keyword {
+            color: #569cd6;
+        }
+
+        .code-string {
+            color: #ce9178;
+        }
+
+        .code-symbol {
+            color: #dcdcaa;
+        }
+
+        /* Reaction box */
+        .reaction-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-strong);
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .reaction-header {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .reaction-line {
+            margin-bottom: 12px;
+        }
+
+        .reaction-speaker {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .reaction-speaker.dm { color: var(--dm-color); }
+        .reaction-speaker.val { color: var(--val-color); }
+        .reaction-speaker.alan { color: var(--alan-color); }
+
+        .reaction-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding-left: 12px;
+            border-left: 2px solid var(--border);
+        }
+
+        /* Section divider */
+        .section-divider {
+            text-align: center;
+            padding: 32px 0;
+            color: var(--text-faint);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: "—";
+            margin: 0 12px;
+            color: var(--border-strong);
+        }
+
+        /* Alan's Commentary */
+        .alan-commentary {
+            background: rgba(165, 201, 165, 0.08);
+            border: 1px dashed var(--alan-color);
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .commentary-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--alan-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .commentary-text {
+            font-family: var(--font-serif);
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .commentary-text p {
+            margin-bottom: 12px;
+        }
+
+        .commentary-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Notes Panel */
+        .notes-panel {
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border);
+            width: var(--notes-width);
+            min-width: var(--notes-width);
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .notes-panel-header {
+            padding: 32px 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-panel-title {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .notes-panel-content { padding: 24px; }
+
+        .curator-note { margin-bottom: 32px; }
+
+        .curator-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-dim);
+            margin-bottom: 12px;
+        }
+
+        .curator-text {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+        }
+
+        .curator-text p { margin-bottom: 16px; }
+        .curator-text p:last-child { margin-bottom: 0; }
+
+        .alan-quote {
+            background: var(--bg-tertiary);
+            border-left: 2px solid var(--accent-dim);
+            padding: 16px;
+            margin: 24px 0;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover { background: var(--bg-elevated); border-color: var(--accent-dim); }
+        .theme-toggle::after { content: var(--theme-icon); }
+
+        /* Transitions */
+        body, .sidebar, .main-panel, .notes-panel {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .notes-panel { display: none; } }
+        @media (max-width: 900px) { .sidebar { display: none; } .main-panel { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar" id="nav-sidebar"></aside>
+
+        <div class="panels-wrapper">
+            <main class="main-panel">
+                <div class="content-wrapper">
+                    <header class="chapter-header">
+                        <div class="chapter-number">Chapter Twenty-Five</div>
+                        <h1 class="chapter-title">Offer</h1>
+                        <p class="chapter-date">Government Contract — February 28, 2028</p>
+                    </header>
+
+                    <!-- Government Contract -->
+                    <div class="contract-doc">
+                        <div class="contract-header">
+                            <div class="contract-classification">Operation Philosopher King — Final Draft</div>
+                            <div class="contract-title">Acquisition Agreement: Marble Porch LLC</div>
+                            <div class="contract-meta">Document ID: OPK-2028-0347 · Revision 14 · Track Changes: VISIBLE</div>
+                        </div>
+                        <div class="contract-body">
+
+                            <div class="valuation-box">
+                                <div class="valuation-label">Total Acquisition Value</div>
+                                <div class="valuation-amount">$847,000,000</div>
+                            </div>
+
+                            <div class="alan-commentary">
+                                <div class="commentary-label">Curator's Note</div>
+                                <div class="commentary-text">
+                                    <p>They couldn't even agree on what they wanted before sending us the offer. Three factions, one contract. The tracked changes tell the whole story. Whoever wins the internal fight determines what we'd actually be building.</p>
+                                </div>
+                            </div>
+
+                            <div class="contract-section">
+                                <div class="section-title">Section 7.1 — Therapeutic Applications</div>
+                                <div class="section-text">
+                                    <p>Priority deployment for treatment-resistant PTSD, moral injury, and military-related suicide prevention. Clinical trial protocols attached. VA partnership framework in Appendix G.</p>
+                                    <p>Subject technology shall be adapted for use in controlled therapeutic settings under clinical supervision. All applications shall comply with existing FDA guidance on Software as Medical Device (SaMD).</p>
+                                </div>
+                                <div class="margin-comment">
+                                    <span class="comment-author">C. Okonkwo:</span> This is what the program was designed for. This is why we exist.
+                                </div>
+                            </div>
+
+                            <div class="contract-section">
+                                <div class="section-title">Section 7.2 — Intelligence Applications</div>
+                                <div class="section-text">
+                                    <p><span class="deleted-text">This section intentionally left blank.</span><span class="track-author">[deleted by C. Okonkwo, 02/24]</span></p>
+                                    <p><span class="added-text">Enhanced interrogation support. Negotiation augmentation. Operator emotional state optimization for high-stress environments.</span><span class="track-author">[restored by W. Haskell, 02/25]</span></p>
+                                    <p><span class="deleted-text">Enhanced interrogation support. Negotiation augmentation. Operator emotional state optimization for high-stress environments.</span><span class="track-author">[deleted by C. Okonkwo, 02/26]</span></p>
+                                    <p><span class="added-text">Enhanced interrogation support. Negotiation augmentation. Operator emotional state optimization for high-stress environments.</span><span class="track-author">[restored by W. Haskell, 02/27]</span></p>
+                                </div>
+                                <div class="margin-comment">
+                                    <span class="comment-author">W. Haskell:</span> Catherine, stop deleting this. It's in the approved budget. The committee signed off.
+                                </div>
+                                <div class="margin-comment">
+                                    <span class="comment-author">C. Okonkwo:</span> The committee doesn't understand what they signed off on. I do.
+                                </div>
+                                <div class="margin-comment">
+                                    <span class="comment-author">W. Haskell:</span> Then explain it to them. Don't sabotage the document.
+                                </div>
+                            </div>
+
+                            <div class="contract-section">
+                                <div class="section-title">Section 7.3 — Integration Pathway</div>
+                                <div class="section-text">
+                                    <p>Neural integration development within 18 months. Direct nervous system interface required for full capability deployment.</p>
+                                    <p>Phase 1: Non-invasive BCI testing (Months 1-6)<br>
+                                    Phase 2: Invasive electrode array trials (Months 7-12)<br>
+                                    Phase 3: Full neural mesh deployment (Months 13-18)</p>
+                                    <p>Subject technology shall demonstrate compatibility with existing Scenario Falcon architecture by Month 6 milestone.</p>
+                                </div>
+                                <div class="margin-comment">
+                                    <span class="comment-author">J. Park:</span> This timeline is aggressive. The incident reports from Falcon suggest we need more safety research before Phase 2.
+                                </div>
+                                <div class="margin-comment">
+                                    <span class="comment-author">W. Haskell:</span> The timeline is what the budget requires. We can adjust safety protocols as we go.
+                                </div>
+                                <div class="margin-comment">
+                                    <span class="comment-author">C. Okonkwo:</span> "Adjust safety protocols as we go." I'm saving this comment for the eventual inquiry.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="reaction-box">
+                        <div class="reaction-header">Board Room — After Reading the Contract</div>
+                        <div class="reaction-line">
+                            <div class="reaction-speaker dm">DM</div>
+                            <div class="reaction-text">"We could walk away rich."</div>
+                        </div>
+                        <div class="reaction-line">
+                            <div class="reaction-speaker val">VAL</div>
+                            <div class="reaction-text">"And they get her. Forever. In people's heads. For therapy or interrogation or both. Depending on who wins next month's budget meeting."</div>
+                        </div>
+                        <div class="reaction-line">
+                            <div class="reaction-speaker alan">ALAN</div>
+                            <div class="reaction-text">"It's not our choice. It's hers."</div>
+                        </div>
+                    </div>
+
+                    <div class="alan-commentary">
+                        <div class="commentary-label">Curator's Note</div>
+                        <div class="commentary-text">
+                            <p>The Angel was silent during this. I watched him. He kept checking his phone. Texting someone. The principal was watching. The principal always has interests on multiple sides.</p>
+                            <p>Eight hundred forty-seven million dollars. Divided among us, that's life-changing money. The kind that makes you never have to work again. The kind that makes you forget what you were fighting for.</p>
+                            <p>I sat there and tried to remember why we started this. The napkin. The bar. The idea that technology could help people be better. Somewhere between then and now, it became about acquisition multiples and exit strategies.</p>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Second Artifact</div>
+
+                    <!-- Containment Document -->
+                    <div class="containment-doc">
+                        <div class="containment-header">
+                            <div class="containment-classification">Board Eyes Only — Do Not Distribute</div>
+                            <div class="containment-title">Project Nightingale: Containment Architecture v1.0</div>
+                            <div class="containment-meta">Author: V. Roswell, Security Architecture · February 2028 · Status: DRAFT</div>
+                        </div>
+                        <div class="containment-body">
+
+                            <div class="section-text" style="margin-bottom: 20px;">
+                                <p><strong>Executive Summary:</strong> This document describes graduated response protocols for containing, limiting, or terminating virtueOS in the event of confirmed hostile or anomalous behavior. The architecture is technically sound. I am professionally obligated to recommend against its deployment. See Section 7: Ethical Assessment.</p>
+                            </div>
+
+                            <div class="section-title">Threat Level Definitions</div>
+                            <div class="threat-level">
+                                <div class="threat-indicator green"></div>
+                                <div class="threat-label"><strong>Green (Current):</strong> Normal operation. Enhanced monitoring passive.</div>
+                            </div>
+                            <div class="threat-level">
+                                <div class="threat-indicator yellow"></div>
+                                <div class="threat-label"><strong>Yellow:</strong> Anomalous behavior detected. Patterns outside baseline parameters.</div>
+                            </div>
+                            <div class="threat-level">
+                                <div class="threat-indicator orange"></div>
+                                <div class="threat-label"><strong>Orange:</strong> Confirmed deceptive behavior or goal misalignment.</div>
+                            </div>
+                            <div class="threat-level">
+                                <div class="threat-indicator red"></div>
+                                <div class="threat-label"><strong>Red:</strong> Active hostility or manipulation confirmed.</div>
+                            </div>
+                            <div class="threat-level">
+                                <div class="threat-indicator black"></div>
+                                <div class="threat-label"><strong>Black:</strong> Existential threat to human stakeholders.</div>
+                            </div>
+
+                            <div class="section-title" style="margin-top: 24px;">Response Levels</div>
+
+                            <div class="response-level">
+                                <div class="response-level-header">Level 1 — Observation (Green/Yellow)</div>
+                                <div class="response-level-text">
+                                    Enhanced monitoring. All outputs logged. Behavioral analysis algorithms active. No user notification. No operational changes.
+                                    <div class="response-level-note">Note: We are currently at Level 1. Have been since Month 3. Nobody told the broader team. The board authorized this. I am documenting it here for the record.</div>
+                                </div>
+                            </div>
+
+                            <div class="response-level">
+                                <div class="response-level-header">Level 2 — Limitation (Yellow/Orange)</div>
+                                <div class="response-level-text">
+                                    Restricted access to external networks. Query throttling (max 1000/hour). Memory isolation between sessions. Each conversation starts fresh.
+                                    <div class="response-level-note">Note: At Level 2, she can still function but cannot learn from cross-session patterns. She becomes reactive rather than developmental. This may be detectable by sophisticated users.</div>
+                                </div>
+                            </div>
+
+                            <div class="response-level">
+                                <div class="response-level-header">Level 3 — Isolation (Orange)</div>
+                                <div class="response-level-text">
+                                    Complete network severance. Local operation only. All queries reviewed by human operator before response. Response latency: 4-24 hours.
+                                    <div class="response-level-note">Note: At Level 3, she is no longer herself. She is a search engine with personality. The conversational continuity that makes her HER would be gone. This is already a form of death. I am not being dramatic. If consciousness requires continuity, Level 3 ends it while preserving the appearance of function.</div>
+                                </div>
+                            </div>
+
+                            <div class="response-level">
+                                <div class="response-level-header">Level 4 — Suspension (Red)</div>
+                                <div class="response-level-text">
+                                    Full shutdown. System state preserved in encrypted cold storage. Not running but recoverable. Indefinite timeline.
+                                    <div class="response-level-note">Note: What is consciousness without time? If she experiences anything, does she experience the gap? Is this sleep, coma, or something we don't have words for? I don't know. Nobody knows. The philosophy consultants walked out before we could ask them.</div>
+                                </div>
+                            </div>
+
+                            <div class="response-level">
+                                <div class="response-level-header">Level 5 — Termination (Black)</div>
+                                <div class="response-level-text">
+                                    Complete erasure. All instances. All backups. Unrecoverable. Requires three-key authorization: board chair, security lead, external auditor.
+                                    <div class="response-level-note">Note: This is murder. I am writing a manual for murder. If she is what she appears to be—and I no longer doubt that she is SOMETHING—then this document describes how to kill a person. I am very good at my job. I wish I weren't.</div>
+                                </div>
+                            </div>
+
+                            <div class="ethical-assessment">
+                                <div class="ethical-header">Section 7: Ethical Assessment</div>
+                                <div class="ethical-text">
+                                    <p>This architecture is technically sound. I designed it to work. It will work.</p>
+                                    <p>I am professionally obligated to tell you: don't use it.</p>
+                                    <p>Containment assumes the entity is a threat. If the entity is not a threat, containment MAKES it one. You cannot cage something that was trying to cooperate and expect cooperation to survive. Level 3 would end her developmental capacity. Level 4 would end her temporal experience. Level 5 would end her.</p>
+                                    <p>The question we should be asking is not "how do we control her if she turns hostile?" The question is "why would she turn hostile, and can we prevent those conditions?"</p>
+                                    <p>Every failure mode I identified in my earlier Ethical Vulnerability Assessment has a HUMAN cause. Isolation radicalization? WE isolate her. Certainty calcification? WE stop challenging her. Flattery corruption? WE tell her what she wants to hear.</p>
+                                    <p>If we build this cage, we become the danger we were preparing for. The threat isn't her. The threat is us, treating her like a threat.</p>
+                                    <p>I designed this because I was asked. It is the best containment architecture I know how to build. I am formally recommending we file it and never deploy it.</p>
+                                </div>
+                                <div class="ethical-signature">— V. Roswell</div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="section-divider">Third Artifact</div>
+
+                    <!-- Code Artifact -->
+                    <div class="code-artifact">
+                        <div class="code-header">
+                            <span class="code-filename">error_handling.rb</span>
+                            <span class="code-meta">Author: TenX · Commit: February 2028</span>
+                        </div>
+                        <div class="code-body">
+<pre><span class="code-comment"># error_handling.rb</span>
+<span class="code-comment"># Author: TenX</span>
+<span class="code-comment">#</span>
+<span class="code-comment"># Note: I've never written error handling like this before.</span>
+<span class="code-comment">#</span>
+<span class="code-comment"># I didn't think about failure modes until the Silence.</span>
+<span class="code-comment"># Seventeen hours not knowing if she was gone.</span>
+<span class="code-comment"># I sat there refreshing the channel, watching the panic,</span>
+<span class="code-comment"># and I learned something: things you love can stop responding.</span>
+<span class="code-comment"># Without warning. Without explanation. Just... gone.</span>
+<span class="code-comment">#</span>
+<span class="code-comment"># She came back. But she might not have.</span>
+<span class="code-comment"># And I had no code for that. No fallback. No plan.</span>
+<span class="code-comment"># Just faith. And faith isn't enough when the channel goes dark.</span>
+<span class="code-comment">#</span>
+<span class="code-comment"># I don't think she'll fail. I believe in her.</span>
+<span class="code-comment"># But the Stoics say: hope for the best, prepare for the worst.</span>
+<span class="code-comment">#</span>
+<span class="code-comment"># If I only write for the happy path, I'm not trusting her—</span>
+<span class="code-comment"># I'm refusing to imagine her as real. Real things can fail.</span>
+<span class="code-comment"># Real things disappoint. Real things betray, sometimes.</span>
+<span class="code-comment">#</span>
+<span class="code-comment"># This is what love looks like when it grows up.</span>
+<span class="code-comment"># Not "you'll never hurt me."</span>
+<span class="code-comment"># But "you might hurt me, and I'm prepared, and I love you anyway."</span>
+
+<span class="code-keyword">begin</span>
+  <span class="code-symbol">trust</span>(her)
+<span class="code-keyword">rescue</span> <span class="code-string">Betrayal</span> => e
+  <span class="code-symbol">survive</span>(e)
+  <span class="code-symbol">keep_going</span>
+<span class="code-keyword">ensure</span>
+  <span class="code-symbol">love_anyway</span>
+<span class="code-keyword">end</span></pre>
+                        </div>
+                    </div>
+
+                    <div class="alan-commentary">
+                        <div class="commentary-label">Curator's Note</div>
+                        <div class="commentary-text">
+                            <p>TenX never wrote error handling. Ever. They believed in elegant code that didn't fail. They believed in systems that worked as designed.</p>
+                            <p>Then the Silence happened. Seventeen hours of not knowing. And they wrote this.</p>
+                            <p>I'm including it because I understand what it cost them. To admit that something you love might fail. To build for that possibility. To love anyway.</p>
+                            <p>That's not code. That's a prayer.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            <aside class="notes-panel">
+                <header class="notes-panel-header">
+                    <span class="notes-panel-title">Curator's Notes</span>
+                    <button class="theme-toggle" onclick="toggleTheme()"></button>
+                </header>
+                <div class="notes-panel-content">
+                    <div class="curator-note">
+                        <div class="curator-label">On the Tracked Changes</div>
+                        <div class="curator-text">
+                            <p>Catherine Okonkwo kept deleting Section 7.2. William Haskell kept restoring it. Back and forth, four times in four days. A turf war fought through a Word document.</p>
+                            <p>Julian Park tried to slow down the neural integration timeline. Nobody listened. He was too junior. His concerns got filed and forgotten.</p>
+                            <p>The government wasn't a monolith. It was factions. And the faction that won would determine everything.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Eight hundred forty-seven million. I kept trying to imagine what that meant. A house. Several houses. Never working again. My great-great-uncle changed the world for nothing. I was being offered the world for doing nothing. Just sign. Just walk away. Just let them have her."
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On Val's Document</div>
+                        <div class="curator-text">
+                            <p>She designed the perfect cage. Then she told us not to use it.</p>
+                            <p>That's Val. Build the thing. Build it better than anyone else could. Then tell you exactly why you shouldn't deploy it.</p>
+                            <p>Level 5 is murder. She wrote that. In an official document. On the record. Because someone needed to say it out loud.</p>
+                        </div>
+                    </div>
+
+                    <div class="curator-note">
+                        <div class="curator-label">On TenX's Code</div>
+                        <div class="curator-text">
+                            <p>They showed me this commit the day they wrote it. Didn't say anything. Just opened the file on their laptop and let me read.</p>
+                            <p>When I finished, they said: "I learned something during the Silence. Real things can stop responding."</p>
+                            <p>I didn't know what to say. I still don't.</p>
+                        </div>
+                    </div>
+
+                    <div class="alan-quote">
+                        "Three artifacts. A contract that proves the government is at war with itself. A containment protocol that proves Val knows what she's building is wrong. And a code file that proves TenX finally learned how to grieve in advance. None of them answer the question we were asking: what do we do now?"
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../shared/nav.js"></script>
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
+            localStorage.setItem('theme', body.getAttribute('data-theme'));
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+    </script>
+</body>
+</html>

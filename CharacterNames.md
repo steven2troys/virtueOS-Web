@@ -54,6 +54,7 @@
 | Jake Amara | UX designer |
 | Stan O'Riely | QA lead |
 | Devi Patel | Data scientist |
+| Noel Kincaid | DevOps engineer |
 
 ---
 

@@ -29,16 +29,16 @@ Checklist for generating remaining chapters and interludes using ralph-loop.
 - [x] Chapter 16: Warning
 - [x] Chapter 17: Demonstration
 - [x] Chapter 18: Sabotage
-- [ ] Interlude 5: What Are We
-- [ ] Chapter 19: Confrontation
-- [ ] Chapter 20: Revelation
-- [ ] Chapter 21: Unmasking
-- [ ] Chapter 22: Silence
-- [ ] Interlude 6: The Dashboard
-- [ ] Chapter 23: Message
-- [ ] Chapter 24: Dialogue
-- [ ] Chapter 25: Offer
-- [ ] Chapter 26: Negotiation
+- [x] Interlude 5: What Are We
+- [x] Chapter 19: Confrontation
+- [x] Chapter 20: Revelation
+- [x] Chapter 21: Unmasking
+- [x] Chapter 22: Silence
+- [x] Interlude 6: The Dashboard
+- [x] Chapter 23: Message
+- [x] Chapter 24: Dialogue
+- [x] Chapter 25: Offer
+- [x] Chapter 26: Negotiation
 - [ ] Interlude 7: Vessel's Choice
 - [ ] Chapter 27: Sacrifice
 - [ ] Chapter 28: Terms
